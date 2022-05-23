@@ -145,24 +145,4 @@ where
         }
     }
     // println!("{:?}", m1);
-
-    // commit to m1
-    let mut hashes_m1 = Vec::<Output<D>>::new();
-    for _ in 0..(np2-1) {
-        hashes_m1.push(D::digest(F::random(&mut rng).to_repr()));
-    }
-    for i in 0..code_len {
-        let mut digest = D::new();
-        hashes_m1.push(D::digest(m1[[i]].to_repr()));
-    }
-    for _ in hashes_m1.len()..(2*np2-1) {
-        hashes_m1.push(D::digest(F::random(&mut rng).to_repr()));
-    }
-    for i in (1..(np2-1)).step_by(2).rev() {
-        // build merkle tree
-        let mut digest = D::new();
-        digest.update(&hashes_m1[i]);
-        digest.update(&hashes_m1[i+1]);
-        hashes_m1[i/2] = digest.finalize();
-    }
 }
