@@ -77,5 +77,6 @@ fn main() {
 
     // commit::commit_t_dim::<Ft255, codespec::Code6>(1000000, 3, 100, 172, 0);
 
-    commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0, 5);
+    // commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0, 5);
+    commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(1000000, 100, 172, 0, 5);
 }
