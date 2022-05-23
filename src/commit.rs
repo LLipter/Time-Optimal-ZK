@@ -11,6 +11,7 @@ use crate::codespec::CodeSpecification;
 use crate::codegen::generate;
 use crate::encode::encode;
 use crate::helper::next_pow_2;
+use crate::helper::build_merkle_tree;
 
 /// generate random coeffs of length 2^`log_len`
 pub fn random_coeffs<Ft: Field>(log_len: usize) -> Vec<Ft> {
@@ -83,7 +84,7 @@ where
     assert_eq!(msg_len * msg_len, coef_no);
     let np2 = next_pow_2(code_len);
 
-    // generate random coefficient
+    // generate random coefficient: m * m
     let mut coef = Array::<F, _>::zeros((msg_len, msg_len));
     let mut rng = rand::thread_rng();
     for i in 0..msg_len {
@@ -91,34 +92,31 @@ where
             coef[[i, j]] = F::random(&mut rng);
         }
     }
+
+    // generate codes
+    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
     
-    // M0
+    // M0: N * m
     let mut m0 = Array::<F, _>::zeros((code_len, msg_len));
     
     // encode for axis 0
-    let iter_m0 = m0.lanes_mut(Axis(0)).into_iter();
-    let iter_coef = coef.lanes_mut(Axis(0)).into_iter();
-    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
-    for (x, mut y) in iter_coef.zip(iter_m0){
-        let mut x_prime = x.to_vec();
-        x_prime.resize_with(code_len, <F as Field>::zero);
-        encode(&mut x_prime, &precodes, &postcodes);
-        // println!("{:?}", x_prime);
-        for (mut yy, xx) in y.iter_mut().zip(x_prime.iter_mut()){
-            *yy = *xx;
-            // println!("{:?}", &xx);
-            // println!("{:?}", &yy); 
+    for a in 0..msg_len {
+        let mut msg = Vec::<F>::with_capacity(code_len);
+        for x in 0..msg_len {
+            msg.push(coef[[x, a]]);
         }
-        // println!("{:?}", y);
+        msg.resize(code_len, <F as Field>::zero());
+        encode(&mut msg, &precodes, &postcodes);
+        for x in 0..code_len {
+            m0[[x, a]] = msg[x];
+        }
     }
-
     // println!("{:?}", m0);
+
 
     // commit to m0
     let mut hashes_m0 = Vec::<Output<D>>::new();
-    for _ in 0..(np2-1) {
-        hashes_m0.push(D::digest(F::random(&mut rng).to_repr()));
-    }
+    hashes_m0.resize_with(np2-1, Default::default);
     for i in 0..code_len {
         let mut digest = D::new();
         for j in 0..msg_len {
@@ -126,34 +124,24 @@ where
         }
         hashes_m0.push(digest.finalize());
     }
-    for _ in hashes_m0.len()..(2*np2-1) {
-        hashes_m0.push(D::digest(F::random(&mut rng).to_repr()));
-    }
-    for i in (1..(np2-1)).step_by(2).rev() {
-        // build merkle tree
-        let mut digest = D::new();
-        digest.update(&hashes_m0[i]);
-        digest.update(&hashes_m0[i+1]);
-        hashes_m0[i/2] = digest.finalize();
-    }
+    // build merkle tree
+    hashes_m0.resize_with(2*np2-1, Default::default);
+    build_merkle_tree::<D>(&mut hashes_m0, np2);
+
+    // for i in 0..hashes_m0.len() {
+    //     println!("{}: {:?}", i, hashes_m0[i]);
+    // }
 
     // random linear combination 1
-    let mut r1 = Vec::<F>::with_capacity(msg_len);
-    for _ in 0..msg_len {
-        r1.push(F::random(&mut rng));
-    }
+    let mut r1 = Vec::<F>::new();
+    r1.resize_with(msg_len, || F::random(&mut rng));
     // println!("{:?}", r1);
+    
     // m1
     let mut m1 = Array::<F, _>::zeros((code_len));
-    for (x, mut y) in m0.lanes_mut(Axis(1)).into_iter().zip(m1.iter_mut()){
-        assert_eq!(x.len(), r1.len());
-        // println!("{:?}", r1);
-        for (xx, yy) in x.iter().zip(r1.iter()) {
-            // println!("{:?}", xx);
-            // println!("{:?}", yy); 
-            // println!("{:?}", xx.mul(yy));
-            // println!("{:?}", y.add(xx.mul(yy)));
-            *y = y.add(xx.mul(yy));
+    for a in 0..code_len {
+        for x in 0..msg_len {
+            m1[[a]] = m1[[a]].add(r1[x].mul(m0[[a, x]]));
         }
     }
     // println!("{:?}", m1);
