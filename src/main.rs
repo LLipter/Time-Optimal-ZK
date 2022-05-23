@@ -70,12 +70,12 @@ fn main() {
     let x = commit::random_coeffs_from_length::<Ft255>(10);
     // println!("{:?}", x);
 
-    let a = vec![1, 2, 3];
-    let b = vec![2, 3, 4];
-    let x = commit::get_1d_index(&a, &b);
-    println!("{}", x);
+    // let a = vec![1, 2, 3];
+    // let b = vec![2, 3, 4];
+    // let x = commit::get_1d_index(&a, &b);
+    // println!("{}", x);
 
     // commit::commit_t_dim::<Ft255, codespec::Code6>(1000000, 3, 100, 172, 0);
 
-    commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0);
+    commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0, 5);
 }

@@ -1,4 +1,6 @@
 use std::iter::repeat_with;
+use std::collections::HashMap;
+use rand::Rng;
 use ff::Field;
 use ff::PrimeField;
 use ndarray::Array;
@@ -46,10 +48,10 @@ where
     return repeat_with(|| F::random(&mut rng)).take(len).collect();
 }
 
-pub fn get_1d_index(dim: &Vec<usize>, idx: &Vec<usize>) -> usize {
-    assert_eq!(dim.len(), idx.len());
-    return dim.iter().zip(idx).map(|(a, b)| a * b).sum();
-}
+// pub fn get_1d_index(dim: &Vec<usize>, idx: &Vec<usize>) -> usize {
+//     assert_eq!(dim.len(), idx.len());
+//     return dim.iter().zip(idx).map(|(a, b)| a * b).sum();
+// }
 
 // pub fn commit_t_dim<F, C>(coef_no: usize, t: usize, msg_len: usize, code_len: usize, seed: u64)
 // where
@@ -75,7 +77,13 @@ pub fn get_1d_index(dim: &Vec<usize>, idx: &Vec<usize>) -> usize {
 //     let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
 // }
 
-pub fn commit_2_dim<F, C, D>(coef_no: usize, msg_len: usize, code_len: usize, seed: u64)
+pub fn commit_2_dim<F, C, D>(
+    coef_no: usize, 
+    msg_len: usize, 
+    code_len: usize, 
+    seed: u64,
+    test_no: usize
+)
 where
     F: PrimeField + Num + MulAcc,
     C: CodeSpecification,
@@ -92,6 +100,10 @@ where
             coef[[i, j]] = F::random(&mut rng);
         }
     }
+
+    // random linear combination 1
+    let mut r1 = Vec::<F>::new();
+    r1.resize_with(msg_len, || F::random(&mut rng));
 
     // generate codes
     let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
@@ -128,15 +140,6 @@ where
     hashes_m0.resize_with(2*np2-1, Default::default);
     build_merkle_tree::<D>(&mut hashes_m0, np2);
 
-    // for i in 0..hashes_m0.len() {
-    //     println!("{}: {:?}", i, hashes_m0[i]);
-    // }
-
-    // random linear combination 1
-    let mut r1 = Vec::<F>::new();
-    r1.resize_with(msg_len, || F::random(&mut rng));
-    // println!("{:?}", r1);
-    
     // m1
     let mut m1 = Array::<F, _>::zeros((code_len));
     for a in 0..code_len {
@@ -144,5 +147,53 @@ where
             m1[[a]] = m1[[a]].add(r1[x].mul(m0[[a, x]]));
         }
     }
-    // println!("{:?}", m1);
+
+    // verifier has access to r1, m1, m0.root
+    let mut m0_map = HashMap::<usize, Output<D>>::new();
+    m0_map.insert(0, hashes_m0[0].clone());
+    for i in 0..test_no {
+        // sample idx
+        let i1 = rng.gen_range(0..code_len);
+        let mut msg = Vec::<F>::with_capacity(code_len);
+        for x in 0..msg_len {
+            msg.push(m1[[x]]);
+        }
+        // println!("{:?}", msg);
+        msg.resize(code_len, <F as Field>::zero());
+        encode(&mut msg, &precodes, &postcodes);
+        let mut s1 = <F as Field>::zero();
+        for k in 0..msg_len {
+            s1 = s1.add(r1[k].mul(m0[[i1, k]]));
+        }
+        assert_eq!(s1, msg[i1]);
+
+        // verify the merkle path for m0
+        let mut digest = D::new();
+        for k in 0..msg_len {
+            digest.update(m0[[i1, k]].to_repr());
+        }
+        let mut cur_hash = digest.finalize();
+        let mut idx = i1 + np2 - 1;
+        while idx > 0 {
+            match m0_map.get(&idx) {
+                None => {
+                    m0_map.insert(idx, cur_hash.clone());
+                },
+                Some(h) => assert!(cur_hash.eq(h)),
+            }
+
+            let mut digest = D::new();
+            if idx % 2 == 0 {
+                digest.update(&hashes_m0[idx-1]);
+                digest.update(&cur_hash);
+            }else{
+                digest.update(&cur_hash);
+                digest.update(&hashes_m0[idx+1]);
+            }
+            cur_hash = digest.finalize();
+            idx = (idx - 1) / 2;
+        }
+        assert!(cur_hash.eq(&m0_map[&0]));
+        println!("test {} passed", i+1);
+    }
 }
