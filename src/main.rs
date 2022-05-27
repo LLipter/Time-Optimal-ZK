@@ -13,10 +13,14 @@ use ff::PrimeField;
 use ff::Field;
 use ndarray::Array;
 use blake3::Hasher as Blake3;
+use num_traits::pow;
+use ndarray::Axis;
+use ndarray::parallel::prelude::*;
 
 
 
 fn main() {
+/*
     println!("Hello, world!");
     let seed : u64 = 0;
     let mut rng = ChaCha20Rng::seed_from_u64(seed);
@@ -53,7 +57,7 @@ fn main() {
     println!("encoded len: {}", data.len());
     // println!("{:?}", data);
 
-
+*/
     // let a = Array::<Ft255, _>::zeros((2, 3, 4));
 
     // // println!("{:?}", a);
@@ -67,7 +71,7 @@ fn main() {
     // let b = Array::<Ft255, _>::zeros(vec);
     // // println!("{:?}", b);
     
-    let x = commit::random_coeffs_from_length::<Ft255>(10);
+    // let x = commit::random_coeffs_from_length::<Ft255>(10);
     // println!("{:?}", x);
 
     // let a = vec![1, 2, 3];
@@ -77,6 +81,20 @@ fn main() {
 
     // commit::commit_t_dim::<Ft255, codespec::Code6>(1000000, 3, 100, 172, 0);
 
+    rayon::ThreadPoolBuilder::new().num_threads(8).build_global().unwrap();
+
     // commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0, 5);
-    commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(1000000, 100, 172, 0, 5);
+    // commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(1000000, 100, 172, 0, 5);
+    // println!("{:?}", pow(2usize, 20));
+    
+    commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(pow(2usize, 20), 1024, 1762, 0, 100);
+    // commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0, 5);
+
+
+
+    // let mut X = Array::<Ft255, _>::zeros((5, 5, 5));
+    // X.axis_iter_mut(Axis(1)).into_par_iter().enumerate().for_each(|(idx, x)| {
+    //     println!("{:?}", idx);
+    //     println!("{:?}", x);
+    // });
 }
