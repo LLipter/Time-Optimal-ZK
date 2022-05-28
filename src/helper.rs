@@ -37,7 +37,11 @@ where
             None => {
                 hashes_map.insert(idx, cur_hash.clone());
             },
-            Some(h) => assert!(cur_hash.eq(h)),
+            Some(h) => {
+                if !cur_hash.eq(h) {
+                    return false;
+                }
+            },
         }
 
         let mut digest = D::new();
@@ -51,6 +55,5 @@ where
         cur_hash = digest.finalize();
         idx = (idx - 1) / 2;
     }
-    assert!(cur_hash.eq(&hashes_map[&0]));
-    return true;
+    return cur_hash.eq(&hashes_map[&0]);
 }
