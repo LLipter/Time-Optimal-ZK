@@ -86,9 +86,9 @@ fn main() {
     // commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(1000000, 100, 172, 0, 5);
     
     rayon::ThreadPoolBuilder::new().num_threads(8).build_global().unwrap();
-    commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(pow(2usize, 20), 1024, 1762, 0, 100);
+    // commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(pow(2usize, 20), 1024, 1762, 0, 100);
     commit::commit_2_dim::<Ft255, codespec::Code6, Blake3>(10000, 100, 172, 0, 5);
-    commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(pow(2usize, 20), 101, 174, 0, 100);
+    // commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(pow(2usize, 20), 101, 174, 0, 100);
     commit::commit_3_dim::<Ft255, codespec::Code6, Blake3>(27000, 30, 52, 0, 5);
 
 }

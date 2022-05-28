@@ -9,6 +9,7 @@ use ndarray::Array;
 use ndarray::Array2;
 use ndarray::Axis;
 use ndarray::ArrayViewMut;
+use ndarray::Dim;
 use ndarray::parallel::prelude::*;
 use num_traits::Num;
 use sprs::MulAcc;
@@ -53,6 +54,128 @@ where
 {
     let mut rng = rand::thread_rng();
     return repeat_with(|| F::random(&mut rng)).take(len).collect();
+}
+
+pub fn linear_combination_2_1<F>(
+    msg_len: usize, 
+    code_len: usize,
+    m_2d: &Array<F, Dim<[usize; 2]>>,
+    r: &Vec<F>
+) -> Array<F, Dim<[usize; 1]>>
+where
+    F: PrimeField + Num,
+{
+    assert_eq!(m_2d.shape(), &[code_len, msg_len]);
+    assert_eq!(r.len(), msg_len);
+
+    let mut result = Array::<F, _>::zeros((msg_len));
+    result
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i1, mut x)| {
+            let data = x.first_mut().unwrap();
+            for i2 in 0..msg_len {
+                *data = data.add(r[i2].mul(m_2d[[i1, i2]]));
+            }
+            *x.first_mut().unwrap() = *data;
+    });
+    return result;
+}
+
+pub fn linear_combination_3_2<F>(
+    msg_len: usize, 
+    code_len: usize,
+    m_3d: &Array<F, Dim<[usize; 3]>>,
+    r: &Vec<F>
+) -> Array<F, Dim<[usize; 2]>>
+where
+    F: PrimeField + Num,
+{
+    assert_eq!(m_3d.shape(), &[code_len, code_len, msg_len]);
+    assert_eq!(r.len(), msg_len);
+
+    let mut result = Array::<F, _>::zeros((code_len, msg_len));
+    result
+        .axis_iter_mut(Axis(1))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i2, mut xx)| {
+            xx
+                .axis_iter_mut(Axis(0))
+                .enumerate()
+                .for_each(|(i1, mut x)| {
+                    let data = x.first_mut().unwrap();
+                    for i3 in 0..msg_len {
+                        *data = data.add(r[i3].mul(m_3d[[i1, i2, i3]]));
+                    }
+                    *x.first_mut().unwrap() = *data;
+                });
+    });
+    return result;
+}
+
+pub fn merkle_tree_commit_2d<F, D>(
+    msg_len: usize, 
+    code_len: usize,
+    m_2d: &Array<F, Dim<[usize; 2]>>
+) -> Vec<Output<D>>
+where
+    F: PrimeField,
+    D: Digest,
+{
+    assert_eq!(m_2d.shape(), &[code_len, msg_len]);
+
+    let mut hashes_vec = Vec::<Output<D>>::new();
+    let item_no = code_len;
+    let np2 = next_pow_2(item_no);
+    hashes_vec.resize_with(2*np2-1, Default::default);
+    (&mut hashes_vec)
+        .into_par_iter()
+        .enumerate()
+        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
+        .for_each(|(i, x)| {
+        let mut digest = D::new();
+        for i2 in 0..msg_len {
+            let i1 = i-(np2-1);
+            digest.update(m_2d[[i1, i2]].to_repr());
+        }
+        *x = digest.finalize();
+    });
+    build_merkle_tree::<D>(&mut hashes_vec, np2);
+    return hashes_vec;
+}
+
+pub fn merkle_tree_commit_3d<F, D>(
+    msg_len: usize, 
+    code_len: usize,
+    m_3d: &Array<F, Dim<[usize; 3]>>
+) -> Vec<Output<D>>
+where
+    F: PrimeField,
+    D: Digest,
+{
+    assert_eq!(m_3d.shape(), &[code_len, code_len, msg_len]);
+
+    let mut hashes_vec = Vec::<Output<D>>::new();
+    let item_no = code_len * code_len;
+    let np2 = next_pow_2(item_no);
+    hashes_vec.resize_with(2*np2-1, Default::default);
+    (&mut hashes_vec)
+        .into_par_iter()
+        .enumerate()
+        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
+        .for_each(|(i, x)| {
+        let mut digest = D::new();
+        for i3 in 0..msg_len {
+            let i1 = (i-(np2-1)) % code_len;
+            let i2 = (i-(np2-1)) / code_len;
+            digest.update(m_3d[[i1, i2, i3]].to_repr());
+        }
+        *x = digest.finalize();
+    });
+    build_merkle_tree::<D>(&mut hashes_vec, np2);
+    return hashes_vec;
 }
 
 pub fn commit_2_dim<F, C, D>(
@@ -101,37 +224,10 @@ where
     });
 
     // M1: m
-    let mut m1 = Array::<F, _>::zeros((msg_len));
-    m1
-        .axis_iter_mut(Axis(0))
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(i1, mut x)| {
-            let data = x.first_mut().unwrap();
-            for i2 in 0..msg_len {
-                *data = data.add(r1[i2].mul(m0[[i1, i2]]));
-            }
-            *x.first_mut().unwrap() = *data;
-    });
+    let m1 = linear_combination_2_1::<F>(msg_len, code_len, &m0, &r1);
 
     // commit to m0
-    let mut hashes_m0 = Vec::<Output<D>>::new();
-    let item_no = code_len;
-    let np2 = next_pow_2(item_no);
-    hashes_m0.resize_with(2*np2-1, Default::default);
-    (&mut hashes_m0)
-        .into_par_iter()
-        .enumerate()
-        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
-        .for_each(|(i, x)| {
-        let mut digest = D::new();
-        for i2 in 0..msg_len {
-            let i1 = i-(np2-1);
-            digest.update(m0[[i1, i2]].to_repr());
-        }
-        *x = digest.finalize();
-    });
-    build_merkle_tree::<D>(&mut hashes_m0, np2);
+    let hashes_m0 = merkle_tree_commit_2d::<F, D>(msg_len, code_len, &m0);
 
     let committed_time = Instant::now();
 
@@ -247,77 +343,15 @@ where
     });
 
     // M1: N * m
-    let mut m1 = Array::<F, _>::zeros((code_len, msg_len));
-    m1
-        .axis_iter_mut(Axis(1))
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(i2, mut xx)| {
-            xx
-                .axis_iter_mut(Axis(0))
-                .enumerate()
-                .for_each(|(i1, mut x)| {
-                    let data = x.first_mut().unwrap();
-                    for i3 in 0..msg_len {
-                        *data = data.add(r1[i3].mul(m0[[i1, i2, i3]]));
-                    }
-                    *x.first_mut().unwrap() = *data;
-                });
-    });
-
+    let m1 = linear_combination_3_2::<F>(msg_len, code_len, &m0, &r1);
     // M2: m
-    let mut m2 = Array::<F, _>::zeros((msg_len));
-    m2
-        .axis_iter_mut(Axis(0))
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(i1, mut x)| {
-            let data = x.first_mut().unwrap();
-            for i2 in 0..msg_len {
-                *data = data.add(r2[i2].mul(m1[[i1, i2]]));
-            }
-            *x.first_mut().unwrap() = *data;
-        });
+    let m2 = linear_combination_2_1::<F>(msg_len, code_len, &m1, &r2);
 
 
     // commit to m0
-    let mut hashes_m0 = Vec::<Output<D>>::new();
-    let item_no = code_len * code_len;
-    let np2 = next_pow_2(item_no);
-    hashes_m0.resize_with(2*np2-1, Default::default);
-    (&mut hashes_m0)
-        .into_par_iter()
-        .enumerate()
-        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
-        .for_each(|(i, x)| {
-        let mut digest = D::new();
-        for i3 in 0..msg_len {
-            let i1 = (i-(np2-1)) % code_len;
-            let i2 = (i-(np2-1)) / code_len;
-            digest.update(m0[[i1, i2, i3]].to_repr());
-        }
-        *x = digest.finalize();
-    });
-    build_merkle_tree::<D>(&mut hashes_m0, np2);
-
+    let hashes_m0 = merkle_tree_commit_3d::<F, D>(msg_len, code_len, &m0);
     // commit to m1
-    let mut hashes_m1 = Vec::<Output<D>>::new();
-    let item_no = code_len;
-    let np2 = next_pow_2(item_no);
-    hashes_m1.resize_with(2*np2-1, Default::default);
-    (&mut hashes_m1)
-        .into_par_iter()
-        .enumerate()
-        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
-        .for_each(|(i, x)| {
-        let mut digest = D::new();
-        for i2 in 0..msg_len {
-            let i1 = i-(np2-1);
-            digest.update(m1[[i1, i2]].to_repr());
-        }
-        *x = digest.finalize();
-    });
-    build_merkle_tree::<D>(&mut hashes_m1, np2);    
+    let hashes_m1 = merkle_tree_commit_2d::<F, D>(msg_len, code_len, &m1);
 
     let committed_time = Instant::now();
 
