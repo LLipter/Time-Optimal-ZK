@@ -8,6 +8,7 @@ use ff::PrimeField;
 use ndarray::Array;
 use ndarray::Array2;
 use ndarray::Axis;
+use ndarray::ArrayViewMut;
 use ndarray::parallel::prelude::*;
 use num_traits::Num;
 use sprs::MulAcc;
@@ -19,6 +20,7 @@ use crate::codegen::generate;
 use crate::encode::encode;
 use crate::helper::next_pow_2;
 use crate::helper::build_merkle_tree;
+use crate::helper::check_merkle_path;
 
 /// generate random coeffs of length 2^`log_len`
 pub fn random_coeffs<Ft: Field>(log_len: usize) -> Vec<Ft> {
@@ -65,7 +67,6 @@ where
     C: CodeSpecification,
     D: Digest,
 {
-    assert_eq!(msg_len * msg_len, coef_no);
     let mut rng = rand::thread_rng();
 
     // generate codes
@@ -86,37 +87,47 @@ where
     r1.resize_with(msg_len, || F::random(&mut rng));
 
     // encode for axis 0
-    m0.axis_iter_mut(Axis(1)).into_par_iter().enumerate().for_each(|(a, mut x)| {
-        let mut msg = x.to_vec();
-        msg.resize(code_len, <F as Field>::zero());
-        encode(&mut msg, &precodes, &postcodes);
-        for b in 0..code_len {
-            x[b] = msg[b];
-        }
+    m0
+        .axis_iter_mut(Axis(1))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i2, mut x)| {
+            let mut msg = x.to_vec();
+            msg.resize(code_len, <F as Field>::zero());
+            encode(&mut msg, &precodes, &postcodes);
+            for i1 in 0..code_len {
+                x[i1] = msg[i1];
+            }
     });
 
-    // m1
-    let mut m1 = Array::<F, _>::zeros((code_len));
-    m1.axis_iter_mut(Axis(0)).into_par_iter().enumerate().for_each(|(a, mut x)| {
-        let data = x.first_mut().unwrap();
-        for b in 0..msg_len {
-            *data = data.add(r1[b].mul(m0[[a, b]]));
-        }
-        *x.first_mut().unwrap() = *data;
+    // M1: m
+    let mut m1 = Array::<F, _>::zeros((msg_len));
+    m1
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i1, mut x)| {
+            let data = x.first_mut().unwrap();
+            for i2 in 0..msg_len {
+                *data = data.add(r1[i2].mul(m0[[i1, i2]]));
+            }
+            *x.first_mut().unwrap() = *data;
     });
 
     // commit to m0
     let mut hashes_m0 = Vec::<Output<D>>::new();
-    let np2 = next_pow_2(code_len);
+    let item_no = code_len;
+    let np2 = next_pow_2(item_no);
     hashes_m0.resize_with(2*np2-1, Default::default);
     (&mut hashes_m0)
         .into_par_iter()
         .enumerate()
-        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+code_len))
+        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
         .for_each(|(i, x)| {
         let mut digest = D::new();
-        for j in 0..msg_len {
-            digest.update(m0[[i-(np2-1), j]].to_repr());
+        for i2 in 0..msg_len {
+            let i1 = i-(np2-1);
+            digest.update(m0[[i1, i2]].to_repr());
         }
         *x = digest.finalize();
     });
@@ -130,46 +141,30 @@ where
     for i in 0..test_no {
         // sample idx
         let i1 = rng.gen_range(0..code_len);
+
         let mut msg = Vec::<F>::with_capacity(code_len);
-        for x in 0..msg_len {
-            msg.push(m1[[x]]);
+        for i1 in 0..msg_len {
+            msg.push(m1[[i1]]);
         }
-        // println!("{:?}", msg);
+
         msg.resize(code_len, <F as Field>::zero());
         encode(&mut msg, &precodes, &postcodes);
-        let mut s1 = <F as Field>::zero();
-        for k in 0..msg_len {
-            s1 = s1.add(r1[k].mul(m0[[i1, k]]));
+        let mut s = <F as Field>::zero();
+        for i2 in 0..msg_len {
+            s = s.add(r1[i2].mul(m0[[i1, i2]]));
         }
-        assert_eq!(s1, msg[i1]);
+        assert_eq!(s, msg[i1]);
 
         // verify the merkle path for m0
         let mut digest = D::new();
-        for k in 0..msg_len {
-            digest.update(m0[[i1, k]].to_repr());
+        for i2 in 0..msg_len {
+            digest.update(m0[[i1, i2]].to_repr());
         }
-        let mut cur_hash = digest.finalize();
-        let mut idx = i1 + np2 - 1;
-        while idx > 0 {
-            match m0_map.get(&idx) {
-                None => {
-                    m0_map.insert(idx, cur_hash.clone());
-                },
-                Some(h) => assert!(cur_hash.eq(h)),
-            }
-
-            let mut digest = D::new();
-            if idx % 2 == 0 {
-                digest.update(&hashes_m0[idx-1]);
-                digest.update(&cur_hash);
-            }else{
-                digest.update(&cur_hash);
-                digest.update(&hashes_m0[idx+1]);
-            }
-            cur_hash = digest.finalize();
-            idx = (idx - 1) / 2;
-        }
-        assert!(cur_hash.eq(&m0_map[&0]));
+        let cur_hash = digest.finalize();
+        let item_no = code_len;
+        let np2 = next_pow_2(item_no);
+        let idx = i1 + np2 - 1;
+        assert!(check_merkle_path::<D>(cur_hash, idx, &mut m0_map, &hashes_m0));
         // println!("test {} passed", i+1);
     }
 
@@ -177,7 +172,7 @@ where
 
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
-    println!("total_time: {} ms", verified_time.duration_since(start_time).as_millis());
+    println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
 }
 
 pub fn commit_3_dim<F, C, D>(
@@ -192,20 +187,20 @@ where
     C: CodeSpecification,
     D: Digest,
 {
-    assert_eq!(msg_len * msg_len * msg_len, coef_no);
-    let np2 = next_pow_2(code_len);
-
-    // generate random coefficient: m * m * m
-    let mut coef = Array::<F, _>::zeros((msg_len, msg_len, msg_len));
     let mut rng = rand::thread_rng();
-    for a in 0..msg_len {
-        for b in 0..msg_len {
-            for c in 0..msg_len {
-                coef[[a, b, c]] = F::random(&mut rng);
-            }
-        }
-    }
 
+    // generate codes
+    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
+
+    // M0: N * N * m
+    let mut m0 = Array::<F, _>::zeros((code_len, code_len, msg_len));
+    // generate random coefficient: m * m * m
+    m0.par_iter_mut().for_each(|x| {
+        let mut rng = rand::thread_rng();
+        *x = F::random(&mut rng);
+    });
+
+    let start_time = Instant::now();
 
     // random linear combination
     let mut r1 = Vec::<F>::new();
@@ -213,121 +208,179 @@ where
     let mut r2 = Vec::<F>::new();
     r2.resize_with(msg_len, || F::random(&mut rng));
 
-    // generate codes
-    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
-    
-    // M0: N * N * m
-    let mut m0 = Array::<F, _>::zeros((code_len, code_len, msg_len));
-    
     // encode for axis 0
-    for a in 0..msg_len {
-        for b in 0..msg_len {
-            let mut msg = Vec::<F>::with_capacity(code_len);
-            for x in 0..msg_len {
-                msg.push(coef[[x, a, b]]);
-            }
-            msg.resize(code_len, <F as Field>::zero());
-            encode(&mut msg, &precodes, &postcodes);
-            for x in 0..code_len {
-                m0[[x, a, b]] = msg[x];
-            }
-        }
-    }
+    m0
+        .axis_iter_mut(Axis(2))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i3, mut xx)| {
+            xx
+                .axis_iter_mut(Axis(1))
+                .enumerate()
+                .filter(|(i, _)| i < &(msg_len))
+                .for_each(|(i2, mut x)| {
+                    let mut msg = x.to_vec();
+                    msg.resize(code_len, <F as Field>::zero());
+                    encode(&mut msg, &precodes, &postcodes);
+                    for i1 in 0..code_len {
+                        x[i1] = msg[i1];
+                    }
+                });
+    });
     // encode for axis 1
-    for a in 0..code_len {
-        for b in 0..msg_len {
-            let mut msg = Vec::<F>::with_capacity(code_len);
-            for x in 0..msg_len {
-                msg.push(m0[[a, x, b]]);
+    m0
+        .axis_iter_mut(Axis(2))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i3, mut xx)| {
+            xx
+                .axis_iter_mut(Axis(0))
+                .enumerate()
+                .for_each(|(i1, mut x)| {
+                    let mut msg = x.to_vec();
+                    msg.resize(code_len, <F as Field>::zero());
+                    encode(&mut msg, &precodes, &postcodes);
+                    for i2 in 0..code_len {
+                        x[i2] = msg[i2];
+                    }
+                });
+    });
+
+    // M1: N * m
+    let mut m1 = Array::<F, _>::zeros((code_len, msg_len));
+    m1
+        .axis_iter_mut(Axis(1))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i2, mut xx)| {
+            xx
+                .axis_iter_mut(Axis(0))
+                .enumerate()
+                .for_each(|(i1, mut x)| {
+                    let data = x.first_mut().unwrap();
+                    for i3 in 0..msg_len {
+                        *data = data.add(r1[i3].mul(m0[[i1, i2, i3]]));
+                    }
+                    *x.first_mut().unwrap() = *data;
+                });
+    });
+
+    // M2: m
+    let mut m2 = Array::<F, _>::zeros((msg_len));
+    m2
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i1, mut x)| {
+            let data = x.first_mut().unwrap();
+            for i2 in 0..msg_len {
+                *data = data.add(r2[i2].mul(m1[[i1, i2]]));
             }
-            msg.resize(code_len, <F as Field>::zero());
-            encode(&mut msg, &precodes, &postcodes);
-            for x in msg_len..code_len {
-                m0[[a, x, b]] = msg[x];
-            }
+            *x.first_mut().unwrap() = *data;
+        });
+
+
+    // commit to m0
+    let mut hashes_m0 = Vec::<Output<D>>::new();
+    let item_no = code_len * code_len;
+    let np2 = next_pow_2(item_no);
+    hashes_m0.resize_with(2*np2-1, Default::default);
+    (&mut hashes_m0)
+        .into_par_iter()
+        .enumerate()
+        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
+        .for_each(|(i, x)| {
+        let mut digest = D::new();
+        for i3 in 0..msg_len {
+            let i1 = (i-(np2-1)) % code_len;
+            let i2 = (i-(np2-1)) / code_len;
+            digest.update(m0[[i1, i2, i3]].to_repr());
         }
-    }
-    // println!("{:?}", m0);
+        *x = digest.finalize();
+    });
+    build_merkle_tree::<D>(&mut hashes_m0, np2);
 
-    // m1
-    let mut m1 = Array::<F, _>::zeros((code_len, code_len));
-    for a in 0..code_len {
-        for b in 0..code_len {
-            for x in 0..msg_len {
-                m1[[a, b]] = m1[[a, b]].add(r1[x].mul(m0[[a, b, x]]));
-            }
+    // commit to m1
+    let mut hashes_m1 = Vec::<Output<D>>::new();
+    let item_no = code_len;
+    let np2 = next_pow_2(item_no);
+    hashes_m1.resize_with(2*np2-1, Default::default);
+    (&mut hashes_m1)
+        .into_par_iter()
+        .enumerate()
+        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
+        .for_each(|(i, x)| {
+        let mut digest = D::new();
+        for i2 in 0..msg_len {
+            let i1 = i-(np2-1);
+            digest.update(m1[[i1, i2]].to_repr());
         }
-    }
+        *x = digest.finalize();
+    });
+    build_merkle_tree::<D>(&mut hashes_m1, np2);    
 
-    // m2
-    let mut m2 = Array::<F, _>::zeros((code_len));
-    for a in 0..code_len {
-        for x in 0..msg_len {
-            m2[[a]] = m2[[a]].add(r2[x].mul(m1[[a, x]]));
+    let committed_time = Instant::now();
+
+    // verifier has access to r1, r2, m2, m0.root, m1.root
+    let mut m0_map = HashMap::<usize, Output<D>>::new();
+    m0_map.insert(0, hashes_m0[0].clone());
+    let mut m1_map = HashMap::<usize, Output<D>>::new();
+    m1_map.insert(0, hashes_m1[0].clone());
+    for i in 0..test_no {
+        // sample idx
+        let i1 = rng.gen_range(0..code_len);
+        let i2 = rng.gen_range(0..code_len);
+
+        let mut msg = Vec::<F>::with_capacity(code_len);
+        for i2 in 0..msg_len {
+            msg.push(m1[[i1, i2]]);
         }
+        msg.resize(code_len, <F as Field>::zero());
+        encode(&mut msg, &precodes, &postcodes);
+        let mut s = <F as Field>::zero();
+        for i3 in 0..msg_len {
+            s = s.add(r1[i3].mul(m0[[i1, i2, i3]]));
+        }
+        assert_eq!(s, msg[i2]);
+        msg.clear();
+        for i1 in 0..msg_len {
+            msg.push(m2[[i1]]);
+        }
+        msg.resize(code_len, <F as Field>::zero());
+        encode(&mut msg, &precodes, &postcodes);
+        let mut s = <F as Field>::zero();
+        for i2 in 0..msg_len {
+            s = s.add(r2[i2].mul(m1[[i1, i2]]));
+        }
+        assert_eq!(s, msg[i1]);
+
+        // verify the merkle path for m0
+        let mut digest = D::new();
+        for i3 in 0..msg_len {
+            digest.update(m0[[i1, i2, i3]].to_repr());
+        }
+        let cur_hash = digest.finalize();
+        let item_no = code_len * code_len;
+        let np2 = next_pow_2(item_no);
+        let idx = i1 + i2 * code_len + np2 - 1;
+        assert!(check_merkle_path::<D>(cur_hash, idx, &mut m0_map, &hashes_m0));
+
+        // verify the merkle path for m1
+        let mut digest = D::new();
+        for i2 in 0..msg_len {
+            digest.update(m1[[i1, i2]].to_repr());
+        }
+        let cur_hash = digest.finalize();
+        let item_no = code_len;
+        let np2 = next_pow_2(item_no);
+        let idx = i1 + np2 - 1;
+        assert!(check_merkle_path::<D>(cur_hash, idx, &mut m1_map, &hashes_m1));
+        // println!("test {} passed", i+1);
     }
 
-    // // commit to m0
-    // let mut hashes_m0 = Vec::<Output<D>>::new();
-    // hashes_m0.resize_with(np2-1, Default::default);
-    // for i in 0..code_len {
-    //     let mut digest = D::new();
-    //     for j in 0..msg_len {
-    //         digest.update(m0[[i, j]].to_repr());
-    //     }
-    //     hashes_m0.push(digest.finalize());
-    // }
-    // // build merkle tree
-    // hashes_m0.resize_with(2*np2-1, Default::default);
-    // build_merkle_tree::<D>(&mut hashes_m0, np2);
+    let verified_time = Instant::now();
 
-
-    // // verifier has access to r1, m1, m0.root
-    // let mut m0_map = HashMap::<usize, Output<D>>::new();
-    // m0_map.insert(0, hashes_m0[0].clone());
-    // for i in 0..test_no {
-    //     // sample idx
-    //     let i1 = rng.gen_range(0..code_len);
-    //     let mut msg = Vec::<F>::with_capacity(code_len);
-    //     for x in 0..msg_len {
-    //         msg.push(m1[[x]]);
-    //     }
-    //     // println!("{:?}", msg);
-    //     msg.resize(code_len, <F as Field>::zero());
-    //     encode(&mut msg, &precodes, &postcodes);
-    //     let mut s1 = <F as Field>::zero();
-    //     for k in 0..msg_len {
-    //         s1 = s1.add(r1[k].mul(m0[[i1, k]]));
-    //     }
-    //     assert_eq!(s1, msg[i1]);
-
-    //     // verify the merkle path for m0
-    //     let mut digest = D::new();
-    //     for k in 0..msg_len {
-    //         digest.update(m0[[i1, k]].to_repr());
-    //     }
-    //     let mut cur_hash = digest.finalize();
-    //     let mut idx = i1 + np2 - 1;
-    //     while idx > 0 {
-    //         match m0_map.get(&idx) {
-    //             None => {
-    //                 m0_map.insert(idx, cur_hash.clone());
-    //             },
-    //             Some(h) => assert!(cur_hash.eq(h)),
-    //         }
-
-    //         let mut digest = D::new();
-    //         if idx % 2 == 0 {
-    //             digest.update(&hashes_m0[idx-1]);
-    //             digest.update(&cur_hash);
-    //         }else{
-    //             digest.update(&cur_hash);
-    //             digest.update(&hashes_m0[idx+1]);
-    //         }
-    //         cur_hash = digest.finalize();
-    //         idx = (idx - 1) / 2;
-    //     }
-    //     assert!(cur_hash.eq(&m0_map[&0]));
-    //     println!("test {} passed", i+1);
-    // }
+    println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
+    println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
+    println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
 }

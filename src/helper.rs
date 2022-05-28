@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use digest::Digest;
 use digest::Output;
 
@@ -20,4 +21,36 @@ where
         digest.update(&data[2*i+2]);
         data[i] = digest.finalize();
     }
+}
+
+pub fn check_merkle_path<D>(
+    mut cur_hash: Output<D>, 
+    mut idx: usize, 
+    hashes_map: &mut HashMap::<usize, Output<D>>,
+    hashes_vec: &Vec<Output<D>>
+) -> bool 
+where
+    D: Digest
+{
+    while idx > 0 {
+        match hashes_map.get(&idx) {
+            None => {
+                hashes_map.insert(idx, cur_hash.clone());
+            },
+            Some(h) => assert!(cur_hash.eq(h)),
+        }
+
+        let mut digest = D::new();
+        if idx % 2 == 0 {
+            digest.update(&hashes_vec[idx-1]);
+            digest.update(&cur_hash);
+        }else{
+            digest.update(&cur_hash);
+            digest.update(&hashes_vec[idx+1]);
+        }
+        cur_hash = digest.finalize();
+        idx = (idx - 1) / 2;
+    }
+    assert!(cur_hash.eq(&hashes_map[&0]));
+    return true;
 }
