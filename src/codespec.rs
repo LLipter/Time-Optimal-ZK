@@ -162,7 +162,7 @@ pub type Code1 = CodeSpec<
     U2500,
     typenum::U71, // r = 1.42
     typenum::U50,
-    typenum::U20, // baselen = 20
+    typenum::U10, // baselen = 20
 >;
 
 /// line 2 from table
@@ -173,7 +173,7 @@ pub type Code2 = CodeSpec<
     U2500,
     typenum::U147, // r = 1.47
     typenum::U100,
-    typenum::U20, // baselen = 20
+    typenum::U10, // baselen = 20
 >;
 
 /// line 3 from table
@@ -184,7 +184,7 @@ pub type Code3 = CodeSpec<
     typenum::U1000,
     U1521, // r = 1.521
     typenum::U1000,
-    typenum::U20, // baselen = 20
+    typenum::U10, // baselen = 20
 >;
 
 /// line 4 from table
@@ -195,7 +195,7 @@ pub type Code4 = CodeSpec<
     typenum::U500,
     typenum::U41, // r = 1.64
     typenum::U25,
-    typenum::U20, // baselen = 20
+    typenum::U10, // baselen = 20
 >;
 
 /// line 5 from table
@@ -206,7 +206,7 @@ pub type Code5 = CodeSpec<
     typenum::U1000,
     typenum::U202, // r = 1.616
     typenum::U125,
-    typenum::U20, // baselen = 20
+    typenum::U10, // baselen = 20
 >;
 
 /// line 6 from table
@@ -217,5 +217,5 @@ pub type Code6 = CodeSpec<
     U2000,
     typenum::U43, // r = 1.72
     typenum::U25,
-    typenum::U20, // baselen = 20
+    typenum::U10, // baselen = 20
 >;
