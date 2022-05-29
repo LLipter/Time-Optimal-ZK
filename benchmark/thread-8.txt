@@ -1,0 +1,19 @@
+coef_no:1048576 msg_len:1024 code_len:1762 test_no:100
+commit_time: 8623 ms
+verify_time: 875 ms
+total_time: 9499 ms
+
+coef_no:10000 msg_len:100 code_len:172 test_no:5
+commit_time: 97 ms
+verify_time: 7 ms
+total_time: 104 ms
+
+coef_no:1048576 msg_len:101 code_len:174 test_no:100
+commit_time: 23121 ms
+verify_time: 177 ms
+total_time: 23298 ms
+
+coef_no:27000 msg_len:30 code_len:52 test_no:5
+commit_time: 383 ms
+verify_time: 3 ms
+total_time: 386 ms

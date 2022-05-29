@@ -17,6 +17,7 @@ use sprs::MulAcc;
 use digest::Digest;
 use digest::Output;
 use rayon::prelude::*;
+use sprs::CsMat;
 use crate::codespec::CodeSpecification;
 use crate::codegen::generate;
 use crate::encode::encode;
@@ -179,12 +180,73 @@ where
     return hashes_vec;
 }
 
+pub fn check_linear_combination_2_1<F>(
+    msg_len: usize, 
+    code_len: usize,
+    m_2d: &Array<F, Dim<[usize; 2]>>,
+    m_1d: &Array<F, Dim<[usize; 1]>>,
+    r: &Vec<F>,
+    precodes: &Vec<CsMat<F>>,
+    postcodes: &Vec<CsMat<F>>,
+    i1: usize
+) -> bool
+where
+    F: PrimeField + Num + MulAcc,
+{
+    assert_eq!(m_2d.shape(), &[code_len, msg_len]);
+    assert_eq!(m_1d.shape(), &[msg_len]);
+    assert_eq!(r.len(), msg_len);
+
+    let mut msg = Vec::<F>::with_capacity(code_len);
+    for i1 in 0..msg_len {
+        msg.push(m_1d[[i1]]);
+    }
+    msg.resize(code_len, <F as Field>::zero());
+    encode(&mut msg, precodes, postcodes);
+    let mut s = <F as Field>::zero();
+    for i2 in 0..msg_len {
+        s = s.add(r[i2].mul(m_2d[[i1, i2]]));
+    }
+    return s == msg[i1];
+}
+
+pub fn check_linear_combination_3_2<F>(
+    msg_len: usize, 
+    code_len: usize,
+    m_3d: &Array<F, Dim<[usize; 3]>>,
+    m_2d: &Array<F, Dim<[usize; 2]>>,
+    r: &Vec<F>,
+    precodes: &Vec<CsMat<F>>,
+    postcodes: &Vec<CsMat<F>>,
+    i1: usize,
+    i2: usize,
+) -> bool
+where
+    F: PrimeField + Num + MulAcc,
+{
+    assert_eq!(m_3d.shape(), &[code_len, code_len, msg_len]);
+    assert_eq!(m_2d.shape(), &[code_len, msg_len]);
+    assert_eq!(r.len(), msg_len);
+
+    let mut msg = Vec::<F>::with_capacity(code_len);
+    for i2 in 0..msg_len {
+        msg.push(m_2d[[i1, i2]]);
+    }
+    msg.resize(code_len, <F as Field>::zero());
+    encode(&mut msg, &precodes, &postcodes);
+    let mut s = <F as Field>::zero();
+    for i3 in 0..msg_len {
+        s = s.add(r[i3].mul(m_3d[[i1, i2, i3]]));
+    }
+    return s == msg[i2];
+}
+
 pub fn commit_2_dim<F, C, D>(
     coef_no: usize, 
     msg_len: usize, 
     code_len: usize, 
     seed: u64,
-    test_no: usize
+    test_no: usize,
 )
 where
     F: PrimeField + Num + MulAcc,
@@ -241,18 +303,15 @@ where
     (0..test_no).into_par_iter().for_each(|i| {
         let i1 = idx_1[i];
 
-        let mut msg = Vec::<F>::with_capacity(code_len);
-        for i1 in 0..msg_len {
-            msg.push(m1[[i1]]);
-        }
-    
-        msg.resize(code_len, <F as Field>::zero());
-        encode(&mut msg, &precodes, &postcodes);
-        let mut s = <F as Field>::zero();
-        for i2 in 0..msg_len {
-            s = s.add(r1[i2].mul(m0[[i1, i2]]));
-        }
-        assert_eq!(s, msg[i1]);
+        assert!(
+            check_linear_combination_2_1::<F>(
+                msg_len, code_len, 
+                &m0, &m1, &r1, 
+                &precodes, &postcodes, 
+                i1
+            )
+        );
+
     });
 
     let m0_map_rwlock = RwLock::new(m0_map); 
@@ -274,6 +333,7 @@ where
 
     let verified_time = Instant::now();
 
+    println!("coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
@@ -284,7 +344,7 @@ pub fn commit_3_dim<F, C, D>(
     msg_len: usize, 
     code_len: usize, 
     seed: u64,
-    test_no: usize
+    test_no: usize,
 )
 where
     F: PrimeField + Num + MulAcc,
@@ -376,30 +436,22 @@ where
     (0..test_no).into_par_iter().for_each(|i| {
         let i1 = idx_1[i];
         let i2 = idx_2[i];
-
-        let mut msg = Vec::<F>::with_capacity(code_len);
-        for i2 in 0..msg_len {
-            msg.push(m1[[i1, i2]]);
-        }
-        msg.resize(code_len, <F as Field>::zero());
-        encode(&mut msg, &precodes, &postcodes);
-        let mut s = <F as Field>::zero();
-        for i3 in 0..msg_len {
-            s = s.add(r1[i3].mul(m0[[i1, i2, i3]]));
-        }
-        assert_eq!(s, msg[i2]);
-        msg.clear();
-        for i1 in 0..msg_len {
-            msg.push(m2[[i1]]);
-        }
-        msg.resize(code_len, <F as Field>::zero());
-        encode(&mut msg, &precodes, &postcodes);
-        let mut s = <F as Field>::zero();
-        for i2 in 0..msg_len {
-            s = s.add(r2[i2].mul(m1[[i1, i2]]));
-        }
-        assert_eq!(s, msg[i1]);
-
+        assert!(
+            check_linear_combination_3_2::<F>(
+                msg_len, code_len, 
+                &m0, &m1, &r1, 
+                &precodes, &postcodes, 
+                i1, i2
+            )
+        );
+        assert!(
+            check_linear_combination_2_1::<F>(
+                msg_len, code_len, 
+                &m1, &m2, &r2, 
+                &precodes, &postcodes, 
+                i1
+            )
+        );
     });
     
     let m0_map_rwlock = RwLock::new(m0_map);
@@ -434,6 +486,7 @@ where
 
     let verified_time = Instant::now();
 
+    println!("coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
