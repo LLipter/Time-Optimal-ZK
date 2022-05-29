@@ -1,6 +1,7 @@
 use std::iter::repeat_with;
 use std::collections::HashMap;
 use std::time::Instant;
+use std::sync::RwLock;
 use itertools::iproduct;
 use rand::Rng;
 use ff::Field;
@@ -234,15 +235,17 @@ where
     // verifier has access to r1, m1, m0.root
     let mut m0_map = HashMap::<usize, Output<D>>::new();
     m0_map.insert(0, hashes_m0[0].clone());
-    for i in 0..test_no {
-        // sample idx
-        let i1 = rng.gen_range(0..code_len);
+    // sample idx
+    let mut idx_1 = Vec::<usize>::new();
+    idx_1.resize_with(test_no, || rng.gen_range(0..code_len));
+    (0..test_no).into_par_iter().for_each(|i| {
+        let i1 = idx_1[i];
 
         let mut msg = Vec::<F>::with_capacity(code_len);
         for i1 in 0..msg_len {
             msg.push(m1[[i1]]);
         }
-
+    
         msg.resize(code_len, <F as Field>::zero());
         encode(&mut msg, &precodes, &postcodes);
         let mut s = <F as Field>::zero();
@@ -250,6 +253,11 @@ where
             s = s.add(r1[i2].mul(m0[[i1, i2]]));
         }
         assert_eq!(s, msg[i1]);
+    });
+
+    let m0_map_rwlock = RwLock::new(m0_map); 
+    (0..test_no).into_par_iter().for_each(|i| {
+        let i1 = idx_1[i];
 
         // verify the merkle path for m0
         let mut digest = D::new();
@@ -260,9 +268,9 @@ where
         let item_no = code_len;
         let np2 = next_pow_2(item_no);
         let idx = i1 + np2 - 1;
-        assert!(check_merkle_path::<D>(cur_hash, idx, &mut m0_map, &hashes_m0));
+        assert!(check_merkle_path::<D>(cur_hash, idx, &m0_map_rwlock, &hashes_m0));
         // println!("test {} passed", i+1);
-    }
+    });
 
     let verified_time = Instant::now();
 
@@ -360,10 +368,14 @@ where
     m0_map.insert(0, hashes_m0[0].clone());
     let mut m1_map = HashMap::<usize, Output<D>>::new();
     m1_map.insert(0, hashes_m1[0].clone());
-    for i in 0..test_no {
-        // sample idx
-        let i1 = rng.gen_range(0..code_len);
-        let i2 = rng.gen_range(0..code_len);
+    // sample idx
+    let mut idx_1 = Vec::<usize>::new();
+    idx_1.resize_with(test_no, || rng.gen_range(0..code_len));
+    let mut idx_2 = Vec::<usize>::new();
+    idx_2.resize_with(test_no, || rng.gen_range(0..code_len));
+    (0..test_no).into_par_iter().for_each(|i| {
+        let i1 = idx_1[i];
+        let i2 = idx_2[i];
 
         let mut msg = Vec::<F>::with_capacity(code_len);
         for i2 in 0..msg_len {
@@ -388,6 +400,14 @@ where
         }
         assert_eq!(s, msg[i1]);
 
+    });
+    
+    let m0_map_rwlock = RwLock::new(m0_map);
+    let m1_map_rwlock = RwLock::new(m1_map);
+    (0..test_no).into_par_iter().for_each(|i| {
+        let i1 = idx_1[i];
+        let i2 = idx_2[i];
+
         // verify the merkle path for m0
         let mut digest = D::new();
         for i3 in 0..msg_len {
@@ -397,8 +417,8 @@ where
         let item_no = code_len * code_len;
         let np2 = next_pow_2(item_no);
         let idx = i1 + i2 * code_len + np2 - 1;
-        assert!(check_merkle_path::<D>(cur_hash, idx, &mut m0_map, &hashes_m0));
-
+        assert!(check_merkle_path::<D>(cur_hash, idx, &m0_map_rwlock, &hashes_m0));
+    
         // verify the merkle path for m1
         let mut digest = D::new();
         for i2 in 0..msg_len {
@@ -408,9 +428,9 @@ where
         let item_no = code_len;
         let np2 = next_pow_2(item_no);
         let idx = i1 + np2 - 1;
-        assert!(check_merkle_path::<D>(cur_hash, idx, &mut m1_map, &hashes_m1));
+        assert!(check_merkle_path::<D>(cur_hash, idx, &m1_map_rwlock, &hashes_m1));
         // println!("test {} passed", i+1);
-    }
+    });
 
     let verified_time = Instant::now();
 

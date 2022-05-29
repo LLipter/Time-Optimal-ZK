@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::sync::RwLock;
+use std::mem::drop;
 use digest::Digest;
 use digest::Output;
 
@@ -26,16 +28,17 @@ where
 pub fn check_merkle_path<D>(
     mut cur_hash: Output<D>, 
     mut idx: usize, 
-    hashes_map: &mut HashMap::<usize, Output<D>>,
+    hashes_map_rwlock: &RwLock<HashMap::<usize, Output<D>>>,
     hashes_vec: &Vec<Output<D>>
 ) -> bool 
 where
     D: Digest
 {
     while idx > 0 {
-        match hashes_map.get(&idx) {
+        let mut rwlock_write = hashes_map_rwlock.write().unwrap();
+        match (*rwlock_write).get(&idx) {
             None => {
-                hashes_map.insert(idx, cur_hash.clone());
+                (*rwlock_write).insert(idx, cur_hash.clone());
             },
             Some(h) => {
                 if !cur_hash.eq(h) {
@@ -43,6 +46,7 @@ where
                 }
             },
         }
+        drop(rwlock_write);
 
         let mut digest = D::new();
         if idx % 2 == 0 {
@@ -55,5 +59,6 @@ where
         cur_hash = digest.finalize();
         idx = (idx - 1) / 2;
     }
-    return cur_hash.eq(&hashes_map[&0]);
+    let rwlock_read = hashes_map_rwlock.read().unwrap();
+    return cur_hash.eq(&((*rwlock_read)[&0]));
 }
