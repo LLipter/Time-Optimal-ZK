@@ -1,19 +1,30 @@
 coef_no:1048576 msg_len:1024 code_len:1762 test_no:100
-commit_time: 8623 ms
-verify_time: 875 ms
-total_time: 9499 ms
+commit_time: 7578 ms
+verify_time: 733 ms
+total_time: 8311 ms
 
 coef_no:10000 msg_len:100 code_len:172 test_no:5
-commit_time: 97 ms
-verify_time: 7 ms
-total_time: 104 ms
+commit_time: 77 ms
+verify_time: 6 ms
+total_time: 83 ms
 
 coef_no:1048576 msg_len:101 code_len:174 test_no:100
-commit_time: 23121 ms
-verify_time: 177 ms
-total_time: 23298 ms
+commit_time: 20662 ms
+verify_time: 156 ms
+total_time: 20819 ms
 
 coef_no:27000 msg_len:30 code_len:52 test_no:5
-commit_time: 383 ms
+commit_time: 336 ms
 verify_time: 3 ms
-total_time: 386 ms
+total_time: 340 ms
+
+coef_no:1048576 msg_len:32 code_len:56 test_no:100
+commit_time: 27088 ms
+verify_time: 53 ms
+total_time: 27142 ms
+
+coef_no:65536 msg_len:16 code_len:28 test_no:5
+commit_time: 1376 ms
+verify_time: 3 ms
+total_time: 1379 ms
+
