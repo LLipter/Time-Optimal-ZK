@@ -435,7 +435,7 @@ where
 
     let verified_time = Instant::now();
 
-    println!("coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
+    println!("t:2 coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
@@ -588,7 +588,7 @@ where
 
     let verified_time = Instant::now();
 
-    println!("coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
+    println!("t:3 coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
@@ -809,7 +809,7 @@ where
 
     let verified_time = Instant::now();
 
-    println!("coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
+    println!("t:4 coef_no:{:?} msg_len:{:?} code_len:{:?} test_no:{:?}", coef_no, msg_len, code_len, test_no);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
