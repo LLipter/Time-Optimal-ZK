@@ -52,7 +52,7 @@ pub fn linear_combination_3_2<F>(
 where
     F: PrimeField + Num,
 {
-    assert_eq!(m_3d.shape(), &[code_len, code_len, msg_len]);
+    assert!(m_3d.shape() == &[code_len, code_len, msg_len] || m_3d.shape() == &[code_len, code_len, code_len]);
     assert_eq!(r.len(), msg_len);
     assert!(range == msg_len || range == code_len);
 

@@ -99,7 +99,7 @@ where
     F: PrimeField,
     D: Digest,
 {
-    assert_eq!(m_3d.shape(), &[code_len, code_len, msg_len]);
+    assert!(m_3d.shape() == &[code_len, code_len, msg_len] || m_3d.shape() == &[code_len, code_len, code_len]);
 
     let mut hashes_vec = Vec::<Output<D>>::new();
     let item_no = code_len * code_len;
