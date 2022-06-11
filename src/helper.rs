@@ -1,8 +1,3 @@
-use std::collections::HashMap;
-use std::sync::RwLock;
-use std::mem::drop;
-use digest::Digest;
-use digest::Output;
 use ff::PrimeField;
 use ndarray::Dim;
 use ndarray::Array;

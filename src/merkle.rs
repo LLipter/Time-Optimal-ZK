@@ -14,7 +14,6 @@ where
     D: Digest,
 {
     for i in (0..(np2-1)).rev() {
-        // println!("{}", i);
         let mut digest = D::new();
         digest.update(&data[2*i+1]);
         digest.update(&data[2*i+2]);
