@@ -380,7 +380,7 @@ where
                     let mut msg = x.to_vec();
                     msg.resize(code_len, <F as Field>::zero());
                     encode(&mut msg, &precodes, &postcodes);
-                    for i2 in 0..code_len {
+                    for i2 in msg_len..code_len {
                         x[i2] = msg[i2];
                     }
                 });
@@ -546,7 +546,7 @@ where
                             let mut msg = x.to_vec();
                             msg.resize(code_len, <F as Field>::zero());
                             encode(&mut msg, &precodes, &postcodes);
-                            for i2 in 0..code_len {
+                            for i2 in msg_len..code_len {
                                 x[i2] = msg[i2];
                             }
                         });
@@ -569,7 +569,7 @@ where
                             let mut msg = x.to_vec();
                             msg.resize(code_len, <F as Field>::zero());
                             encode(&mut msg, &precodes, &postcodes);
-                            for i3 in 0..code_len {
+                            for i3 in msg_len..code_len {
                                 x[i3] = msg[i3];
                             }
                         });
