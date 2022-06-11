@@ -23,7 +23,7 @@ pub fn linear_combination_2_1<F>(
 where
     F: PrimeField + Num,
 {
-    assert_eq!(m_2d.shape(), &[code_len, msg_len]);
+    assert!(m_2d.shape() == &[code_len, msg_len] || m_2d.shape() == &[code_len, code_len]);
     assert_eq!(r.len(), msg_len);
     assert!(range == msg_len || range == code_len);
 
