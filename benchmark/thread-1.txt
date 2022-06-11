@@ -1,30 +1,30 @@
-coef_no:1048576 msg_len:1024 code_len:1762 test_no:100
-commit_time: 31020 ms
-verify_time: 2938 ms
-total_time: 33959 ms
+t:2 coef_no:1048576 msg_len:1024 code_len:1762 test_no:100
+commit_time: 30583 ms
+verify_time: 2896 ms
+total_time: 33479 ms
 
-coef_no:10000 msg_len:100 code_len:172 test_no:5
-commit_time: 322 ms
-verify_time: 14 ms
-total_time: 337 ms
+t:3 coef_no:1048576 msg_len:101 code_len:174 test_no:100
+commit_time: 83315 ms
+verify_time: 586 ms
+total_time: 83901 ms
 
-coef_no:1048576 msg_len:101 code_len:174 test_no:100
-commit_time: 80449 ms
-verify_time: 587 ms
-total_time: 81037 ms
+t:4 coef_no:1048576 msg_len:32 code_len:56 test_no:100
+commit_time: 100796 ms
+verify_time: 171 ms
+total_time: 100968 ms
 
-coef_no:27000 msg_len:30 code_len:52 test_no:5
-commit_time: 1316 ms
-verify_time: 5 ms
-total_time: 1322 ms
+simple zk t:2 coef_no:1048576 msg_len:1024 code_len:1762 test_no:100
+commit_time: 41737 ms
+verify_time: 3057 ms
+total_time: 44794 ms
 
-coef_no:1048576 msg_len:32 code_len:56 test_no:100
-commit_time: 102001 ms
-verify_time: 168 ms
-total_time: 102169 ms
+simple zk t:3 coef_no:1048576 msg_len:101 code_len:174 test_no:100
+commit_time: 99642 ms
+verify_time: 623 ms
+total_time: 100266 ms
 
-coef_no:65536 msg_len:16 code_len:28 test_no:5
-commit_time: 4217 ms
-verify_time: 3 ms
-total_time: 4220 ms
+simple zk t:4 coef_no:1048576 msg_len:32 code_len:56 test_no:100
+commit_time: 153558 ms
+verify_time: 204 ms
+total_time: 153762 ms
 
