@@ -22,107 +22,14 @@ use crate::codespec::CodeSpecification;
 use crate::codegen::generate;
 use crate::encode::encode;
 use crate::helper::next_pow_2;
+use crate::helper::linear_combination_2_1;
+use crate::helper::linear_combination_3_2;
+use crate::helper::linear_combination_4_3;
 use crate::merkle::build_merkle_tree;
 use crate::merkle::check_merkle_path;
 use crate::merkle::merkle_tree_commit_2d;
 use crate::merkle::merkle_tree_commit_3d;
 use crate::merkle::merkle_tree_commit_4d;
-
-pub fn linear_combination_2_1<F>(
-    msg_len: usize, 
-    code_len: usize,
-    m_2d: &Array<F, Dim<[usize; 2]>>,
-    r: &Vec<F>
-) -> Array<F, Dim<[usize; 1]>>
-where
-    F: PrimeField + Num,
-{
-    assert_eq!(m_2d.shape(), &[code_len, msg_len]);
-    assert_eq!(r.len(), msg_len);
-
-    let mut result = Array::<F, _>::zeros((msg_len));
-    result
-        .axis_iter_mut(Axis(0))
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(i1, mut x)| {
-            let data = x.first_mut().unwrap();
-            for i2 in 0..msg_len {
-                *data = data.add(r[i2].mul(m_2d[[i1, i2]]));
-            }
-            *x.first_mut().unwrap() = *data;
-        });
-    return result;
-}
-
-pub fn linear_combination_3_2<F>(
-    msg_len: usize, 
-    code_len: usize,
-    m_3d: &Array<F, Dim<[usize; 3]>>,
-    r: &Vec<F>
-) -> Array<F, Dim<[usize; 2]>>
-where
-    F: PrimeField + Num,
-{
-    assert_eq!(m_3d.shape(), &[code_len, code_len, msg_len]);
-    assert_eq!(r.len(), msg_len);
-
-    let mut result = Array::<F, _>::zeros((code_len, msg_len));
-    result
-        .axis_iter_mut(Axis(1))
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(i2, mut xx)| {
-            xx
-                .axis_iter_mut(Axis(0))
-                .enumerate()
-                .for_each(|(i1, mut x)| {
-                    let data = x.first_mut().unwrap();
-                    for i3 in 0..msg_len {
-                        *data = data.add(r[i3].mul(m_3d[[i1, i2, i3]]));
-                    }
-                    *x.first_mut().unwrap() = *data;
-                });
-        });
-    return result;
-}
-
-pub fn linear_combination_4_3<F>(
-    msg_len: usize, 
-    code_len: usize,
-    m_4d: &Array<F, Dim<[usize; 4]>>,
-    r: &Vec<F>
-) -> Array<F, Dim<[usize; 3]>>
-where
-    F: PrimeField + Num,
-{
-    assert_eq!(m_4d.shape(), &[code_len, code_len, code_len, msg_len]);
-    assert_eq!(r.len(), msg_len);
-
-    let mut result = Array::<F, _>::zeros((code_len, code_len, msg_len));
-    result
-        .axis_iter_mut(Axis(2))
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(i3, mut xxx)| {
-            xxx
-                .axis_iter_mut(Axis(1))
-                .enumerate()
-                .for_each(|(i2, mut xx)| {
-                    xx
-                        .axis_iter_mut(Axis(0))
-                        .enumerate()
-                        .for_each(|(i1, mut x)| {
-                            let data = x.first_mut().unwrap();
-                            for i4 in 0..msg_len {
-                                *data = data.add(r[i4].mul(m_4d[[i1, i2, i3, i4]]));
-                            }
-                            *x.first_mut().unwrap() = *data;
-                        });
-                });
-        });
-    return result;
-}
 
 pub fn check_linear_combination_2_1<F>(
     msg_len: usize, 
@@ -263,7 +170,7 @@ where
         });
 
     // M1: m
-    let m1 = linear_combination_2_1::<F>(msg_len, code_len, &m0, &r1);
+    let m1 = linear_combination_2_1::<F>(msg_len, code_len, &m0, &r1, msg_len);
 
     // commit to m0
     let hashes_m0 = merkle_tree_commit_2d::<F, D>(msg_len, code_len, &m0);
@@ -387,9 +294,9 @@ where
         });
 
     // M1: N * m
-    let m1 = linear_combination_3_2::<F>(msg_len, code_len, &m0, &r1);
+    let m1 = linear_combination_3_2::<F>(msg_len, code_len, &m0, &r1, msg_len);
     // M2: m
-    let m2 = linear_combination_2_1::<F>(msg_len, code_len, &m1, &r2);
+    let m2 = linear_combination_2_1::<F>(msg_len, code_len, &m1, &r2, msg_len);
 
 
     // commit to m0
@@ -577,11 +484,11 @@ where
         });
 
     // M1: N * N * m
-    let m1 = linear_combination_4_3::<F>(msg_len, code_len, &m0, &r1);
+    let m1 = linear_combination_4_3::<F>(msg_len, code_len, &m0, &r1, msg_len);
     // M2: N * m
-    let m2 = linear_combination_3_2::<F>(msg_len, code_len, &m1, &r2);
+    let m2 = linear_combination_3_2::<F>(msg_len, code_len, &m1, &r2, msg_len);
     // M3: m
-    let m3 = linear_combination_2_1::<F>(msg_len, code_len, &m2, &r3);
+    let m3 = linear_combination_2_1::<F>(msg_len, code_len, &m2, &r3, msg_len);
 
 
     // commit to m0
