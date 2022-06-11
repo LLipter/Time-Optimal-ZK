@@ -27,7 +27,7 @@ where
     assert_eq!(r.len(), msg_len);
     assert!(range == msg_len || range == code_len);
 
-    let mut result = Array::<F, _>::zeros((range));
+    let mut result = Array::<F, _>::zeros(range);
     result
         .axis_iter_mut(Axis(0))
         .into_par_iter()

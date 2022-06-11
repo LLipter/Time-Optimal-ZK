@@ -1,28 +1,22 @@
-use std::iter::repeat_with;
 use std::collections::HashMap;
 use std::time::Instant;
 use std::sync::RwLock;
-use itertools::iproduct;
 use rand::Rng;
 use ff::Field;
 use ff::PrimeField;
 use ndarray::Array;
-use ndarray::Array2;
 use ndarray::Axis;
-use ndarray::ArrayViewMut;
 use ndarray::Dim;
 use ndarray::parallel::prelude::*;
 use num_traits::Num;
 use sprs::MulAcc;
 use digest::Digest;
 use digest::Output;
-use rayon::prelude::*;
 use sprs::CsMat;
 use crate::helper::next_pow_2;
 use crate::helper::linear_combination_2_1;
 use crate::helper::linear_combination_3_2;
 use crate::helper::linear_combination_4_3;
-use crate::merkle::build_merkle_tree;
 use crate::merkle::check_merkle_path;
 use crate::merkle::merkle_tree_commit_2d;
 use crate::merkle::merkle_tree_commit_3d;
@@ -143,7 +137,6 @@ where
     D: Digest,
 {
     let mut rng = rand::thread_rng();
-    let code_len2 = 2 * code_len;
 
     // generate codes
     let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
