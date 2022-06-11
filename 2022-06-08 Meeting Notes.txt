@@ -1,0 +1,13 @@
+Suggest zero-knowledge or discuss
+
+https://eprint.iacr.org/2022/422.pdf
+Sections 3.4 and 4. Replace that commitment scheme with the one implemented, to try and reduce proof size and prover time simultaneously.
+Will ask if implementation is public yet. Maybe it is in Rust!
+
+Point 1:
+simple zero-knowledge encoding method?
+
+Point 2:
+soundness error needs to be improved. underlying code needs better distance. even if we use DI, better to use an underlying code with good distance.
+So extend brakedown table to get better distance and investigate.
+Work out theoretical limit to distance of Brakedown, based on constraints to input of entropy function.
