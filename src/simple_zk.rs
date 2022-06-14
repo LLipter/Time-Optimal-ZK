@@ -289,12 +289,12 @@ where
         .axis_iter_mut(Axis(2))
         .into_par_iter()
         .enumerate()
-        .for_each(|(i3, mut xx)| {
+        .for_each(|(_i3, mut xx)| {
             xx
                 .axis_iter_mut(Axis(1))
                 .enumerate()
                 .filter(|(i, _)| i < &(msg_len))
-                .for_each(|(i2, mut x)| {
+                .for_each(|(_i2, mut x)| {
                     let mut msg = x.to_vec();
                     msg.resize(code_len, <F as Field>::zero());
                     encode(&mut msg, &precodes, &postcodes);
@@ -308,11 +308,11 @@ where
         .axis_iter_mut(Axis(2))
         .into_par_iter()
         .enumerate()
-        .for_each(|(i3, mut xx)| {
+        .for_each(|(_i3, mut xx)| {
             xx
                 .axis_iter_mut(Axis(0))
                 .enumerate()
-                .for_each(|(i1, mut x)| {
+                .for_each(|(_i1, mut x)| {
                     let mut msg = x.to_vec();
                     msg.resize(code_len, <F as Field>::zero());
                     encode(&mut msg, &precodes, &postcodes);
@@ -497,17 +497,17 @@ where
         .axis_iter_mut(Axis(3))
         .into_par_iter()
         .enumerate()
-        .for_each(|(i4, mut xxx)| {
+        .for_each(|(_i4, mut xxx)| {
             xxx
                 .axis_iter_mut(Axis(2))
                 .enumerate()
                 .filter(|(i, _)| i < &(msg_len))
-                .for_each(|(i3, mut xx)| {
+                .for_each(|(_i3, mut xx)| {
                     xx
                         .axis_iter_mut(Axis(1))
                         .enumerate()
                         .filter(|(i, _)| i < &(msg_len))
-                        .for_each(|(i2, mut x)| {
+                        .for_each(|(_i2, mut x)| {
                             let mut msg = x.to_vec();
                             msg.resize(code_len, <F as Field>::zero());
                             encode(&mut msg, &precodes, &postcodes);
@@ -522,16 +522,16 @@ where
         .axis_iter_mut(Axis(3))
         .into_par_iter()
         .enumerate()
-        .for_each(|(i4, mut xxx)| {
+        .for_each(|(_i4, mut xxx)| {
             xxx
                 .axis_iter_mut(Axis(2))
                 .enumerate()
                 .filter(|(i, _)| i < &(msg_len))
-                .for_each(|(i3, mut xx)| {
+                .for_each(|(_i3, mut xx)| {
                     xx
                         .axis_iter_mut(Axis(0))
                         .enumerate()
-                        .for_each(|(i1, mut x)| {
+                        .for_each(|(_i1, mut x)| {
                             let mut msg = x.to_vec();
                             msg.resize(code_len, <F as Field>::zero());
                             encode(&mut msg, &precodes, &postcodes);
@@ -546,15 +546,15 @@ where
         .axis_iter_mut(Axis(3))
         .into_par_iter()
         .enumerate()
-        .for_each(|(i4, mut xxx)| {
+        .for_each(|(_i4, mut xxx)| {
             xxx
                 .axis_iter_mut(Axis(1))
                 .enumerate()
-                .for_each(|(i2, mut xx)| {
+                .for_each(|(_i2, mut xx)| {
                     xx
                         .axis_iter_mut(Axis(0))
                         .enumerate()
-                        .for_each(|(i1, mut x)| {
+                        .for_each(|(_i1, mut x)| {
                             let mut msg = x.to_vec();
                             msg.resize(code_len, <F as Field>::zero());
                             encode(&mut msg, &precodes, &postcodes);
