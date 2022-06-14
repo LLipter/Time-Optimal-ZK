@@ -10,6 +10,11 @@ def soundness_error(distance, test_no, t, code_len, field_size):
     # print(part3)
     return part1 + part2 + part3
 
+def binary_entropy(x):
+    return - x * math.log(x, 2) - (1 - x) * math.log(1 - x, 2)
+
+def d_bound4(e, p, n):
+    return (binary_entropy(e) * math.log(2) - math.log(p) / n) / e / e
 
 if __name__ == '__main__':
     fs = 46242760681095663677370860714659204618859642560429202607213929836750194081793
@@ -28,3 +33,6 @@ if __name__ == '__main__':
     print(soundness_error(0.50, 100, 2, 1762, fs))
     print(soundness_error(0.50, 204, 3, 174, fs))
     print(soundness_error(0.50, 411, 4, 56, fs))
+
+
+    print(d_bound4(1/1.72, math.pow(2, -256), 1762))

@@ -1,3 +1,4 @@
+use std::f64::consts::LN_2;
 use ff::PrimeField;
 use ndarray::Dim;
 use ndarray::Array;
@@ -11,6 +12,15 @@ pub fn next_pow_2(x: usize) -> usize {
         y *= 2;
     }
     return y;
+}
+
+pub fn binary_entropy(x: f64) -> f64 {
+    return - x * x.log2() - (1.0 - x) * (1.0 - x).log2();
+}
+
+pub fn degree_bound(e: f64, security_level: i32, code_len: usize) -> usize {
+    let result = (binary_entropy(e) * LN_2 - 2.0_f64.powi(-security_level).ln() / (code_len as f64) ) / e / e;
+    return result.ceil() as usize;
 }
 
 pub fn linear_combination_2_1<F>(
