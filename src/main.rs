@@ -35,6 +35,7 @@ use helper::degree_bound;
 use codegen::generate_rev;
 use std::ops::Add;
 use encode::encode_rev;
+use encode::test_reverse_encoding;
 
 
 fn main() {
@@ -79,4 +80,5 @@ fn main() {
 
 
     // TODO: test reverse encoding
+    test_reverse_encoding::<Ft255, codespec::Code6>();
 }

@@ -7,6 +7,8 @@ use ndarray::linalg::Dot;
 use num_traits::Num;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+use crate::codegen::generate;
+use crate::codegen::generate_rev;
 use crate::helper::degree_bound;
 use crate::codespec::CodeSpecification;
 
@@ -159,6 +161,41 @@ where
         let x_len = precode.rows();
         for i in 0..x_len {
             data_mut[x_start + i] = data_mut[x_start + i].add(z_reversed[i]);
+        }
+    }
+}
+
+pub fn test_reverse_encoding<F, C>()
+where
+    F: PrimeField + Num + MulAcc,
+    C: CodeSpecification,
+{
+    let msg_len = 1024;
+    let code_len = 1762;
+    
+    let (precodes, postcodes) = generate::<F, C>(msg_len, 0);
+    let mut matrix1 = Vec::<Vec<F>>::new();
+    for i in 0..msg_len {
+        let mut codeword = Vec::<F>::new();
+        codeword.resize_with(code_len, || <F as Field>::zero());
+        codeword[i] = <F as Field>::one();
+        encode::<F, _>(&mut codeword, &precodes, &postcodes);
+        matrix1.push(codeword);
+    }
+
+    let (precodes, postcodes) = generate_rev::<F, C>(code_len, 0);
+    let mut matrix2 = Vec::<Vec<F>>::new();
+    for i in 0..code_len {
+        let mut codeword = Vec::<F>::new();
+        codeword.resize_with(code_len, || <F as Field>::zero());
+        codeword[i] = <F as Field>::one();
+        encode_rev::<F, _>(&mut codeword, &precodes, &postcodes);
+        matrix2.push(codeword);
+    }
+
+    for i in 0..msg_len {
+        for j in 0..code_len {
+            assert_eq!(matrix1[i][j], matrix2[j][i]);
         }
     }
 }
