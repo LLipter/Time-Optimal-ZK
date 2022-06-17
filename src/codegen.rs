@@ -175,3 +175,21 @@ where
 
     (precodes, postcodes)
 }
+
+/// Generate a random reverse code from a given seed
+pub fn generate_rev<F, S>(n: usize, seed: u64) -> (Vec<CsMat<F>>, Vec<CsMat<F>>)
+where
+    F: PrimeField,
+    S: CodeSpecification,
+{
+    let input_len = ((n as f64) / S::r()).floor() as usize;
+    let (mut precodes, mut postcodes) = generate::<F, S>(input_len, seed);
+    // println!("x len: {}", precodes[0].cols());
+    for precode in precodes.iter_mut() {
+        precode.transpose_mut();
+    }
+    for postcode in postcodes.iter_mut() {
+        postcode.transpose_mut();
+    }
+    return (precodes, postcodes)
+}
