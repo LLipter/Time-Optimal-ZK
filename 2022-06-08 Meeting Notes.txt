@@ -3,6 +3,7 @@ Suggest zero-knowledge or discuss
 https://eprint.iacr.org/2022/422.pdf
 Sections 3.4 and 4. Replace that commitment scheme with the one implemented, to try and reduce proof size and prover time simultaneously.
 Will ask if implementation is public yet. Maybe it is in Rust!
+https://github.com/dfaranha/lattice-voting-ctrsa21
 
 Point 1:
 simple zero-knowledge encoding method?
