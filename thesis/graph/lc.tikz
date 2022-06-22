@@ -1,0 +1,17 @@
+\begin{tikzpicture}
+
+
+\draw [-stealth](0,0) node[anchor=east] {input} -- (1,0) node[anchor=west]{\textbf{.}};
+\draw [-stealth](1.4,0) -- (5.4,0);
+
+\draw (5.6,1) rectangle node{x} (6.2,-1.0);
+\draw (5.6,-1.0) rectangle node{z} (6.2,-3.0);
+\draw (5.6,-3.0) rectangle node{v} (6.2,-5.0);
+
+\draw [-stealth](1.2,-0.2) -- node[below left] {$A$} (2.2,-1.8) node[anchor=north west]{\textbf{.}};
+\draw [-stealth](2.6,-2) -- node[above] {Enc} (3.8,-2) node[anchor=west]{\textbf{.}};
+\draw [-stealth](4.2,-2) -- (5.4,-2);
+\draw [-stealth](4.0,-2.2) -- node[below left] {$B$} (5.4,-4);
+\draw [-stealth](6.4,-2) -- (7.4,-2) node[anchor=west]{output};
+
+\end{tikzpicture}

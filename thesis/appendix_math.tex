@@ -1,0 +1,92 @@
+\chapter{Math Preliminary}
+
+% https://www.youtube.com/watch?v=N9L3oGMK3mc
+\begin{lemma}
+\label{lemma:nchoosem}
+
+$\binom{n}{m} \le (\frac{en}{m})^m$, for $n, m \in \mathbb{Z}^+$
+
+\end{lemma}
+
+\begin{proof}
+\begin{align}
+\log m! 
+    &= \log 1 + \log 2 + \cdots + \log m \nonumber \\
+    &\ge \int_1^m \log x \, dx \nonumber \\
+    &= [x \log x - x]_1^m \nonumber \\
+    &= m \log m - m + 1 \label{eq:logm!}
+\end{align}
+
+\begin{align}
+m! 
+    &= e^{\ln m!} \nonumber \\
+    &\ge e^{m \log m - m + 1} \nonumber 
+    && \text{apply equation \ref{eq:logm!}} \\
+    &= e^{\log m^m} \cdot e^{-m} \cdot e \nonumber \\
+    &= m^m \cdot e^{-m} \cdot e \nonumber \\
+    &= (\frac{m}{e})^m \cdot e \nonumber \\
+    &\ge (\frac{m}{e})^m \label{eq:m!}
+\end{align}
+
+
+\begin{align}
+\binom{n}{m} 
+    &= \frac{n \cdot (n-1) \cdot (n-2) \cdots (n-m+1)}{m!} \nonumber \\
+    &\le \frac{n^m}{m!} \nonumber \\
+    &\le \frac{n^m}{(\frac{m}{e})^m} \nonumber 
+    && \text{apply equation \ref{eq:m!}} \\
+    &= (\frac{en}{m})^m
+\end{align}
+
+\end{proof}
+
+% https://math.stackexchange.com/questions/544667/upper-bound-for-1-1-xx
+\begin{lemma}
+\label{lemma:(1-1x)x}
+
+$(1 - \frac{1}{x})^x \le \frac{1}{e}$, for $x \ge 1$
+
+\end{lemma}
+
+\begin{proof}
+
+\begin{align}
+\shortintertext{Recall that for $x \in \mathbb{R}$}
+    1 + x &\le e^x \nonumber \\
+\shortintertext{Then for $x \in \mathbb{R}$}
+    1 - x &\le e^{-x} \nonumber \\
+\shortintertext{Then for $x \neq 0$}
+    1 - \frac{1}{x} &\le e^{-\frac{1}{x}} \nonumber \\ 
+\shortintertext{And, since $t \mapsto t^x$ is increasing on $[0, \infty]$ for $x \ge 1$}
+   (1 - \frac{1}{x})^x &\le \frac{1}{e}
+\end{align}
+
+\end{proof}
+
+% https://www.doubtnut.com/question-answer/prove-that-maximum-value-of-1-xx-is-e1-e-4556542
+\begin{lemma}
+\label{lemma:(1x)x}
+
+$(\frac{a}{x})^x \le e^\frac{a}{e}$, for $x > 0$, $a > 0$
+
+\end{lemma}
+
+\begin{proof}
+
+\begin{align}
+\shortintertext{Let $f(x) = (\frac{a}{x})^x $}
+    \ln f(x) &= x \cdot \ln (\frac{a}{x}) \nonumber = - x \cdot \ln \frac{x}{a} \\
+\shortintertext{Take derivative from both side}
+    \frac{1}{f(x)} \frac{df(x)}{dx} &= -\ln \frac{x}{a} - x \cdot \frac{a}{x} \cdot \frac{1}{a} = -\ln \frac{x}{a} - 1 \nonumber \\
+    \frac{df(x)}{dx} &= - f(x) \cdot (\ln \frac{x}{a} + 1) \nonumber = - (\frac{a}{x})^x \cdot (\ln \frac{x}{a} + 1) \\
+\shortintertext{Let $\frac{df(x)}{dx} = 0$}
+    - (\frac{a}{x})^x \cdot (\ln \frac{x}{a} + 1) &= 0 \nonumber \\
+    (\ln \frac{x}{a} + 1) &= 0 \nonumber \\
+    x &= \frac{a}{e} \nonumber \\
+\shortintertext{$\frac{df(x)}{dx} > 0$ when $x < \frac{a}{e}$, and $\frac{df(x)}{dx} < 0$ when $x > \frac{a}{e}$}
+\shortintertext{Therefore, $x = \frac{a}{e}$ is a maximum point}
+    (\frac{a}{x})^x &= f(x) \le f(\frac{a}{e}) = {e}^\frac{a}{e}
+\end{align}
+
+\end{proof}
+

@@ -1,0 +1,198 @@
+\chapter{Simple Zero-Knowledge Polynomial Commitments}
+
+In this chapter, we describe a simple method to add zero-knowledge property to a given polynomial commitments scheme. This method uses random numbers to hide the actual coefficients and it works similar to one-time pad encryption.
+
+\section{Protocol}
+
+\textbf{Commitment Phase.}
+
+Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-1 \text{ times}} \times m}$.
+Let $PAD_0$ be a matrix with shape identical to $M_0^\prime$ filled with random elements from $\mathbb{F}$. Now let $M_0^{\prime\prime} = M_0^{\prime} \oplus PAD_0$, where $\oplus$ denotes elements-wise matrix addition.
+
+Send $M_0^{\prime\prime}$ to the verifier.
+
+\textbf{Testing Phase.}
+
+The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
+
+In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
+The prover will compute a linear combination $M_i \in \mathbb{F}^{\underbrace{m \times m \times \cdots \times m}_{t-i \text{ times}}}$ across the last dimension of matrix $M_{i-1}$.
+Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+$$M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]$$
+Let 
+$$
+M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-i-1 \text{ times}} \times m}
+$$
+
+The prover will also compute a linear combination $PAD_i \in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-i \text{ times}}}$ across the last dimension of matrix $PAD_{i-1}$.
+
+Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le N$:
+$$PAD_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot PAD_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]$$
+And let $PAD_i^\prime \in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-i-1 \text{ times}} \times m}$ be a sub-matrix truncated from $PAD_i$.
+
+Let 
+$$
+M_i^{\prime\prime} = M_i^{\prime} \oplus PAD_i^\prime
+$$
+where $\oplus$ denotes element-wise addition.
+
+Then the prover sends $M_i^{\prime\prime}$ and $PAD_i$ to the verifier.
+
+Then the verifier will perform a probabilistic checking to make sure 
+$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
+are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, \cdots, i_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. 
+For each tuple $(i_1, i_2, \cdots, i_t)$,
+the verifier will check whether the following equation holds for every $i \in [t-1]$:
+$$
+    \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] = \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
+$$
+Since the verifier do not have direct access to $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$, a detour is necessary. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$ in the left side of the equation can be computed as a element-wise subtraction as follows:
+$$
+    M_i^{\prime\prime}[i_1, i_2, \cdots, i_{t-i-1}, *] - PAD_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]
+$$
+And the right side of the equation is equivalent to 
+$$
+    (\sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime\prime}[i_1,i_2, \cdots, i_{t-i},k]) - PAD_i[i_1, i_2, \cdots, i_{t-i}]
+$$
+
+\textbf{Evaluation Phase.}
+
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{t-1}^{\prime}, q_t \rangle$ as $g(x)$, where $M_{t-1}$ can be computed as a element-wise subtraction between $M_{t-1}^{\prime\prime}$ and $PAD_{t-1}^\prime$.
+
+\section{Formal Description}
+
+\subsection{Notation}
+
+\subsubsection{Fold Operation}
+
+Define $\textbf{Fold}_i(X, r)$ to be the operation taking a linear combination of $X$ across the $i$-th dimension according to coefficient $r$. 
+
+Namely, for indexes $j_1, \cdots, j_{i-1}, j_{i+1}, \cdots , j_{k} \ge 1$:
+$$
+\textbf{Fold}_i(X, r)[j_1, \cdots, j_{i-1}, j_{i+1}, \cdots , j_{k}] = \sum_{k=1}^{m} r_{i}[k] \cdot X[j_1, \cdots, j_{i-1}, k, j_{i+1}, \cdots , j_{k}]
+$$
+
+\subsubsection{Encode Operation}
+
+Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{i}$.
+
+\subsection{Testing Phase (Proximity Test)}
+
+In this section, we describe the testing phase in the above protocol formally in terms of a IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
+
+The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C, m, N, t)$ and witness $\mathbb{W} = (M_0^{\prime\prime}, M_1^{\prime\prime}, \cdots, M_{t-1}^{\prime\prime}, PAD_1, PAD_2, \cdots, PAD_{t-1})$. The verifier $\textbf{V}$ takes as input the instance $\mathbb{X}$.
+
+\begin{enumerate}
+    \item \textit{Interactive phase}. 
+    
+    In the beginning, $\textbf{P}$ sends the proof message $M_0^{\prime\prime}$ computed as:
+$$
+    M_0 = u
+$$
+$$
+    M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0)
+$$
+$$
+    M_0^{\prime\prime} = M_0^{\prime} \oplus PAD_0
+$$
+    Note that $PAD_0$ is a matrix with shape identical to $M_0^\prime$ filled with random elements from $\mathbb{F}$. And $\oplus$ denotes elements-wise matrix addition.
+    
+    For each round $i \in [t-1]$:
+    \begin{itemize}
+        \item $\textbf{V}$ sends random challenge message $r_i \in \mathbb{F}^m$.
+        \item $\textbf{P}$ sends the proof message $M_i^{\prime\prime}$ and $PAD_i$ computed as:
+$$
+    PAD_i = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i)
+$$
+$$
+    M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i)
+$$
+$$
+    M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i)
+$$
+$$
+    M_i^{\prime\prime} = M_i^{\prime} \oplus PAD_i^\prime
+$$
+    Note that $PAD_i^\prime$ is just a truncate version of $PAD_i$ such that $M_i^{\prime}$ and $ PAD_i^\prime$ will have the same shape. And $\oplus$ denotes elements-wise addition.
+
+    \end{itemize}
+    \item \textit{Query phase}. The verifier $\textbf{V}$ samples $l$ tuples of the form $(i_1, \cdots, i_t)$ in space $[N]^t$ and proceeds as follows for each tuple. For each $i \in [t-1]$, the verifier $\textbf{V}$ will query $M_{i}^{\prime\prime}$, $PAD_{i}^{\prime\prime}$ at $(i_1, \cdots, i_{t-i-1}, i_k)$ for each $i_k \in [N]$. And the verifier $\textbf{V}$ also needs to query $M_{0}^{\prime\prime}$ at $(i_1, \cdots, i_{t-1}, i_k)$ for each $i_k \in [N]$. Then the verifier $\textbf{V}$ will check the following equation:
+$$
+    \text{Enc}_{t-i}(M_i^\prime)[i_1, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) [i_1, \cdots, i_{t-i}]
+$$
+Since the verifier $\textbf{V}$ do not have direct access to $M_i^\prime$ and $M_{i-1}^\prime$, we check the following equivalent equation:
+\begin{equation}
+\label{eq:szkpctc_eq}
+    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)[i_1, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) [i_1, \cdots, i_{t-i}] - PAD_i[i_1, \cdots, i_{t-i}]
+\end{equation}
+where $\ominus$ denotes element-wise subtraction.
+\end{enumerate}
+
+\subsection{Testing Phase Completeness}
+
+\begin{lemma}
+\label{lemma:szkpctcc}
+
+IOPP = ($\textbf{P}$, $\textbf{V}$) has \textbf{perfect completeness}.
+
+\end{lemma}
+\begin{proof}
+We begin by noting that the queries made by $\textbf{V}$ suffice to perform the checks in the query phase (see equation \ref{eq:szkpctc_eq}).
+
+Next, observe that the verifier $\textbf{V}$ checks the following equation:
+$$
+    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) - PAD_i 
+$$
+Note that the left side of this equation is equivalent to:
+\begin{align}
+\text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) &= \text{Enc}_{t-i}(M_i^\prime) \nonumber \\
+&= \text{Enc}_{t-i}(\textbf{Enc}_{1, \cdots, t- i - 1}(M_i)) \nonumber \\
+&= \textbf{Enc}_{1, \cdots, t-i}(M_i) \nonumber \\
+&= \textbf{Enc}_{1, \cdots, t-i}(\textbf{Fold}_{t-i+1}(M_{i-1}, r_i)) \label{lb:exp1} \\
+\end{align}
+And the right side of this equation is equivalent to:
+\begin{align}
+\textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) - PAD_i &= \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) \nonumber \\
+&= \textbf{Fold}_{t-i+1}(\textbf{Enc}_{1, \cdots, t- i}(M_{i-1}), r_i) \label{lb:exp2} \\
+\end{align}
+Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. The equation checked by the verifier $\textbf{V}$ holds.
+
+\end{proof}
+
+\subsection{Testing Phase Zero-Knowledge}
+
+\begin{definition}
+
+A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R_\otimes$ is \textbf{perfect zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
+ 
+\end{definition}
+
+\begin{lemma}
+\label{lemma:szkpc-zk}
+
+IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{perfect zero-knowledge}
+
+\end{lemma}
+\begin{proof}
+
+For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier randomness $\rho$, we can construct the polynomial-time simulator algorithm $\textbf{S}$ as follows:
+
+\begin{itemize}
+    \item Query $M_0^{\prime\prime}$ or internally access $PAD_0$ at index $I$:
+    
+    If index I has never been accessed before, generate a random element $x$ from field $\mathbb{F}$. Store this value $x$ in a internal dictionary and return it.
+    
+    Otherwise lookup index $I$ in the internal dictionary and return the stored value.
+    
+    \item Query $M_i^{\prime\prime}$ and $PAD_i$ at index $I$ for $i \in [t-1]$:
+
+    If index I has never been accessed before, recursively access the corresponding values in $M_{i-1}^{\prime\prime}$ and $PAD_{i-1}$ and take the linear combination of them as $x$.
+    Store this value $x$ in a internal dictionary and return it.
+    
+    Otherwise lookup index $I$ in the internal dictionary and return the stored value.    
+    
+\end{itemize}
+
+Both the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are uniformly distributed. They are identically distributed.
+
+\end{proof}

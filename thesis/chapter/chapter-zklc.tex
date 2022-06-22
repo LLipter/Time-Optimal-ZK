@@ -1,0 +1,157 @@
+\chapter{Zero-Knowledge Linear Code}
+
+% http://www.cs.cmu.edu/~odonnell/toolkit13/lecture12.pdf
+\section{Random d-regular Bipartite Graph}
+\label{sec:randomgraph}
+To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it's possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
+
+\RestyleAlgo{ruled}
+%% This is needed if you want to add comments in
+%% your algorithm with \Comment
+\SetKwComment{Comment}{/* }{ */}
+\begin{algorithm}[hbt!]
+\caption{Random d-regular Bipartite Graph Generation}
+\label{alg:randomgarph}
+\KwData{$n \geq 0$, $d <= n$}
+\KwResult{A random $d$-regular bipartite graph $G=(L, R, E)$ with $|L| = |R| = n$}
+
+$L \gets \text{a set of } n \text{ nodes}$\;
+$R \gets \text{a set of } n \text{ nodes}$\;
+$E \gets \emptyset$\;
+$P \gets [1, 2, \cdots , n]$\;
+\For{$i$ in $1, 2, \cdots , d$}{
+    Permute $P$ randomly \Comment*[r]{sample a perfect matching}
+    \For{$j$ in $1, 2, \cdots , n$}{
+        $E \gets E \cup (L_j, R_{P_j})$ \;
+    }
+}
+\Return{(L, R, E)}
+\end{algorithm}
+
+
+\section{Expander Graph}
+
+\begin{lemma}
+\label{lemma:randomgraph}
+
+For any $0 < \epsilon < 1$, there exist a degree $d$ such that a random $d$-regular bipartite graph $G=(L, R, E)$ with $|L| = |R| = n$ generated according to algorithm \ref{alg:randomgarph} satisfy the following property with high probability.
+
+    \begin{itemize}
+        \item Expansion: For every set $X \subset L$ with $|X| \ge \epsilon n$, if $Y$ is the set of neighbors of $X$ in $G$, then $|Y| \ge (1 - \epsilon)  n$.
+    \end{itemize}
+
+\end{lemma}
+
+\begin{proof}
+
+Negating the statement, we can say that the randomly generated graph $G$ doesn't satisfy the expansion property if and only if $\exists S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| \ge  \epsilon n$ such that there's no edge connecting between set $S$ and set $M$. We bound the probability that this negating statement is true as follows:
+
+For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ and $b$ are not connected in the random graph $G$ is:
+
+$$P_1 = (\frac{n-1}{n})^{d}$$
+
+For a set of vertices $S \subset L$ with $|S| = s \ge \epsilon n$, the probability that non of vertices in $S$ is connected to $b$ is:
+
+$$P_2 = (P_1)^s = (\frac{n-1}{n})^{d s}$$
+
+The probability that there exists at least $\epsilon n$ vertices in $R$ are not connected to any vertex in $S$ is:
+
+$$P_3 = \binom{n}{\epsilon n} (P_2)^{\epsilon n} = \binom{n}{\epsilon n} (\frac{n-1}{n})^{d s \epsilon n}$$
+
+For $0 \le x \le 1$, we denote the binary entropy function to be:
+
+$$H(x) = -x\log_2 x - (1-x)\log_x (1-x)$$ 
+where we adopt the convention that $0 \log_2 0 = 0$.
+
+Then, we take a union bound over all possible sets $S$, 
+
+\begin{align}
+% bound 5
+P_4 &= \sum_{s=\epsilon n}^{n} \binom{n}{s} P_3 \nonumber \\
+    &= \sum_{s=\epsilon n}^{n} \binom{n}{s} \binom{n}{\epsilon n} (\frac{n-1}{n})^{d s \epsilon n} \nonumber \\
+    &\le \sum_{s=\epsilon n}^{n} \binom{n}{s} \binom{n}{\epsilon n} (\frac{n-1}{n})^{d \epsilon^2 n^2} 
+    && \text{since } s \ge \epsilon n \text{ and } \frac{n-1}{n} < 1 \nonumber \\
+    &\le \sum_{s=\epsilon n}^{n} \binom{n}{s} 2^{n H(\frac{\epsilon n}{n})} (\frac{n-1}{n})^{d \epsilon^2 n^2} 
+    && \binom{n}{k} \le 2^{n H(\frac{k}{n})} \nonumber \\
+    &= \sum_{s=\epsilon n}^{n} \binom{n}{s} 2^{n H(\epsilon)} ((1 - \frac{1}{n})^{n})^{d \epsilon^2 n} \nonumber \\
+    &\le \sum_{s=\epsilon n}^{n} \binom{n}{s} 2^{n H(\epsilon)} (\frac{1}{e})^{d \epsilon^2 n} 
+    && (1 - \frac{1}{x})^x \le \frac{1}{e} \text{ for } x \ge 1 \text{ (lemma \ref{lemma:(1-1x)x})} \nonumber \\
+    &= \sum_{s=\epsilon n}^{n} \binom{n}{s} (e^{ H(\epsilon) \ln 2  - d \epsilon^2})^n \nonumber \\
+    &\le \sum_{s=0}^{n} \binom{n}{s} (e^{ H(\epsilon) \ln 2 - d \epsilon^2})^n \nonumber \\
+    &= 2^n (e^{ H(\epsilon) \ln 2 - d \epsilon^2})^n 
+    && \sum_{i=0}^n \binom{n}{i} = 2^n \nonumber \\
+    &= (e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n \nonumber \\
+\end{align}
+
+$P_4$ is the probability that a randomly generated graph $G$ doesn't satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n < p$.
+By rearranging the above equation, we have $ d > \frac{\ln 2 + H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
+
+For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $370.86$.
+
+\end{proof}
+
+
+\begin{lemma}
+\label{lemma:randomgraph2}
+
+For any $0 < \epsilon < 1$, there exist a degree $d$ such that a random $d$-regular bipartite graph $G=(L, R, E)$ with $|L| = |R| = n$ generated according to algorithm \ref{alg:randomgarph} satisfy the following property.
+
+    \begin{itemize}
+        \item Expansion: For every set $X \subset L$ with $|X| \ge \epsilon n$, if $Y$ is the set of neighbors of $X$ in $G$, then $|Y| \ge (1 - \epsilon)  n$ with high probability.
+    \end{itemize}
+
+\end{lemma}
+
+
+\begin{proof}
+
+We use the same trick as in lemma \ref{lemma:randomgraph}. Negating the statement, we can say that the randomly generated graph $G$ doesn't satisfy the expansion property if and only if 
+for every $ S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| > \epsilon n$ such that there's no edge connecting between set $S$ and set $M$ with low probability. 
+We bound the probability true as follows:
+
+For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ and $b$ are not connected in the random graph $G$ is:
+
+$$P_1 = (\frac{n-1}{n})^{d}$$
+
+For a set of vertices $S \subset L$ with $|S| = \epsilon n$, the probability that non of vertices in $S$ is connected to $b$ is:
+
+$$P_2 = (P_1)^{\epsilon n} = (\frac{n-1}{n})^{d\epsilon n}$$
+
+The probability that there exists at least $\epsilon n$ vertices in $R$ are not connected to any vertex in $S$ is:
+
+\begin{align}
+P_3 &= \binom{n}{\epsilon n} (P_2)^{\epsilon n} \nonumber \\
+    &= \binom{n}{\epsilon n} (\frac{n-1}{n})^{d \epsilon^2 n^2} \nonumber \\
+    &\le 2^{n H(\frac{\epsilon n}{n})} (\frac{n-1}{n})^{d \epsilon^2 n^2} 
+    && \binom{n}{k} \le 2^{n H(\frac{k}{n})} \nonumber \\
+    &= 2^{n H(\epsilon)} ((1 - \frac{1}{n})^{n})^{d \epsilon^2 n} \nonumber \\
+    &\le 2^{n H(\epsilon)} (\frac{1}{e})^{d \epsilon^2 n} 
+    && (1 - \frac{1}{x})^x \le \frac{1}{e} \text{ for } x \ge 1 \text{ (lemma \ref{lemma:(1-1x)x})} \nonumber \\
+    &= (e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} \nonumber \\
+\end{align}
+
+$P_3$ is the probability that a set $S$ in a randomly generated graph doesn't satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} < p$.
+By rearranging the above equation, we have $ d > \frac{H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
+
+For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $93.60$.
+
+Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfy the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such set is hard to be found. Similar with hash functions, hash collision must exist somewhere, but this collision is hard to be found.
+
+\end{proof}
+
+\section{Reversed Linear Code}
+
+
+\begin{figure}[h]
+\centering
+\input{graph/lc.tikz}
+\caption{Linear Code}
+\label{fig:lc}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\input{graph/lc-rev.tikz}
+\caption{Reversed Linear Code}
+\label{fig:lc-rev}
+\end{figure}

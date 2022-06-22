@@ -1,0 +1,117 @@
+\chapter{Polynomial Commitments}
+
+In this chapter, We present an general polynomial commitments scheme for arbitrary dimension $t$. The scheme is an extension of the polynomial commitments scheme for $t=2$ described in \cite{brakedown}. We first extend the scheme to the $t=3$ situation so that readers can have a good intuition on how it works. Then we generalize it to arbitrary $t$ with detailed analysis available.
+
+\section{Notation}
+
+Let $g$ be a multilinear polynomial with $n$ coefficients. For simplicity we assume that $n = m^t$ for some integer $m$. And let $u$ denote the coefficient vector of $g$ in the Lagrange basis, which means $u$ represents all evaluations of $g$ over inputs in hypercube $\{0, 1\}^{\log n}$. 
+We can rearrange $u$ to be a $\underbrace{n^{\frac{1}{t}} \times n^{\frac{1}{t}} \times \cdots \times n^{\frac{1}{t}}}_{t \text{ times}}$ matrix, such that we can index entries in this matrix easily by elements from set $[m]^t$.
+
+Let $N = \rho^{-1} \cdot m$ and \text{Enc}: $\mathbb{F}^m \rightarrow \mathbb{F}^N$ represent the encoding function of a linear code with a constant rate $\rho > 0$ and a constant minimum relative distance $\gamma > 0$.
+
+Let $\text{Enc}_i(M)$ denote the function that encode every stripes in the $i$th dimension of matrix $M$ using encoding function Enc. For example, $\text{Enc}_1(M)$ will encode each column of a $n \times n $ matrix and produce a $N \times m$ matrix.
+
+\begin{lemma}[Polynomial Evaluation \cite{brakedown}]
+\label{lemma:petq}
+
+For an $l$-variate multilinear polynomial $g$ represented in the Lagrange basis via a vector $u \in \mathbb{F}^{n}$ where $2^l = n$, given an evaluation point $x \in \mathbb{F}^l$, $g(x)$ can be evaluated using the following tensor product identity: 
+
+\[
+    g(x) = \langle (x_1, 1-x_1) \otimes (x_2, 1-x_2) \otimes \cdots \otimes (x_l, 1-x_l) , u \rangle
+\]
+
+And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_t \in \mathbb{F}^{n^{\frac{1}{t}}}$ such that the following holds:
+
+\[
+    (x_1, 1-x_1) \otimes (x_2, 1-x_2) \otimes \cdots \otimes (x_l, 1-x_l) = q_1 \otimes q_2 \otimes \cdots \otimes q_t
+\]
+
+\end{lemma}
+
+\section{Polynomial Commitments for t = 3}
+
+\textbf{Commitment Phase.}
+
+Let $M_0 = u$ and $M_0^{\prime} = \text{Enc}_1(\text{Enc}_2(M_0)) \in \mathbb{F}^{N \times N \times m}$. Send $M_0^{\prime}$ to the verifier.
+
+\textbf{Testing Phase.}
+
+The testing phase consists of $2$ rounds, with each round reducing the dimension by 1.
+
+In round 1, the verifier will send a random value $r_1 \in \mathbb{F}^m$ to the prover.
+The prover will compute a linear combination $M_1 \in \mathbb{F}^{m \times m}$ across the 3rd dimension of matrix $M_0$.
+Namely, $M_1[i,j] = \sum_{k=1}^{m} r_1[k] \cdot M_0[i,j,k]$ for $1 \le i, j \le m$. 
+Let $M_1^\prime = \text{Enc}_1(M_1) \in \mathbb{F}^{N \times m}$.
+Then the prover sends $M_1^\prime$ to the verifier.
+
+In round 2, the verifier will send a random value $r_2 \in \mathbb{F}^m$ to the prover.
+The prover will compute a linear combination $M_2 \in \mathbb{F}^{m}$ across the 2nd dimension of matrix $M_1$.
+Namely, $M_2[i] = \sum_{k=1}^{m} r_2[k] \cdot M_1[i, k]$. 
+Let $M_2^\prime = M_2 \in \mathbb{F}^{m}$.
+Then the prover sends $M_2^\prime$ to the verifier.
+
+Then the verifier will perform a probabilistic checking to make sure $M_0^\prime $, $ M_1^\prime$ and $M_2^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, i_3)$ from space $[N] \times [N] \times [N]$. 
+For each tuple $(i_1, i_2, i_3)$, let $M_1^\prime[i_1, *]$ denotes the $i_1$-th row in $M_1^\prime$.
+The verifier will check whether the following equation holds:
+
+$$
+    \text{Enc}(M_1^\prime[i_1, *])[i_2] = \sum_{k=1}^m r_1[k] \cdot M_0^{\prime}[i_1,i_2,k]
+$$
+$$
+    \text{Enc}(M_2^\prime[*])[i_1] = \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[i_1,k]
+$$
+
+\textbf{Evaluation Phase.}
+
+Let $q_1, q_2, q_3 \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes q_3, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{2}^\prime, q_3 \rangle$ as $g(x)$.
+
+\section{Polynomial Commitments for Arbitrary t}
+
+\subsection{Protocol}
+
+\textbf{Commitment Phase.}
+
+Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-1 \text{ times}} \times m}$. Send $M_0^{\prime}$ to the verifier.
+
+\textbf{Testing Phase.}
+
+The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
+
+In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
+The prover will compute a linear combination $M_i \in \mathbb{F}^{\underbrace{m \times m \times \cdots \times m}_{t-i \text{ times}}}$ across the last dimension of matrix $M_{i-1}$.
+Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+$$M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]$$
+Let 
+$$
+M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-i-1 \text{ times}} \times m}
+$$
+Then the prover sends $M_i^\prime$ to the verifier.
+
+Then the verifier will perform a probabilistic checking to make sure 
+$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
+are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, \cdots, i_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. 
+For each tuple $(i_1, i_2, \cdots, i_t)$,
+the verifier will check whether the following equation holds for every $i \in [t-1]$:
+
+$$
+    \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] = \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
+$$
+
+\textbf{Evaluation Phase.}
+
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{t-1}^{\prime}, q_t \rangle$ as $g(x)$.
+
+
+\section{Implementation Details}
+
+\subsection{Merkle Tree Commitment}
+
+Coefficient matrices $M_0^\prime, M_1^\prime, \cdots, M_{t-1}^\prime$ sent by the prover may be replaced by a Merkle tree commitment to that matrix, and each query the verifier makes to a matrix is answered by the prover with Merkle tree authentication path for the answer.
+
+And since each time the verifier will query a strip of elements in a matrix (i.e. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$), it's possible to zip such a strip of elements into a single node in Merkle-tree's leaf level to decrease runtime complexity and communication complexity.
+
+\subsection{Parallelism}
+
+Most of the computation in the commitment scheme can be done in parallel in a nature fashion. There's little data dependence among them. Therefore, it's possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
+
+
