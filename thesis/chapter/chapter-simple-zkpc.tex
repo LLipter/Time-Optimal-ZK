@@ -54,6 +54,10 @@ And the right side of the equation is equivalent to
 $$
     (\sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime\prime}[i_1,i_2, \cdots, i_{t-i},k]) - PAD_i[i_1, i_2, \cdots, i_{t-i}]
 $$
+Additionally, the verifier will also check:
+$$
+    PAD_i[i_1, i_2, \cdots, i_{t-i}] = \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}[i_1,i_2, \cdots, i_{t-i},k]
+$$
 
 \textbf{Evaluation Phase.}
 
@@ -126,6 +130,12 @@ Since the verifier $\textbf{V}$ do not have direct access to $M_i^\prime$ and $M
     \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)[i_1, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) [i_1, \cdots, i_{t-i}] - PAD_i[i_1, \cdots, i_{t-i}]
 \end{equation}
 where $\ominus$ denotes element-wise subtraction.
+Additionally, the verifier will also check:
+\begin{equation}
+\label{eq:szkpctc_eq2}
+    PAD_i[i_1, i_2, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) [i_1, \cdots, i_{t-i}]
+\end{equation}
+
 \end{enumerate}
 
 \subsection{Testing Phase Completeness}
@@ -137,11 +147,11 @@ IOPP = ($\textbf{P}$, $\textbf{V}$) has \textbf{perfect completeness}.
 
 \end{lemma}
 \begin{proof}
-We begin by noting that the queries made by $\textbf{V}$ suffice to perform the checks in the query phase (see equation \ref{eq:szkpctc_eq}).
+We begin by noting that the queries made by $\textbf{V}$ suffice to perform the checks in the query phase (see equation \ref{eq:szkpctc_eq} and equation \ref{eq:szkpctc_eq2}).
 
 Next, observe that the verifier $\textbf{V}$ checks the following equation:
 $$
-    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) - PAD_i 
+    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i 
 $$
 Note that the left side of this equation is equivalent to:
 \begin{align}
@@ -152,12 +162,14 @@ Note that the left side of this equation is equivalent to:
 \end{align}
 And the right side of this equation is equivalent to:
 \begin{align}
-\textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) - PAD_i &= \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) \nonumber \\
+\textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i &= \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) \nonumber \\
 &= \textbf{Fold}_{t-i+1}(\textbf{Enc}_{1, \cdots, t- i}(M_{i-1}), r_i) \label{lb:exp2} \\
 \end{align}
-Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. The equation checked by the verifier $\textbf{V}$ holds.
+Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. And equation \ref{eq:szkpctc_eq2} holds by definition.
+The equations checked by the verifier $\textbf{V}$ holds.
 
 \end{proof}
+
 
 \subsection{Testing Phase Zero-Knowledge}
 
@@ -194,5 +206,65 @@ For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier random
 \end{itemize}
 
 Both the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are uniformly distributed. They are identically distributed.
+
+\end{proof}
+
+\subsection{Testing Phase Soundness}
+
+\begin{lemma}
+\label{lemma:szkpctc-soundness}
+
+
+IOPP = ($\textbf{P}$, $\textbf{V}$) has soundness error at most:
+$$
+    \epsilon(\Delta_\otimes) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
+$$
+where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
+
+\end{lemma}
+\begin{proof}
+
+We prove this lemma by arguing that the soundness (lemma \ref{lemma:pc-soundness}) of original proximity test implies the soundness of the simple zero-knowledge proximity test. And we will prove this argument by doing a reduction formally described in figure \ref{img:red-soundness}.
+
+\begin{figure}[ht]
+\centering
+\resizebox{\textwidth}{!}{
+\input{graph/soundness-reduction}
+}
+\caption{Reduction from Simple ZK Proximity Test to Original Proximity Test}
+\label{img:red-soundness}
+\end{figure}
+
+For the simple zero-knowledge proximity test, suppose we have an malicious prover algorithm $\textbf{P}^\prime$ that can pass the proximity test with probability $p$ larger than $\epsilon(\Delta_\otimes)$, we will run it as a black box and construct another malicious prover algorithm $\textbf{P}$ that can pass the original proximity test with probability $p$.
+
+\begin{itemize}
+    \item $\textbf{P}$ will receive an input \mzeroprime representing the tensor code matrix. \textbf{P} pass \mzeroprime to $\textbf{P}^\prime$.
+    \item $\textbf{P}^\prime$ sends out $M_0^{\prime\prime}$ as the commitment to the underlying tensor code matrix. \textbf{P} sends $M_0^\prime$ to the verifier \textbf{V}  as the commitment to the underlying tensor code matrix.
+    \item For $i \in [t-1]$, verifier \textbf{V} will send the random linear combination coefficients $r_i$ to \textbf{P}. \textbf{P} simply forward $r_i$ to $\textbf{P}^\prime$. $\textbf{P}^\prime$ will output $M_i^\prime$ and $PAD_i$. \textbf{P} then compute $M_i^\prime$ as element-wise subtraction of $M_i^\prime$ and $PAD_i$ and then send $M_i^\prime$ to the verifier \textbf{V}. 
+    
+    Note that $PAD_i^\prime$ is the truncated version of $PAD_i$.
+    \item If verifier \textbf{V} query $M_0^\prime$ at index $I$, \textbf{P} return $M_0^\prime[I]$ directly.
+    \item If verifier \textbf{V} query $M_i^\prime$ at index $I$ for $i \in [t-1]$, \textbf{P} query $\textbf{P}^\prime$ for $M_i^{\prime\prime}$ and $PAD_i$ at index $I$. \textbf{P} will return $M_i^\prime$ computed as $M_i^{\prime\prime}[I] - PAD_i[I]$.
+\end{itemize}
+
+During the query phase, the original verifier \textbf{V} will check the following equation:
+$$
+    \text{Enc}_{t-i}(M_i^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i)
+$$
+And our construction \textbf{P} will act like the zero-knowledge verifier $\textbf{V}^\prime$ and check the following equation:
+$$
+    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i
+$$
+Looking at the left side of these two equation, $\text{Enc}_{t-i}(M_i^\prime)$ is identical to $\text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)$, since $M_i^\prime = M_i^{\prime\prime} \ominus PAD_{i}^\prime$ by construction.
+
+And since equation \ref{eq:szkpctc_eq2} is checked in the simple zero-knowledge proximity test, the right side of these two equations are also identical to each other.
+\begin{align}
+\textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) 
+&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime} \ominus PAD_{i-1}^\prime, r_i) \nonumber \\
+&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus \textbf{Fold}_{t-i+1}(PAD_{i-1}^\prime, r_i) \nonumber \\
+&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i \nonumber \\
+\end{align}
+
+Therefore, as long as malicious prover $\textbf{P}^\prime$ can pass the check in zero-knowledge proximity test, our constructed prover \textbf{P} can pass the check in original proximity test. In other words, they have the same soundness error.
 
 \end{proof}

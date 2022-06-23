@@ -101,6 +101,25 @@ $$
 
 Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{t-1}^{\prime}, q_t \rangle$ as $g(x)$.
 
+\section{Analysis}
+
+We refer the result in \cite{cryptoeprint:2020/1426} and summarize to the following lemmas. 
+
+\begin{lemma}
+\label{lemma:pc-completeness}
+The testing phase (proximity test) has perfect completeness.
+\end{lemma}
+
+\begin{lemma}
+\label{lemma:pc-soundness}
+The testing phase (proximity test) has soundness error:
+$$
+    \epsilon(\Delta_\otimes) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
+$$
+where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
+\end{lemma}
+
+
 
 \section{Implementation Details}
 
