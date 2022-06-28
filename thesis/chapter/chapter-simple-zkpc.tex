@@ -9,7 +9,7 @@ In this chapter, we describe a simple method to add zero-knowledge property to a
 Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-1 \text{ times}} \times m}$.
 Let $PAD_0$ be a matrix with shape identical to $M_0^\prime$ filled with random elements from $\mathbb{F}$. Now let $M_0^{\prime\prime} = M_0^{\prime} \oplus PAD_0$, where $\oplus$ denotes elements-wise matrix addition.
 
-Send $M_0^{\prime\prime}$ to the verifier.
+Send $M_0^{\prime\prime}$ and $PAD_0$ to the verifier.
 
 \textbf{Testing Phase.}
 
@@ -39,29 +39,44 @@ where $\oplus$ denotes element-wise addition.
 Then the prover sends $M_i^{\prime\prime}$ and $PAD_i$ to the verifier.
 
 Then the verifier will perform a probabilistic checking to make sure 
-$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
-are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, \cdots, i_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. 
-For each tuple $(i_1, i_2, \cdots, i_t)$,
-the verifier will check whether the following equation holds for every $i \in [t-1]$:
+$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, \cdots, i_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. Let $S_1$ denotes this set of sampled tuples.
+For each tuple $(i_1, i_2, \cdots, i_t)$, the verifier will do the following checks:
+
+\begin{itemize}
+    \item 
+    For every $i \in [t-1]$,
+    $$
+        \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
+    $$
+    Since the verifier do not have direct access to $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$, a detour is necessary. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$ in the left side of the equation can be computed as a element-wise subtraction as follows:
+    $$
+        M_i^{\prime\prime}[i_1, i_2, \cdots, i_{t-i-1}, *] - PAD_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]
+    $$
+    And the right side of the equation is equivalent to 
+    $$
+        (\sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime\prime}[i_1,i_2, \cdots, i_{t-i},k]) - PAD_i[i_1, i_2, \cdots, i_{t-i}]
+    $$
+    
+    \item
+    For every $2 \le i \le t-1$,
+    $$
+        PAD_i[i_1, i_2, \cdots, i_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}[i_1,i_2, \cdots, i_{t-i},k]
+    $$
+\end{itemize}
+
+Additionally, the verifier will sample another $p$ random distinct tuple $(i_1, i_2, \cdots, i_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$, with the restriction that 
+$$(i_1, i_2, \cdots, i_t) \not\in S_1$$ 
+Let $S_2$ denotes this set of sampled tuples. the verifier will check whether the following equation holds for each sampled tuple in $S_2$.
 $$
-    \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] = \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
+    PAD_1[i_1, i_2, \cdots, i_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_1[k] \cdot PAD_{0}[i_1,i_2, \cdots, i_{t-i},k]
 $$
-Since the verifier do not have direct access to $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$, a detour is necessary. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$ in the left side of the equation can be computed as a element-wise subtraction as follows:
-$$
-    M_i^{\prime\prime}[i_1, i_2, \cdots, i_{t-i-1}, *] - PAD_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]
-$$
-And the right side of the equation is equivalent to 
-$$
-    (\sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime\prime}[i_1,i_2, \cdots, i_{t-i},k]) - PAD_i[i_1, i_2, \cdots, i_{t-i}]
-$$
-Additionally, the verifier will also check:
-$$
-    PAD_i[i_1, i_2, \cdots, i_{t-i}] = \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}[i_1,i_2, \cdots, i_{t-i},k]
-$$
+
+
+
 
 \textbf{Evaluation Phase.}
 
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{t-1}^{\prime}, q_t \rangle$ as $g(x)$, where $M_{t-1}$ can be computed as a element-wise subtraction between $M_{t-1}^{\prime\prime}$ and $PAD_{t-1}^\prime$.
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{t-1}^{\prime}, q_t \rangle$ as $g(x)$, where $M_{t-1}^\prime$ can be computed as a element-wise subtraction between $M_{t-1}^{\prime\prime}$ and $PAD_{t-1}^\prime$.
 
 \section{Formal Description}
 
@@ -89,15 +104,15 @@ The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C,
 \begin{enumerate}
     \item \textit{Interactive phase}. 
     
-    In the beginning, $\textbf{P}$ sends the proof message $M_0^{\prime\prime}$ computed as:
+    In the beginning, $\textbf{P}$ sends the proof message $M_0^{\prime\prime}$ and $PAD_0$ computed as:
 $$
-    M_0 = u
-$$
-$$
-    M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0)
+    M_0 = u \in \mathbb{F}^{m^t}
 $$
 $$
-    M_0^{\prime\prime} = M_0^{\prime} \oplus PAD_0
+    M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0) \in \mathbb{F}^{N^{t-1} \cdot m}
+$$
+$$
+    M_0^{\prime\prime} = M_0^{\prime} \oplus PAD_0 \in \mathbb{F}^{N^{t-1} \cdot m}
 $$
     Note that $PAD_0$ is a matrix with shape identical to $M_0^\prime$ filled with random elements from $\mathbb{F}$. And $\oplus$ denotes elements-wise matrix addition.
     
@@ -106,35 +121,57 @@ $$
         \item $\textbf{V}$ sends random challenge message $r_i \in \mathbb{F}^m$.
         \item $\textbf{P}$ sends the proof message $M_i^{\prime\prime}$ and $PAD_i$ computed as:
 $$
-    PAD_i = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i)
+    PAD_i = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) \in \mathbb{F}^{N^{t-i}}
 $$
 $$
-    M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i)
+    M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
 $$
 $$
-    M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i)
+    M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
 $$
 $$
-    M_i^{\prime\prime} = M_i^{\prime} \oplus PAD_i^\prime
+    M_i^{\prime\prime} = M_i^{\prime} \oplus PAD_i^\prime \in \mathbb{F}^{N^{t-i-1} \cdot m}
 $$
     Note that $PAD_i^\prime$ is just a truncate version of $PAD_i$ such that $M_i^{\prime}$ and $ PAD_i^\prime$ will have the same shape. And $\oplus$ denotes elements-wise addition.
 
     \end{itemize}
-    \item \textit{Query phase}. The verifier $\textbf{V}$ samples $l$ tuples of the form $(i_1, \cdots, i_t)$ in space $[N]^t$ and proceeds as follows for each tuple. For each $i \in [t-1]$, the verifier $\textbf{V}$ will query $M_{i}^{\prime\prime}$, $PAD_{i}^{\prime\prime}$ at $(i_1, \cdots, i_{t-i-1}, i_k)$ for each $i_k \in [N]$. And the verifier $\textbf{V}$ also needs to query $M_{0}^{\prime\prime}$ at $(i_1, \cdots, i_{t-1}, i_k)$ for each $i_k \in [N]$. Then the verifier $\textbf{V}$ will check the following equation:
+    \item \textit{Query phase}. The verifier $\textbf{V}$ samples $l$ tuples of the form $(i_1, \cdots, i_t)$ in space $[N]^t$. Let $S_1$ denotes this set of sampled tuples.
+    The verifier $\textbf{V}$ proceeds as follows for each tuple in $S_1$.
+    
+    For each $0 \le i \le t-1$, 
+    the verifier $\textbf{V}$ will query $M_{i}^{\prime\prime}$ at $(i_1, \cdots, i_{t-i-1}, i_k)$ for each $i_k \in [m]$. 
+    
+    And for $1 \le i \le t-1$,
+    the verifier $\textbf{V}$ will query $PAD_{i}$ at $(i_1, \cdots, i_{t-i-1}, i_k)$ for each $i_k \in [N]$.
+    
+    Then the verifier $\textbf{V}$ will check the following equation for $i \in [t-1]$:
 $$
-    \text{Enc}_{t-i}(M_i^\prime)[i_1, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) [i_1, \cdots, i_{t-i}]
+    \text{Enc}_{t-i}(M_i^\prime)[i_1, \cdots, i_{t-i}] \stackrel{?}{=} \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) [i_1, \cdots, i_{t-i}]
 $$
 Since the verifier $\textbf{V}$ do not have direct access to $M_i^\prime$ and $M_{i-1}^\prime$, we check the following equivalent equation:
 \begin{equation}
 \label{eq:szkpctc_eq}
-    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)[i_1, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) [i_1, \cdots, i_{t-i}] - PAD_i[i_1, \cdots, i_{t-i}]
+    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)[i_1, \cdots, i_{t-i}] 
+    \stackrel{?}{=}
+    \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) [i_1, \cdots, i_{t-i}] - PAD_i[i_1, \cdots, i_{t-i}]
 \end{equation}
 where $\ominus$ denotes element-wise subtraction.
-Additionally, the verifier will also check:
+Additionally, the verifier will also check the following equation for $2 \le i \le t-1$:
 \begin{equation}
 \label{eq:szkpctc_eq2}
-    PAD_i[i_1, i_2, \cdots, i_{t-i}] = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) [i_1, \cdots, i_{t-i}]
+    PAD_i[i_1, i_2, \cdots, i_{t-i}] 
+    \stackrel{?}{=}
+    \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) [i_1, \cdots, i_{t-i}]
 \end{equation}
+
+Then the verifier will sample another $p$ random distinct tuple $(i_1, i_2, \cdots, i_t)$ from space $[N]^t$, with the restriction that 
+$$(i_1, i_2, \cdots, i_t) \not\in S_1$$ 
+Let $S_2$ denotes this set of sampled tuples. the verifier will check whether the following equation holds for each sampled tuple in $S_2$.
+$$
+    PAD_1[i_1, i_2, \cdots, i_{t-i}] 
+    \stackrel{?}{=}
+    \textbf{Fold}_{0}(PAD_{i-1}, r_i) [i_1, \cdots, i_{t-i}]
+$$
 
 \end{enumerate}
 
@@ -171,11 +208,95 @@ The equations checked by the verifier $\textbf{V}$ holds.
 \end{proof}
 
 
+
+
+\subsection{Testing Phase Soundness}
+
+\begin{lemma}
+\label{lemma:szkpctc-soundness}
+
+
+IOPP = ($\textbf{P}$, $\textbf{V}$) has soundness error at most:
+$$
+    \epsilon^\prime(\Delta_\otimes) = 
+    \frac{ \epsilon(\Delta_\otimes)}{1 - (1 - (1 - \frac{1}{N^{t-1}})^l) \cdot (1 - \frac{1}{N^{t-1} - p})^p }
+$$
+
+\end{lemma}
+\begin{proof}
+
+We prove this lemma by arguing that the soundness (lemma \ref{lemma:pc-soundness}) of original proximity test implies the soundness of the simple zero-knowledge proximity test. And we will prove this argument by doing a reduction formally described in figure \ref{img:red-soundness}.
+
+\begin{figure}[ht]
+\centering
+\resizebox{\textwidth}{!}{
+\input{graph/soundness-reduction}
+}
+\caption{Reduction from Simple ZK Proximity Test to Original Proximity Test}
+\label{img:red-soundness}
+\end{figure}
+
+Let $E_1$ be the event that the following equation holds for all sampled tuples,
+$$
+    \textbf{Fold}_{t}(PAD_{0}^\prime, r_0) = PAD_1
+$$
+For the simple zero-knowledge proximity test, suppose we have an malicious prover algorithm $\textbf{P}^\prime$ that can pass the proximity test with probability $p_0$, we will run it as a black box and construct another malicious prover algorithm $\textbf{P}$ that can pass the original proximity test with probability $p_0$ if event $E_1$ happens.
+
+\begin{itemize}
+    \item $\textbf{P}$ will receive an input \mzeroprime representing the tensor code matrix. \textbf{P} pass \mzeroprime to $\textbf{P}^\prime$.
+    
+    \item $\textbf{P}^\prime$ sends out $M_0^{\prime\prime}$ as the commitment to the underlying tensor code matrix. 
+    \textbf{P} sends $M_0^\prime$ to the verifier \textbf{V}  as the commitment to the underlying tensor code matrix.
+    
+    \item For $i \in [t-1]$, verifier \textbf{V} will send the random linear combination coefficients $r_i$ to \textbf{P}. \textbf{P} simply forward $r_i$ to $\textbf{P}^\prime$. $\textbf{P}^\prime$ will output $M_i^\prime$ and $PAD_i$. \textbf{P} then compute $M_i^\prime$ as element-wise subtraction of $M_i^\prime$ and $PAD_i$ and then send $M_i^\prime$ to the verifier \textbf{V}. 
+    
+    Note that $PAD_i^\prime$ is the truncated version of $PAD_i$.
+    \item If verifier \textbf{V} query $M_0^\prime$ at index $I$, \textbf{P} return $M_0^\prime[I]$ directly.
+    
+    \item If verifier \textbf{V} query $M_i^\prime$ at index $I$ for $i \in [t-1]$, \textbf{P} query $\textbf{P}^\prime$ for $M_i^{\prime\prime}$ and $PAD_i$ at index $I$. \textbf{P} will return $M_i^\prime$ computed as $M_i^{\prime\prime}[I] - PAD_i[I]$.
+\end{itemize}
+
+During the query phase, the original verifier \textbf{V} will check the following equation:
+$$
+    \text{Enc}_{t-i}(M_i^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i)
+$$
+And our construction \textbf{P} will act like the zero-knowledge verifier $\textbf{V}^\prime$ and check the following equation:
+$$
+    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i
+$$
+Looking at the left side of these two equation, $\text{Enc}_{t-i}(M_i^\prime)$ is identical to $\text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)$, since $M_i^\prime = M_i^{\prime\prime} \ominus PAD_{i}^\prime$ by construction.
+
+And since equation \ref{eq:szkpctc_eq2} is checked in the simple zero-knowledge proximity test and event $E_1$ happens, the right side of these two equations are also identical to each other.
+\begin{align}
+\textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) 
+&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime} \ominus PAD_{i-1}^\prime, r_i) \nonumber \\
+&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus \textbf{Fold}_{t-i+1}(PAD_{i-1}^\prime, r_i) \nonumber \\
+&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i \nonumber \\
+\end{align}
+
+Therefore, as long as malicious prover $\textbf{P}^\prime$ can pass the check in zero-knowledge proximity test, our constructed prover \textbf{P} can pass the check in original proximity test if event $E_1$ happens.
+
+The probability event $E_1$ happens could be computed as follows:
+
+$$
+    1 - (1 - (1 - \frac{1}{N^{t-1}})^l) \cdot (1 - \frac{1}{N^{t-1} - p})^p 
+$$
+
+Therefore, the soundness error of the simple zero-knowledge protocol is at most
+
+$$
+    \epsilon^\prime(\Delta_\otimes) = 
+    \frac{ \epsilon(\Delta_\otimes)}{1 - (1 - (1 - \frac{1}{N^{t-1}})^l) \cdot (1 - \frac{1}{N^{t-1} - p})^p }
+$$
+
+\end{proof}
+
+
 \subsection{Testing Phase Zero-Knowledge}
 
 \begin{definition}
 
-A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R_\otimes$ is \textbf{perfect zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
+A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{perfect zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
  
 \end{definition}
 
@@ -206,65 +327,5 @@ For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier random
 \end{itemize}
 
 Both the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are uniformly distributed. They are identically distributed.
-
-\end{proof}
-
-\subsection{Testing Phase Soundness}
-
-\begin{lemma}
-\label{lemma:szkpctc-soundness}
-
-
-IOPP = ($\textbf{P}$, $\textbf{V}$) has soundness error at most:
-$$
-    \epsilon(\Delta_\otimes) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
-$$
-where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
-
-\end{lemma}
-\begin{proof}
-
-We prove this lemma by arguing that the soundness (lemma \ref{lemma:pc-soundness}) of original proximity test implies the soundness of the simple zero-knowledge proximity test. And we will prove this argument by doing a reduction formally described in figure \ref{img:red-soundness}.
-
-\begin{figure}[ht]
-\centering
-\resizebox{\textwidth}{!}{
-\input{graph/soundness-reduction}
-}
-\caption{Reduction from Simple ZK Proximity Test to Original Proximity Test}
-\label{img:red-soundness}
-\end{figure}
-
-For the simple zero-knowledge proximity test, suppose we have an malicious prover algorithm $\textbf{P}^\prime$ that can pass the proximity test with probability $p$ larger than $\epsilon(\Delta_\otimes)$, we will run it as a black box and construct another malicious prover algorithm $\textbf{P}$ that can pass the original proximity test with probability $p$.
-
-\begin{itemize}
-    \item $\textbf{P}$ will receive an input \mzeroprime representing the tensor code matrix. \textbf{P} pass \mzeroprime to $\textbf{P}^\prime$.
-    \item $\textbf{P}^\prime$ sends out $M_0^{\prime\prime}$ as the commitment to the underlying tensor code matrix. \textbf{P} sends $M_0^\prime$ to the verifier \textbf{V}  as the commitment to the underlying tensor code matrix.
-    \item For $i \in [t-1]$, verifier \textbf{V} will send the random linear combination coefficients $r_i$ to \textbf{P}. \textbf{P} simply forward $r_i$ to $\textbf{P}^\prime$. $\textbf{P}^\prime$ will output $M_i^\prime$ and $PAD_i$. \textbf{P} then compute $M_i^\prime$ as element-wise subtraction of $M_i^\prime$ and $PAD_i$ and then send $M_i^\prime$ to the verifier \textbf{V}. 
-    
-    Note that $PAD_i^\prime$ is the truncated version of $PAD_i$.
-    \item If verifier \textbf{V} query $M_0^\prime$ at index $I$, \textbf{P} return $M_0^\prime[I]$ directly.
-    \item If verifier \textbf{V} query $M_i^\prime$ at index $I$ for $i \in [t-1]$, \textbf{P} query $\textbf{P}^\prime$ for $M_i^{\prime\prime}$ and $PAD_i$ at index $I$. \textbf{P} will return $M_i^\prime$ computed as $M_i^{\prime\prime}[I] - PAD_i[I]$.
-\end{itemize}
-
-During the query phase, the original verifier \textbf{V} will check the following equation:
-$$
-    \text{Enc}_{t-i}(M_i^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i)
-$$
-And our construction \textbf{P} will act like the zero-knowledge verifier $\textbf{V}^\prime$ and check the following equation:
-$$
-    \text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i
-$$
-Looking at the left side of these two equation, $\text{Enc}_{t-i}(M_i^\prime)$ is identical to $\text{Enc}_{t-i}(M_i^{\prime\prime} \ominus PAD_{i}^\prime)$, since $M_i^\prime = M_i^{\prime\prime} \ominus PAD_{i}^\prime$ by construction.
-
-And since equation \ref{eq:szkpctc_eq2} is checked in the simple zero-knowledge proximity test, the right side of these two equations are also identical to each other.
-\begin{align}
-\textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) 
-&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime} \ominus PAD_{i-1}^\prime, r_i) \nonumber \\
-&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus \textbf{Fold}_{t-i+1}(PAD_{i-1}^\prime, r_i) \nonumber \\
-&= \textbf{Fold}_{t-i+1}(M_{i-1}^{\prime\prime}, r_i) \ominus PAD_i \nonumber \\
-\end{align}
-
-Therefore, as long as malicious prover $\textbf{P}^\prime$ can pass the check in zero-knowledge proximity test, our constructed prover \textbf{P} can pass the check in original proximity test. In other words, they have the same soundness error.
 
 \end{proof}

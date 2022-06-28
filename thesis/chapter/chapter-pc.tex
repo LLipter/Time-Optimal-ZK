@@ -55,10 +55,10 @@ For each tuple $(i_1, i_2, i_3)$, let $M_1^\prime[i_1, *]$ denotes the $i_1$-th 
 The verifier will check whether the following equation holds:
 
 $$
-    \text{Enc}(M_1^\prime[i_1, *])[i_2] = \sum_{k=1}^m r_1[k] \cdot M_0^{\prime}[i_1,i_2,k]
+    \text{Enc}(M_1^\prime[i_1, *])[i_2] \stackrel{?}{=} \sum_{k=1}^m r_1[k] \cdot M_0^{\prime}[i_1,i_2,k]
 $$
 $$
-    \text{Enc}(M_2^\prime[*])[i_1] = \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[i_1,k]
+    \text{Enc}(M_2^\prime[*])[i_1] \stackrel{?}{=} \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[i_1,k]
 $$
 
 \textbf{Evaluation Phase.}
@@ -94,7 +94,7 @@ For each tuple $(i_1, i_2, \cdots, i_t)$,
 the verifier will check whether the following equation holds for every $i \in [t-1]$:
 
 $$
-    \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] = \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
+    \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
 $$
 
 \textbf{Evaluation Phase.}
