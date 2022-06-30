@@ -1,6 +1,6 @@
-\chapter{Polynomial Commitments}
+\chapter{Polynomial Commitment}
 
-In this chapter, We present an general polynomial commitments scheme for arbitrary dimension $t$. The scheme is an extension of the polynomial commitments scheme for $t=2$ described in \cite{brakedown}. We first extend the scheme to the $t=3$ situation so that readers can have a good intuition on how it works. Then we generalize it to arbitrary $t$ with detailed analysis available.
+In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}. We first extend the scheme to the $t=3$ situation so that readers can have a good intuition on how it works. Then we generalize it to arbitrary $t$ with detailed analysis available.
 
 \section{Notation}
 
@@ -28,7 +28,7 @@ And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_
 
 \end{lemma}
 
-\section{Polynomial Commitments for t = 3}
+\section{Polynomial Commitment for t = 3}
 
 \textbf{Commitment Phase.}
 
@@ -36,74 +36,84 @@ Let $M_0 = u$ and $M_0^{\prime} = \text{Enc}_1(\text{Enc}_2(M_0)) \in \mathbb{F}
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $2$ rounds, with each round reducing the dimension by 1.
+The testing phase consists of $3$ rounds, with each round reducing the dimension by 1.
 
 In round 1, the verifier will send a random value $r_1 \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_1 \in \mathbb{F}^{m \times m}$ across the 3rd dimension of matrix $M_0$.
+The prover will compute a linear combination $M_1 \in \mathbb{F}^{m \times m}$ of the 3rd dimension of matrix $M_0$.
 Namely, $M_1[i,j] = \sum_{k=1}^{m} r_1[k] \cdot M_0[i,j,k]$ for $1 \le i, j \le m$. 
 Let $M_1^\prime = \text{Enc}_1(M_1) \in \mathbb{F}^{N \times m}$.
 Then the prover sends $M_1^\prime$ to the verifier.
 
 In round 2, the verifier will send a random value $r_2 \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_2 \in \mathbb{F}^{m}$ across the 2nd dimension of matrix $M_1$.
+The prover will compute a linear combination $M_2 \in \mathbb{F}^{m}$ of the 2nd dimension of matrix $M_1$.
 Namely, $M_2[i] = \sum_{k=1}^{m} r_2[k] \cdot M_1[i, k]$. 
 Let $M_2^\prime = M_2 \in \mathbb{F}^{m}$.
 Then the prover sends $M_2^\prime$ to the verifier.
 
-Then the verifier will perform a probabilistic checking to make sure $M_0^\prime $, $ M_1^\prime$ and $M_2^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, i_3)$ from space $[N] \times [N] \times [N]$. 
-For each tuple $(i_1, i_2, i_3)$, let $M_1^\prime[i_1, *]$ denotes the $i_1$-th row in $M_1^\prime$.
+In round 3, the verifier will send a random value $r_3 \in \mathbb{F}^m$ to the prover.
+The prover will compute a linear combination $M_3 \in \mathbb{F}$ of the first dimension of matrix $M_2$.
+Namely, $M_3 = \sum_{k=1}^{m} r_3[k] \cdot M_1[k]$. 
+Then the prover sends $M_3$ to the verifier.
+
+Then the verifier will perform a probabilistic check to make sure $M_0^\prime $, $ M_1^\prime$, $M_2^\prime$ and $M_3$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, j_3)$ from space $[N] \times [N] \times [N]$. 
+For each tuple $(j_1, j_2, j_3)$, let $M_1^\prime[j_1, *]$ denotes the $j_1$-th row in $M_1^\prime$.
 The verifier will check whether the following equation holds:
 
 $$
-    \text{Enc}(M_1^\prime[i_1, *])[i_2] \stackrel{?}{=} \sum_{k=1}^m r_1[k] \cdot M_0^{\prime}[i_1,i_2,k]
+    \text{Enc}(M_1^\prime[j_1, *])[i_2] \stackrel{?}{=} \sum_{k=1}^m r_1[k] \cdot M_0^{\prime}[j_1,j_2,k]
 $$
 $$
-    \text{Enc}(M_2^\prime[*])[i_1] \stackrel{?}{=} \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[i_1,k]
+    \text{Enc}(M_2^\prime[*])[j_1] \stackrel{?}{=} \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[j_1,k]
+$$
+$$
+    M_3[*] \stackrel{?}{=} \sum_{k=1}^m r_3[k] \cdot M_2^{\prime}[k]
 $$
 
 \textbf{Evaluation Phase.}
 
-Let $q_1, q_2, q_3 \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes q_3, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{2}^\prime, q_3 \rangle$ as $g(x)$.
+Let $q_1, q_2, q_3 \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes q_3, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistency checks passed, then the verifier outputs $M_{3}$ as $g(x)$.
 
-\section{Polynomial Commitments for Arbitrary t}
+\section{Polynomial Commitment for Arbitrary t}
 
 \subsection{Protocol}
 
 \textbf{Commitment Phase.}
 
-Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-1 \text{ times}} \times m}$. Send $M_0^{\prime}$ to the verifier.
+Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$. Send $M_0^{\prime}$ to the verifier.
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
+The testing phase consists of $t$ rounds, with each round reducing the number of dimensions by 1.
 
 In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_i \in \mathbb{F}^{\underbrace{m \times m \times \cdots \times m}_{t-i \text{ times}}}$ across the last dimension of matrix $M_{i-1}$.
+The prover will compute a linear combination $M_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of the last dimension of matrix $M_{i-1}$.
 Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
 $$M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]$$
 Let 
 $$
-M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\underbrace{N \times N \times \cdots \times N}_{t-i-1 \text{ times}} \times m}
+M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
 $$
 Then the prover sends $M_i^\prime$ to the verifier.
 
-Then the verifier will perform a probabilistic checking to make sure 
+Note that in the last round, $M_t$ is degenerate to a single value in $\mathbb{F}$ and no encoding takes place.
+
+Then the verifier will perform a probabilistic check to make sure 
 $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
-are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(i_1, i_2, \cdots, i_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. 
-For each tuple $(i_1, i_2, \cdots, i_t)$,
-the verifier will check whether the following equation holds for every $i \in [t-1]$:
+are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\overbrace{[N] \times [N] \times \cdots \times [N]}^{t \text{ times}}$. 
+For each tuple $(j_1, j_2, \cdots, j_t)$,
+the verifier will check whether the following equation holds for every $i \in [t]$:
 
 $$
-    \text{Enc}(M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *])[i_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[i_1,i_2, \cdots, i_{t-i},k]
+    \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
 $$
 
 \textbf{Evaluation Phase.}
 
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $\langle M_{t-1}^{\prime}, q_t \rangle$ as $g(x)$.
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistency checks passed, then the verifier outputs $M_{t}^{\prime}$ as $g(x)$.
 
 \section{Analysis}
 
-We refer the result in \cite{cryptoeprint:2020/1426} and summarize to the following lemmas. 
+We refer to the result in \cite{cryptoeprint:2020/1426} and summarize to the following lemmas. 
 
 \begin{lemma}
 \label{lemma:pc-completeness}
@@ -131,6 +141,6 @@ And since each time the verifier will query a strip of elements in a matrix (i.e
 
 \subsection{Parallelism}
 
-Most of the computation in the commitment scheme can be done in parallel in a nature fashion. There's little data dependence among them. Therefore, it's possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
+Most of the computations for the commitment scheme can be done in parallel in a natural fashion. There's little data dependence among them. Therefore, it's possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
 
 

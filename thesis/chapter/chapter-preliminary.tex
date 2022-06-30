@@ -1,4 +1,4 @@
-\chapter{Preliminary}
+\chapter{Preliminaries}
 
 
 \begin{definition}[$d$-regular Graph]
@@ -13,8 +13,69 @@ $[n]$ is the shorthand for the set $\{i: 1 \le i \le n\}$
 
 \end{definition}
 
-\begin{definition}[Multilinear Polynomial]
+\begin{definition}[Relation]
 
-
+An \textbf{relation} $R$ is a set of pair $(\mathbb{X}, \mathbb{W})$ where $\mathbb{X}$ is the instance and $\mathbb{W}$ is the witness. The corresponding \textbf{language} $L(R)$ is the set of instances $\mathbb{X}$ for which there exists a witness $\mathbb{W}$ such that $(\mathbb{X}, \mathbb{W}) \in R$.
 
 \end{definition}
+
+\begin{definition}[Interactive Oracle Proof (IOP)]
+An \textbf{Interactive Oracle Proof (IOP)} is defined by a pair of interactive randomized
+algorithms \textbf{IOP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
+The number of rounds of interaction is called the \textbf{round complexity} of the system. 
+During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover. 
+The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message.
+We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
+
+An interactive oracle proof IOP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ if the following holds.
+
+\begin{enumerate}
+    \item \textbf{Completeness.}
+    For every pair $(\mathbb{X}, \mathbb{W}) \in R$, the probability that $P(\mathbb{X}, \mathbb{W})$ convinces $V(\mathbb{X})$ to accept is 1.
+    
+    \item \textbf{Soundness.}
+    For every instance $\mathbb{X} \not\in L(R)$ and malicious prover $\tilde{P}$, the probability that $\tilde{P}$ convince $V(\mathbb{X})$ to accept is at most $\epsilon$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Interactive Oracle Proof of Proximity (IOPP)]
+An \textbf{Interactive Oracle Proof of Proximity (IOPP)} is defined by a pair of interactive randomized
+algorithms \textbf{IOPP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
+The number of rounds of interaction is called the \textbf{round complexity} of the system. 
+During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover. 
+The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message.
+We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
+The protocol's goal is to show that a particular string is close to a valid witness.
+An interactive oracle proof of proximity IOPP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ with distance function $\Delta$ if the following holds.
+
+\begin{enumerate}
+    \item \textbf{Completeness.}
+    For every pair $(\mathbb{X}, \mathbb{W}) \in R$, the probability that $P(\mathbb{X}, \mathbb{W})$ convinces $V^{\mathbb{W}}(\mathbb{X})$ to accept is 1.
+    
+    \item \textbf{Soundness.}
+    For every instance $\mathbb{X} \not\in L(R)$ and malicious prover $\tilde{P}$, the probability that $\tilde{P}$ convince $V^{\mathbb{W}}(\mathbb{X})$ to accept is at most $\epsilon(\Delta(\mathbb{W}, R|_{\mathbb{X}}))$. Here the soundness error $\epsilon$ is a function of the $\Delta$-distance of $\mathbb{W}$ to the set of valid witnesses $R|_{\mathbb{X}} := \{ \mathbb{W}^\prime | (\mathbb{X}, \mathbb{W}^\prime) \in R \}$.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Monomials of Polynomial]
+A polynomial g over $\mathbb{F}$ is an expression consisting of a sum of \textbf{monomials} where each monomial is the product of a constant (from $\mathbb{F}$) and powers of one or more variables (which take values from $\mathbb{F}$); all arithmetic is performed over $\mathbb{F}$.
+\end{definition}
+
+\begin{definition}[Degree of Polynomial]
+The degree of a monomial is the sum of the exponents of variables in the monomial; the (total) degree of a polynomial g is the maximum degree of any monomial in g. Furthermore, the degree of a polynomial g in a particular variable $x_i$ is the maximum exponent that $x_i$ takes in any of the monomials in g.
+\end{definition}
+
+\begin{definition}[Multivariate / Univariate Polynomial]
+A \textbf{multivariate} polynomial is a polynomial with more than one variable; otherwise it is called a \textbf{univariate} polynomial.
+\end{definition}
+
+\begin{definition}[Multilinear Polynomial]
+A \textbf{multivariate} polynomial is called a \textbf{multilinear} polynomial if the degree of the polynomial in each variable is at most one.
+\end{definition}
+
+\begin{definition}[Linear code]
+If $\mathbb{F}$ is a field and $C \subset \mathbb{F}^n$ is a subspace of $\mathbb{F}^n$ then C is said to be a linear code.
+\end{definition}
+As $C$ is a subspace, there exists a basis $c_1, c_2, \cdots, c_k$ where $k$ is the dimension of the subspace. Any codeword can be expressed as the linear combination of these basis vectors. We can write these vectors in matrix form as the rows of a $k \times n$ matrix. Such a matrix is called a \textbf{generator matrix}.
