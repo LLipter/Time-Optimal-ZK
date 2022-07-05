@@ -15,6 +15,7 @@ use digest::Output;
 use sprs::CsMat;
 use crate::codespec::CodeSpecification;
 use crate::codegen::generate;
+use crate::codegen::generate_rev;
 use crate::encode::encode;
 use crate::encode::encode_zk;
 use crate::helper::next_pow_2;
@@ -34,6 +35,9 @@ pub fn check_linear_combination_2_1_zk<F, C>(
     r: &Vec<F>,
     precodes: &Vec<CsMat<F>>,
     postcodes: &Vec<CsMat<F>>,
+    precodes_rev: &Vec<CsMat<F>>,
+    postcodes_rev: &Vec<CsMat<F>>,
+    degree: usize,
     i1: usize,
 ) -> bool
 where
@@ -49,7 +53,7 @@ where
         msg.push(m_1d[[i1]]);
     }
     msg.resize(code_len, <F as Field>::zero());
-    encode_zk::<F, C>(&mut msg, precodes, postcodes);
+    encode_zk::<F, C>(&mut msg, precodes, postcodes, precodes_rev, postcodes_rev, degree);
     let mut s = <F as Field>::zero();
     for i2 in 0..msg_len {
         s = s.add(r[i2].mul(m_2d[[i1, i2]]));
@@ -136,7 +140,10 @@ where
     let mut rng = rand::thread_rng();
 
     // generate codes
+    let degree = 3;
+    // let degree = degree_bound(1.0/rate, 256, code_len);
     let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
+    let (precodes_rev, postcodes_rev) = generate_rev::<F, C>(degree*code_len, seed);
 
     // M0: N * m
     let mut m0 = Array::<F, _>::zeros((code_len, msg_len));
@@ -160,7 +167,7 @@ where
         .for_each(|(i2, mut x)| {
             let mut msg = x.to_vec();
             msg.resize(code_len, <F as Field>::zero());
-            encode_zk::<F, C>(&mut msg, &precodes, &postcodes);
+            encode_zk::<F, C>(&mut msg, &precodes, &postcodes, &precodes_rev, &postcodes_rev, degree);
             for i1 in 0..code_len {
                 x[i1] = msg[i1];
             }
@@ -189,7 +196,7 @@ where
             check_linear_combination_2_1_zk::<F, C>(
                 msg_len, code_len, 
                 &m0, &m1, &r1, 
-                &precodes, &postcodes, 
+                &precodes, &postcodes, &precodes_rev, &postcodes_rev, degree,
                 i1
             )
         );

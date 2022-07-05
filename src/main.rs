@@ -36,7 +36,7 @@ use codegen::generate_rev;
 use std::ops::Add;
 use encode::encode_rev;
 use encode::test_reverse_encoding;
-
+use encode::encode_zk_bench;
 
 fn main() {
     rayon::ThreadPoolBuilder::new().num_threads(1).build_global().unwrap();
@@ -62,23 +62,46 @@ fn main() {
     // commit_zk::commit_4_dim_zk::<Ft255, codespec::Code6, Blake3>(pow(2usize, 20), 32, 56, 0, 100);
     // commit_zk::commit_4_dim_zk::<Ft255, codespec::Code6, Blake3>(65536, 16, 28, 0, 5);
 
-    println!("{}", binary_entropy(0.5));
-    println!("{}", binary_entropy(0.1));
-    println!("{}", degree_bound(1.0/1.72, 256, 1762));
-    println!("{}", degree_bound(1.0/1.72, 256, 174));
-    println!("{}", degree_bound(1.0/1.72, 256, 56));
+    // println!("{}", binary_entropy(0.5));
+    // println!("{}", binary_entropy(0.1));
+    // println!("{}", degree_bound(1.0/1.72, 256, 1762));
+    // println!("{}", degree_bound(1.0/1.72, 256, 174));
+    // println!("{}", degree_bound(1.0/1.72, 256, 56));
 
-    let (precodes, postcodes) = generate_rev::<Ft255, codespec::Code6>(1762, 0);
-    let mut data = Vec::<Ft255>::new();
-    let mut cur = <Ft255 as Field>::zero();
-    for i in 0..1762 {
-        data.push(cur);
-        cur = cur.add(<Ft255 as Field>::one());
-    }
-    // println!("{:?}", data);
-    encode_rev::<Ft255, _>(&mut data, &precodes, &postcodes);
+    // let (precodes, postcodes) = generate_rev::<Ft255, codespec::Code6>(1762, 0);
+    // let mut data = Vec::<Ft255>::new();
+    // let mut cur = <Ft255 as Field>::zero();
+    // for i in 0..1762 {
+    //     data.push(cur);
+    //     cur = cur.add(<Ft255 as Field>::one());
+    // }
+    // // println!("{:?}", data);
+    // encode_rev::<Ft255, _>(&mut data, &precodes, &postcodes);
 
 
-    // TODO: test reverse encoding
-    test_reverse_encoding::<Ft255, codespec::Code6>();
+    // // test reverse encoding
+    // test_reverse_encoding::<Ft255, codespec::Code6>();
+
+    println!("{}", degree_bound(0.5, 256, 128));
+    println!("{}", degree_bound(0.45, 256, 128));
+    println!("{}", degree_bound(0.40, 256, 128));
+    println!("{}", degree_bound(0.35, 256, 128));
+    println!("{}", degree_bound(0.30, 256, 128));
+    println!("{}", degree_bound(0.25, 256, 128));
+    println!("{}", degree_bound(0.20, 256, 128));
+    println!("{}", degree_bound(0.15, 256, 128));
+    println!("{}", degree_bound(0.10, 256, 128));
+    println!("");
+
+    encode_zk_bench::<Ft255>(128, degree_bound(0.5, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.45, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.40, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.35, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.30, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.25, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.20, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.15, 256, 128));
+    encode_zk_bench::<Ft255>(128, degree_bound(0.10, 256, 128));
+    // encode_zk_bench::<Ft255>(128, degree_bound(0.32, 256, 128));
+    // encode_zk_bench::<Ft255>(128, degree_bound(0.30, 256, 128));
 }

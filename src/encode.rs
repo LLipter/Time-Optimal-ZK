@@ -1,3 +1,4 @@
+use std::time::Instant;
 use sprs::CsMat;
 use sprs::MulAcc;
 use ff::Field;
@@ -92,7 +93,7 @@ where
 }
 
 /// reverse-encode a vector given a code of corresponding length
-pub fn encode_rev<F, T>(mut data: T, precodes: &[CsMat<F>], postcodes: &[CsMat<F>])
+pub fn encode_rev<F, T>(mut data: T, precodes: &[CsMat<F>], postcodes: &[CsMat<F>]) -> usize
 where
     F: PrimeField + Num + MulAcc,
     T: AsMut<[F]>,
@@ -154,6 +155,7 @@ where
         data_mut[vandermonde_start+i] = vandermonde_result[i];
     }
 
+    let mut result_len: usize = 0;
     for (precode, (x_start, z_start, v_start)) in precodes.iter().rev().zip(xzv_stack.iter().rev()) {
         // println!("{} {} {}", x_start, z_start, v_start);
         let z_len = precode.cols();
@@ -162,7 +164,9 @@ where
         for i in 0..x_len {
             data_mut[x_start + i] = data_mut[x_start + i].add(z_reversed[i]);
         }
+        result_len = *z_start;
     }
+    return result_len;
 }
 
 pub fn test_reverse_encoding<F, C>()
@@ -220,6 +224,9 @@ pub fn encode_zk<F, C>(
     mut msg: &mut Vec<F>, 
     precodes: &[CsMat<F>], 
     postcodes: &[CsMat<F>],
+    precodes_rev: &[CsMat<F>], 
+    postcodes_rev: &[CsMat<F>],
+    degree: usize
 )
 where
     F: PrimeField + Num + MulAcc,
@@ -228,8 +235,6 @@ where
     encode(&mut msg, &precodes, &postcodes);
 
     let code_len = codeword_length(precodes, postcodes);
-    // let degree = degree_bound(1.0/rate, 256, code_len);
-    let degree = 3;
     
     // generate random graph
     let mut rng = rand::thread_rng();
@@ -278,7 +283,67 @@ where
     // println!("{:?}", randomlized);
     // println!("{:?}", redistributed);
 
-
-
     // TODO: step 3 reverse encoding
+    let resule_len = encode_rev::<F, _>(&mut randomlized, &precodes_rev, &postcodes_rev);
+    randomlized.truncate(resule_len);
+}
+
+pub fn encode_zk_bench<F>(
+    degree: usize,
+    code_len: usize
+)
+where
+    F: PrimeField + Num + MulAcc,
+{
+    let mut rng = rand::thread_rng();
+    let mut msg = Vec::<F>::new();
+    msg.resize_with(code_len, || F::random(&mut rng));
+
+    let start_time = Instant::now();
+    
+    // generate random graph
+    let mut permute: Vec<usize> = (0..code_len).collect();
+    let mut graph = Vec::<Vec<usize>>::new();
+    graph.resize_with(code_len, || Vec::new());
+    for _ in 0..degree {
+        permute.shuffle(&mut rng);
+        for (i, j) in permute.iter().enumerate() {
+            graph[i].push(*j);
+        }
+    }
+
+    // step1: redistribute
+    let mut redistributed = Vec::<F>::new();
+    for i in 0..code_len {
+        for j in 0..degree {
+            redistributed.push(msg[graph[i][j]]);
+        }
+    }
+    let redistributed_len = redistributed.len();
+
+    // step2: randomlize
+    let mut randomlized = Vec::<F>::new();
+    for i in 0..(redistributed_len / degree) {
+        let mut random_block = Vec::<Vec<F>>::new();
+        random_block.resize_with(degree, || Vec::<F>::new());
+        for i in 0..degree {
+            for _ in 0..degree {
+                random_block[i].push(F::random(&mut rng));
+            }
+        }
+        for j in 0..degree {
+            let mut result = <F as Field>::zero();
+            for k in 0..degree {
+                result = result.add(
+                    redistributed[i * degree + k].mul(
+                        random_block[k][j]
+                    )
+                );
+            }
+            randomlized.push(result);
+        }
+    }
+    
+    let end_time = Instant::now();
+    println!("{}", end_time.duration_since(start_time).as_millis());
 }
