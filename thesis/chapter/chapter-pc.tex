@@ -36,7 +36,7 @@ Let $M_0 = u$ and $M_0^{\prime} = \text{Enc}_1(\text{Enc}_2(M_0)) \in \mathbb{F}
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $3$ rounds, with each round reducing the dimension by 1.
+The testing phase consists of $2$ rounds, with each round reducing the dimension by 1.
 
 In round 1, the verifier will send a random value $r_1 \in \mathbb{F}^m$ to the prover.
 The prover will compute a linear combination $M_1 \in \mathbb{F}^{m \times m}$ of the 3rd dimension of matrix $M_0$.
@@ -50,12 +50,7 @@ Namely, $M_2[i] = \sum_{k=1}^{m} r_2[k] \cdot M_1[i, k]$.
 Let $M_2^\prime = M_2 \in \mathbb{F}^{m}$.
 Then the prover sends $M_2^\prime$ to the verifier.
 
-In round 3, the verifier will send a random value $r_3 \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_3 \in \mathbb{F}$ of the first dimension of matrix $M_2$.
-Namely, $M_3 = \sum_{k=1}^{m} r_3[k] \cdot M_1[k]$. 
-Then the prover sends $M_3$ to the verifier.
-
-Then the verifier will perform a probabilistic check to make sure $M_0^\prime $, $ M_1^\prime$, $M_2^\prime$ and $M_3$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, j_3)$ from space $[N] \times [N] \times [N]$. 
+Then the verifier will perform a probabilistic check to make sure $M_0^\prime $, $ M_1^\prime$ and $M_2^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, j_3)$ from space $[N] \times [N] \times [N]$. 
 For each tuple $(j_1, j_2, j_3)$, let $M_1^\prime[j_1, *]$ denotes the $j_1$-th row in $M_1^\prime$.
 The verifier will check whether the following equation holds:
 
@@ -64,9 +59,6 @@ $$
 $$
 $$
     \text{Enc}(M_2^\prime[*])[j_1] \stackrel{?}{=} \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[j_1,k]
-$$
-$$
-    M_3[*] \stackrel{?}{=} \sum_{k=1}^m r_3[k] \cdot M_2^{\prime}[k]
 $$
 
 \textbf{Evaluation Phase.}
@@ -83,7 +75,7 @@ Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots 
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $t$ rounds, with each round reducing the number of dimensions by 1.
+The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
 
 In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
 The prover will compute a linear combination $M_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of the last dimension of matrix $M_{i-1}$.
@@ -95,13 +87,11 @@ M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - 
 $$
 Then the prover sends $M_i^\prime$ to the verifier.
 
-Note that in the last round, $M_t$ is degenerate to a single value in $\mathbb{F}$ and no encoding takes place.
-
 Then the verifier will perform a probabilistic check to make sure 
 $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
 are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\overbrace{[N] \times [N] \times \cdots \times [N]}^{t \text{ times}}$. 
 For each tuple $(j_1, j_2, \cdots, j_t)$,
-the verifier will check whether the following equation holds for every $i \in [t]$:
+the verifier will check whether the following equation holds for every $i \in [t-1]$:
 
 $$
     \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
@@ -124,7 +114,7 @@ The testing phase (proximity test) has perfect completeness.
 \label{lemma:pc-soundness}
 The testing phase (proximity test) has soundness error:
 $$
-    \epsilon(\Delta_\otimes) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
+    \epsilon(\Delta_\otimes, t, l) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
 $$
 where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 \end{lemma}

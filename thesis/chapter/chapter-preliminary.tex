@@ -79,3 +79,23 @@ A \textbf{multivariate} polynomial is called a \textbf{multilinear} polynomial i
 If $\mathbb{F}$ is a field and $C \subset \mathbb{F}^n$ is a subspace of $\mathbb{F}^n$ then C is said to be a linear code.
 \end{definition}
 As $C$ is a subspace, there exists a basis $c_1, c_2, \cdots, c_k$ where $k$ is the dimension of the subspace. Any codeword can be expressed as the linear combination of these basis vectors. We can write these vectors in matrix form as the rows of a $k \times n$ matrix. Such a matrix is called a \textbf{generator matrix}.
+
+\begin{definition}[Tensor Product Code]
+The tensor product cide $C^{\otimes t}$ is the linear code in $\mathbb{F}^{n^t}$ with message length $k^t$, block length $n^t$ and distance $d^t$ where any axis-parallel line is in C.
+\end{definition}
+
+\begin{definition}[Relation $R_\otimes$]
+The relation $R_\otimes$ is the sef of tuples
+$$
+    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t), (c_0^{0}, \{c_1^{(s)}\}_s, \cdots, \{c_{t-1}^{(s)}\}_s))
+$$ 
+such that $c_0^{0} \in (C^{\otimes t})^l$ and for all $r \in [t-1]$ and $s \in [q]$, we have $c_r^{(s)} \in (C^{\otimes t-r})^k$.
+\end{definition}
+
+\begin{definition}[Distance $\Delta_\otimes$]
+Let $\mathbb{W} = (c_0^{0}, \{c_1^{(s)}\}_s, \cdots, \{c_{t-1}^{(s)}\}_s)$ be such that $c_0^{(0)} \in \mathbb{F}^{l \cdot n^t}$ and, for all $r \in [t-1]$ and $s \in [q]$, we have $c_r^{(s)} \in \mathbb{F}^{k \cdot n^{t-r}}$. Given $\mathbb{X} = (\mathbb{F}, C, l, q, t)$, the $\Delta_\otimes$ distance of $\mathbb{W}$ to $R_\otimes|_{\mathbb{X}}$ is
+$$
+    \Delta_\otimes(\mathbb{W}, R_\otimes|_{\mathbb{X}}) := \max \{\Delta_0, \Delta_1, \cdots, \Delta_{t-1}\}
+$$
+where $\Delta_0 := \Delta(c_0^{(0)}, C^{\otimes t})$ and $\forall r \in [t-1], \Delta_r := \Delta(\{c_r^{(s)}\}_s, C^{\otimes t-r})$.
+\end{definition}
