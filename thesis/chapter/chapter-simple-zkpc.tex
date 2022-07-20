@@ -50,7 +50,7 @@ For each sampled tuple $(j_1, j_2, \cdots, j_t)$, the verifier will check the fo
 $$
     \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
 $$
-Then, in step 2, the verifier will sample another $l_2$ random tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$ with the restriction that $j_i^\prime \neq j_i$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
+Then, in step 2, the verifier will sample another $l_2$ random tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$ with the restriction that $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
 For each sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$, the verifier will check the following equation holds for every $1 \le i \le t-2$.
 $$
     \text{Enc}(PAD_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
@@ -65,9 +65,9 @@ Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\lang
 
     \item In round $i$, the random value $r_i$ is replaced by $q_i$.
     
-    \item For every sampled tuple $(j_1, j_2, \cdots, j_t)$ in step 1, the following restriction is required, $j_i \neq j_i^\prime$ for $\forall (j_1^\prime, j_2^\prime, \cdots, j_t^\prime) \in L_2$.
+    \item For every sampled tuple $(j_1, j_2, \cdots, j_t)$ in step 1, the following restriction is required, $j_k \neq j_k^\prime$ for $\forall (j_1^\prime, j_2^\prime, \cdots, j_t^\prime) \in L_2$.
 
-    \item For every sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ in step 2, the following restriction is required, $j_i^\prime \neq j_i$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$.
+    \item For every sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ in step 2, the following restriction is required, $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$.
 \end{itemize}
 
 If all consistent checks passed, then the verifier outputs $M_{t}^{\prime} - PAD_t^\prime$ as $g(x)$.
@@ -142,7 +142,7 @@ $$
     \text{Enc}_{t-i}(M_i^\prime)[i_1, \cdots, i_{t-i}] \stackrel{?}{=} \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) [i_1, \cdots, i_{t-i}]
 \end{equation}
 
-    In step 2, the verifier $\textbf{V}$ samples $l_2$ tuples of the form $(j_1^\prime, \cdots, j_t^\prime)$ in space $[N]^t$ with the restriction that $j_i^\prime \neq j_i$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
+    In step 2, the verifier $\textbf{V}$ samples $l_2$ tuples of the form $(j_1^\prime, \cdots, j_t^\prime)$ in space $[N]^t$ with the restriction that $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
     The verifier $\textbf{V}$ proceeds as follows for each sampled tuple.
     
     For each $0 \le i \le t-1$, 

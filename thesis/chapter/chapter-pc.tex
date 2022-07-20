@@ -134,3 +134,81 @@ And since each time the verifier will query a strip of elements in a matrix (i.e
 Most of the computations for the commitment scheme can be done in parallel in a natural fashion. There's little data dependence among them. Therefore, it's possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
 
 
+\section{Benchmark}
+
+\subsection{Runtime}
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{3em} |} 
+ \hline
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Total Time [ms] \\ [0.5ex] 
+ \hline\hline
+ 2 & 1024   & 1762 & 41737  & 3057  & 44794   \\
+ \hline
+ 3 & 101    & 174 & 99642  & 623  & 100266  \\
+ \hline
+ 4 & 32     & 56 & 153558  & 204  & 153762   \\
+ \hline
+\end{tabular}
+\caption{Runtime of polynomial commitment scheme with 1048576 coefficient, 1 threads, and 100 test tuples.}
+\label{table:benchmark-pc-1}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{3em} |} 
+ \hline
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Total Time [ms] \\ [0.5ex] 
+ \hline\hline
+ 2 & 1024   & 1762 & 10048 & 776 & 10825  \\
+ \hline
+ 3 & 101    & 174 & 24314 & 165 & 24480 \\
+ \hline
+ 4 & 32     & 56 & 37961 & 63 & 38025  \\ 
+ \hline
+\end{tabular}
+\caption{Runtime of polynomial commitment scheme with 1048576 coefficient, 8 threads, and 100 test tuples.}
+\label{table:benchmark-pc-2}
+\end{table}
+
+We benckmark the above polynomial commitment scheme on a computer with
+Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There're 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-pc-1} and table \ref{table:benchmark-pc-2}.
+
+
+Running the polynomial commitment scheme with the same setting, using 8-threads-parallelism can provides approximately a 4x speedup.
+
+As the dimension increases, it's generally require more time to complete the commit phase for the prover. And less time is required to complete the verify phase for the verifier.
+
+\subsection{Soundness Error}
+
+According to lemma \ref{lemma:pc-soundness}, we can compute the soundness error summarized in the table \ref{table:benchmark-pc-3}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{5em} | m{5em} | m{5em}  | m{5em}|} 
+ \hline
+ Dimension & Number of Test Tuples & Code Length & Code Relative Distance & Soundness Error \\ [0.5ex] 
+ \hline\hline
+ 
+ \multirow{3}{*}{2} & 100 & 1762 & 0.07 & 1.66  \\
+  & 1000 & 1762 & 0.07 & 0.37  \\
+  & 100 & 1762 & 0.55 & 0.0003  \\
+ \hline
+ 
+ \multirow{3}{*}{3} & 100 & 174  & 0.07 & 1.97 \\
+ & 1000 & 174  & 0.07 & 1.76 \\
+ & 100 & 174  & 0.55 & 0.01 \\
+ \hline
+ 
+ \multirow{3}{*}{4} & 100 & 56   & 0.07 & 1.99  \\
+  & 1000 & 56   & 0.07 & 1.98  \\
+  & 100 & 56   & 0.55 & 0.10  \\ 
+ \hline
+\end{tabular}
+\caption{Soundness error of polynomial commitment scheme}
+\label{table:benchmark-pc-3}
+\end{table}
+
+The theoretically computed soundness error for the setting used in the above benchmark experiment is large, even above 1. The soundness error can be decreased by either increasing the number of tested tuples or by increasing the relative distance of the underlying linear code. However, the soundness error is not sensitive to the number of tested tuples and the length of the code is usually quite limited. Therefore, using a linear code with large relative distance is the only promising solution here.
