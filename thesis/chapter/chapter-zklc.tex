@@ -1,9 +1,11 @@
 \chapter{Zero-Knowledge Linear Code}
 
+In this chapter, we use the construction presented in paper \cite{10.1145/2554797.2554815} to add zero-knowledge property to a normal linear code.
+
 % http://www.cs.cmu.edu/~odonnell/toolkit13/lecture12.pdf
 \section{Random d-regular Bipartite Graph}
 \label{sec:randomgraph}
-To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it's possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
+First, we present a algorithm to generate a random d-regular bipartite graph. To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it's possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
 
 \RestyleAlgo{ruled}
 %% This is needed if you want to add comments in
@@ -141,6 +143,10 @@ Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} prod
 
 \section{Reversed Linear Code}
 
+According to Tellegen’s principle \cite{Tellegen}, it's generally possible to transpose a linear algorithm that performs a matrix-vector product, producing an algorithm that computes the transposed matrix-vector product.
+
+In this section, we transpose the Brakedown linear code to get a reverse encoding algorithm. Figure \ref{fig:lc} is the construction of Brakedown linear code. And figure \ref{fig:lc-rev} is the reversed construction.
+
 
 \begin{figure}[h]
 \centering
@@ -149,9 +155,43 @@ Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} prod
 \label{fig:lc}
 \end{figure}
 
+
+
 \begin{figure}[h]
 \centering
 \input{graph/lc-rev.tikz}
 \caption{Reversed Linear Code}
 \label{fig:lc-rev}
 \end{figure}
+
+
+\section{Construction}
+
+\subsection{Redistribution}
+
+Given the normal encoding function \textbf{Enc()} and message $x$, we first compute the codeword $y = \textbf{Enc}(x) \in \mathbb{F}^n$. Then a random expander graph $G = (L, R, E)$ with degree $\Delta$ satisfying lemma \ref{lemma:randomgraph} will be generated. We will redistribute the symbols in $y$ according to $G$. More concretely, for everty $i \in [n]$ and $j \in [\Delta]$, let $\gamma(i, j)$ be the index of the $j$-th vertex in $R$. The $(i - 1) \cdot \Delta + j$-th entry of $z$ is defined to be the $y_{\gamma(i, j)}$.
+
+\subsection{Randomization}
+
+Given $z \in \mathbb{F}^{n \cdot \Delta}$, we generate a random block diagonal matrix $H$ with $n$ blocks each of size $\Delta \cdot \Delta$. We compute $v = H \cdot z \in \mathbb{F}^{n \cdot \Delta}$.
+
+\subsection{Reverse Encoding}
+
+Given the reverse encoding function $\textbf{Enc}^{-1}$, the final output is $w = \textbf{Enc}^{-1}(v)$.
+
+\section{Performance}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{graph/degree.pdf}
+    \caption{Runtime of Redistribution and Randomization Step}
+    \label{fig:degree}
+\end{figure}
+
+
+We have implement the above construction. We measure the runtime required for the redistribution step and the randomization step, whose execution is irrelevant to the actual underlying linear code.
+
+
+According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is every sensitive to the relevant distance of underlying linear code. The larger the relevant distance, the smaller the degree. And larger degree will cause the algorithm more time consuming.
+
+Figure \ref{fig:degree} presents the relation between relevant distance and runtime. As relevant distance approaches 0.1, the runtime increases dramatically. And even for larger relevant distance, the construction is still significant slower than the original linear code, making this construction unacceptable in practice.

@@ -41,6 +41,7 @@ if __name__ == '__main__':
     plt.title("Intel® Core™ i7-7700HQ CPU @ 2.80GHz (Kabylake)\nL1: 128KB, L2: 256KB, L3: 6MB\nCode Length=128", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Relevant Distance", fontsize=16)
     plt.ylabel("Runtime[ms]", fontsize=16)
-    # plt.savefig('timing_add_opt.pdf')
 
-    plt.show()
+    plt.savefig('degree.pdf')
+
+    # plt.show()
