@@ -192,6 +192,6 @@ Given the reverse encoding function $\textbf{Enc}^{-1}$, the final output is $w 
 We have implement the above construction. We measure the runtime required for the redistribution step and the randomization step, whose execution is irrelevant to the actual underlying linear code.
 
 
-According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is every sensitive to the relevant distance of underlying linear code. The larger the relevant distance, the smaller the degree. And larger degree will cause the algorithm more time consuming.
+According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is every sensitive to the relative distance of underlying linear code. The larger the relative distance, the smaller the degree. And larger degree will cause the algorithm more time consuming.
 
-Figure \ref{fig:degree} presents the relation between relevant distance and runtime. As relevant distance approaches 0.1, the runtime increases dramatically. And even for larger relevant distance, the construction is still significant slower than the original linear code, making this construction unacceptable in practice.
+Figure \ref{fig:degree} presents the relation between relative distance and runtime. As relative distance approaches 0.1, the runtime increases dramatically. And even for larger relative distance, the construction is still significant slower than the original linear code, making this construction unacceptable in practice.

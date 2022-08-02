@@ -209,7 +209,14 @@ $$
 \end{lemma}
 \begin{proof}
 
-Equivalently speaking, this protocol performs two proximity test in parallel. One on $M_i^\prime$ tensor and the other on $PAD_i$ tensor. The soundness error introduced by the first proximity test is $\epsilon(\Delta_\otimes, t, l_1)$. The soundness error introduced by the second proximity test is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
+Equivalently speaking, this protocol performs two proximity test in parallel. One on $M_i^\prime$ tensor and the other on $PAD_i$ tensor. 
+
+The soundness error introduced by the first proximity test is $\epsilon(\Delta_\otimes, t, l_1)$. 
+
+The soundness error introduced by the second proximity test is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$. 
+In a complete proximity test, we use $E_1$ denote the event that the last round of test is passed. And we use $E_2$ denote the event that all other tests are passed.
+The soundness error is the probability the verifier is convinced by a malicious input.
+The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it's also the probability where both event $E_1$ and event $E_2$ occurs. Therefore, $P_t = P_{E_1} \cdot P_{E_2}$. Note that $P_{E_1}$ is actually the soundness error when $t=2$, namely, $P_{E_1} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_2}$ is the soundness error introduced by the second proximity test here. Therefore, $P_{E_2} = \frac{P_{t}}{P_{E_1}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
 \end{proof}
 
@@ -232,22 +239,46 @@ IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{perfect zero-knowledge}
 
 For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier randomness $\rho$, we can construct the polynomial-time simulator algorithm $\textbf{S}$ as follows:
 
-\begin{itemize}
-    \item Query $M_0^{\prime}$ or $PAD_0^\prime$ at index $I$:
-    
-    If index I has never been accessed before, generate a random element $x$ from field $\mathbb{F}$. Store this value $x$ in a internal dictionary and return it.
-    
-    Otherwise lookup index $I$ in the internal dictionary and return the stored value.
-    
-    \item Query $M_i^{\prime}$ and $PAD_i^\prime$ at index $I$ for $i \in [t-1]$:
 
-    If index I has never been accessed before, recursively access the corresponding values in $M_{i-1}^{\prime}$ or $PAD_{i-1}^\prime$ and take the linear combination of them as $x$.
-    Store this value $x$ in a internal dictionary and return it.
+\begin{itemize}
+    \item Generate matrix $M_0$ and $PAD_0$ randomly from field $\mathbb{F}$. Then compute $M_0^\prime$ and $PAD_0^\prime$ as follows:
+    $$
+        M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0) \in \mathbb{F}^{N^{t-1} \cdot m}
+    $$
+    $$
+        PAD_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(PAD_0) \in \mathbb{F}^{N^{t-1} \cdot m}
+    $$
+    Then compute $M_i^{\prime}$ and $PAD_i^\prime$ for $i \in [t-1]$:
+    $$
+        PAD_i = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
+    $$
+    $$
+        M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
+    $$
+    $$
+        M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i \oplus PAD_I) \in \mathbb{F}^{N^{t-i-1} \cdot m}
+    $$
+    $$
+        PAD_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(PAD_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
+    $$
+\end{itemize}
+
+If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (i_1, i_2, \cdots, i_t)$:
+
+\begin{itemize}
+    \item If $i_k \le m$ for $\forall k \in [t]$,
     
-    Otherwise lookup index $I$ in the internal dictionary and return the stored value.    
+    The verifier will see a uniformly distributed random element from $\mathbb{F}$ both in simulator world and in real world.
+    
+    \item Otherwise,
+    
+    The verifier will see a random variable that is the result of encoding a number of random element from $\mathbb{F}$ both in simulator world and in real world.
+    
     
 \end{itemize}
 
-Both the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are uniformly distributed. They are identically distributed.
+
+
+The random variables in $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and in $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are indistinguishable to each other. They are identically distributed.
 
 \end{proof}
