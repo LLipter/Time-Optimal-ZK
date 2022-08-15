@@ -5,7 +5,7 @@ In this chapter, we use the construction presented in paper \cite{10.1145/255479
 % http://www.cs.cmu.edu/~odonnell/toolkit13/lecture12.pdf
 \section{Random d-regular Bipartite Graph}
 \label{sec:randomgraph}
-First, we present a algorithm to generate a random d-regular bipartite graph. To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it's possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
+First, we present a algorithm to generate a random d-regular bipartite graph. To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it is possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
 
 \RestyleAlgo{ruled}
 %% This is needed if you want to add comments in
@@ -46,7 +46,7 @@ For any $0 < \epsilon < 1$, there exist a degree $d$ such that a random $d$-regu
 
 \begin{proof}
 
-Negating the statement, we can say that the randomly generated graph $G$ doesn't satisfy the expansion property if and only if $\exists S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| \ge  \epsilon n$ such that there's no edge connecting between set $S$ and set $M$. We bound the probability that this negating statement is true as follows:
+Negating the statement, we can say that the randomly generated graph $G$ does not satisfy the expansion property if and only if $\exists S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| \ge  \epsilon n$ such that there is no edge connecting between set $S$ and set $M$. We bound the probability that this negating statement is true as follows:
 
 For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ and $b$ are not connected in the random graph $G$ is:
 
@@ -85,7 +85,7 @@ P_4 &= \sum_{s=\epsilon n}^{n} \binom{n}{s} P_3 \nonumber \\
     &= (e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n \nonumber \\
 \end{align}
 
-$P_4$ is the probability that a randomly generated graph $G$ doesn't satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n < p$.
+$P_4$ is the probability that a randomly generated graph $G$ does not satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n < p$.
 By rearranging the above equation, we have $ d > \frac{\ln 2 + H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $370.86$.
@@ -107,8 +107,8 @@ For any $0 < \epsilon < 1$, there exist a degree $d$ such that a random $d$-regu
 
 \begin{proof}
 
-We use the same trick as in lemma \ref{lemma:randomgraph}. Negating the statement, we can say that the randomly generated graph $G$ doesn't satisfy the expansion property if and only if 
-for every $ S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| > \epsilon n$ such that there's no edge connecting between set $S$ and set $M$ with low probability. 
+We use the same trick as in lemma \ref{lemma:randomgraph}. Negating the statement, we can say that the randomly generated graph $G$ does not satisfy the expansion property if and only if 
+for every $ S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| > \epsilon n$ such that there is no edge connecting between set $S$ and set $M$ with low probability. 
 We bound the probability true as follows:
 
 For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ and $b$ are not connected in the random graph $G$ is:
@@ -132,7 +132,7 @@ P_3 &= \binom{n}{\epsilon n} (P_2)^{\epsilon n} \nonumber \\
     &= (e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} \nonumber \\
 \end{align}
 
-$P_3$ is the probability that a set $S$ in a randomly generated graph doesn't satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} < p$.
+$P_3$ is the probability that a set $S$ in a randomly generated graph does not satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} < p$.
 By rearranging the above equation, we have $ d > \frac{H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $93.60$.
@@ -143,7 +143,7 @@ Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} prod
 
 \section{Reversed Linear Code}
 
-According to Tellegen’s principle \cite{Tellegen}, it's generally possible to transpose a linear algorithm that performs a matrix-vector product, producing an algorithm that computes the transposed matrix-vector product.
+According to Tellegen’s principle \cite{Tellegen}, it is generally possible to transpose a linear algorithm that performs a matrix-vector product, producing an algorithm that computes the transposed matrix-vector product.
 
 In this section, we transpose the Brakedown linear code to get a reverse encoding algorithm. Figure \ref{fig:lc} is the construction of Brakedown linear code. And figure \ref{fig:lc-rev} is the reversed construction.
 

@@ -1,5 +1,6 @@
 \chapter{Preliminaries}
 
+\section{Combinatorics}
 
 \begin{definition}[$d$-regular Graph]
 
@@ -13,19 +14,21 @@ $[n]$ is the shorthand for the set $\{i: 1 \le i \le n\}$
 
 \end{definition}
 
+\section{Interactive Oracle Proof}
+
 \begin{definition}[Relation]
 
 An \textbf{relation} $R$ is a set of pair $(\mathbb{X}, \mathbb{W})$ where $\mathbb{X}$ is the instance and $\mathbb{W}$ is the witness. The corresponding \textbf{language} $L(R)$ is the set of instances $\mathbb{X}$ for which there exists a witness $\mathbb{W}$ such that $(\mathbb{X}, \mathbb{W}) \in R$.
 
 \end{definition}
 
-\begin{definition}[Interactive Oracle Proof (IOP)]
+\begin{definition}[Point Query Interactive Oracle Proof (IOP)]
 An \textbf{Interactive Oracle Proof (IOP)} is defined by a pair of interactive randomized
 algorithms \textbf{IOP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
 During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
 The \textbf{proof length} is the sum of lengths of all messages sent by the prover. 
-The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message.
+The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message and for each query only elements in a single point will be responded.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 
 An interactive oracle proof IOP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ if the following holds.
@@ -59,6 +62,8 @@ An interactive oracle proof of proximity IOPP = (P, V) for a relation R has comp
 \end{enumerate}
 \end{definition}
 
+\section{Polynomial}
+
 \begin{definition}[Monomials of Polynomial]
 A polynomial g over $\mathbb{F}$ is an expression consisting of a sum of \textbf{monomials} where each monomial is the product of a constant (from $\mathbb{F}$) and powers of one or more variables (which take values from $\mathbb{F}$); all arithmetic is performed over $\mathbb{F}$.
 \end{definition}
@@ -75,10 +80,28 @@ A \textbf{multivariate} polynomial is a polynomial with more than one variable; 
 A \textbf{multivariate} polynomial is called a \textbf{multilinear} polynomial if the degree of the polynomial in each variable is at most one.
 \end{definition}
 
-\begin{definition}[Linear code]
+\begin{definition}[Polynomial Commitment]
+A \textbf{Polynomial Commitment} consists of three algorithms:
+
+\begin{itemize}
+    \item \textsc{PC.Commit}$(\phi(\cdot))$:the algorithm outputs a commitment $\mathcal{R}$ of the polynomial $\phi(\cdot)$.
+    \item \textsc{PC.Prove}$(\phi, x, \mathcal{R})$: given an evaluation point $x$, the algorithm outputs a tuple $(x, \phi(x),\pi_x)$, where $\pi_x$ is the proof.
+    \item \textsc{PC.Verify}$(\pi_x, x, \phi(x), \mathcal{R})$:given $\pi_x, x, \phi(x), \mathcal{R}$, the algorithm checks if $\phi(x)$ is the correct evaluation. The algorithm outputs \textsc{accept} or \textsc{reject}.
+\end{itemize}
+
+\end{definition}
+
+\section{Linear Code}
+
+\begin{definition}[Linear Code]
 If $\mathbb{F}$ is a field and $C \subset \mathbb{F}^n$ is a subspace of $\mathbb{F}^n$ then C is said to be a linear code.
 \end{definition}
+
+The weight of a codeword is the number of its elements that are nonzero and the distance between two codewords is the \textbf{Hamming distance} between them, that is, the number of elements in which they differ. The distance $d$ of the linear code is the minimum weight of its nonzero codewords, or equivalently, the \textbf{minimum distance} between distinct codewords. A linear code of length $n$, dimension $k$, and distance $d$ is called an $[n,k,d]$ code.
+
 As $C$ is a subspace, there exists a basis $c_1, c_2, \cdots, c_k$ where $k$ is the dimension of the subspace. Any codeword can be expressed as the linear combination of these basis vectors. We can write these vectors in matrix form as the rows of a $k \times n$ matrix. Such a matrix is called a \textbf{generator matrix}.
+
+Additionally, any linear combination of valid codeword is also a valid codeword, which is the \textbf{linearity property}. Formally speaking, given $x_1, x_2, \cdots, x_n$ are valid codeword, and given $r_1, r_2, \cdots, r_n$ are some constant, $x^\prime = r_1 x_1 + r_2 x_2 + \cdots + r_n x_n$ is also a valid codeword.
 
 \begin{definition}[Tensor Product Code]
 The tensor product cide $C^{\otimes t}$ is the linear code in $\mathbb{F}^{n^t}$ with message length $k^t$, block length $n^t$ and distance $d^t$ where any axis-parallel line is in C.

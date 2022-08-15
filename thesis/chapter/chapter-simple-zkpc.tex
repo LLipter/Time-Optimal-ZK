@@ -61,7 +61,7 @@ $$
 Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except for the following difference.
 
 \begin{itemize}
-    \item One additional round is required. There're $t$ rounds in total. In round $t$, $M_t^\prime$ and $ PAD_t^\prime$ are degenerated to a single value.
+    \item One additional round is required. There are $t$ rounds in total. In round $t$, $M_t^\prime$ and $ PAD_t^\prime$ are degenerated to a single value.
 
     \item In round $i$, the random value $r_i$ is replaced by $q_i$.
     
@@ -216,7 +216,7 @@ The soundness error introduced by the first proximity test is $\epsilon(\Delta_\
 The soundness error introduced by the second proximity test is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$. 
 In a complete proximity test, we use $E_1$ denote the event that the last round of test is passed. And we use $E_2$ denote the event that all other tests are passed.
 The soundness error is the probability the verifier is convinced by a malicious input.
-The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it's also the probability where both event $E_1$ and event $E_2$ occurs. Therefore, $P_t = P_{E_1} \cdot P_{E_2}$. Note that $P_{E_1}$ is actually the soundness error when $t=2$, namely, $P_{E_1} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_2}$ is the soundness error introduced by the second proximity test here. Therefore, $P_{E_2} = \frac{P_{t}}{P_{E_1}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
+The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_1$ and event $E_2$ occurs. Therefore, $P_t = P_{E_1} \cdot P_{E_2}$. Note that $P_{E_1}$ is actually the soundness error when $t=2$, namely, $P_{E_1} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_2}$ is the soundness error introduced by the second proximity test here. Therefore, $P_{E_2} = \frac{P_{t}}{P_{E_1}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
 \end{proof}
 
@@ -248,7 +248,7 @@ For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier random
     $$
         PAD_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(PAD_0) \in \mathbb{F}^{N^{t-1} \cdot m}
     $$
-    Then compute $M_i^{\prime}$ and $PAD_i^\prime$ for $i \in [t-1]$:
+    \item Then compute $M_i^{\prime}$ and $PAD_i^\prime$ for $i \in [t-1]$:
     $$
         PAD_i = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
     $$
@@ -256,7 +256,7 @@ For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier random
         M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
     $$
     $$
-        M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i \oplus PAD_I) \in \mathbb{F}^{N^{t-i-1} \cdot m}
+        M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
     $$
     $$
         PAD_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(PAD_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
