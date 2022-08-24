@@ -150,35 +150,35 @@ Most of the computations for the commitment scheme can be done in parallel in a 
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{3em} |} 
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
  \hline
- Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Total Time [ms] \\ [0.5ex] 
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
  \hline\hline
- 2 & 1024   & 1762 & 41737  & 3057  & 44794   \\
+ 2 & 1024   & 1762 & 41737  & 3057  & 1.66 & 1206579 \\
  \hline
- 3 & 101    & 174 & 99642  & 623  & 100266  \\
+ 3 & 101    & 174 & 99642  & 623  & 1.97 & 235621  \\
  \hline
- 4 & 32     & 56 & 153558  & 204  & 153762   \\
+ 4 & 32     & 56 & 153558  & 204  & 1.99 & 114701   \\
  \hline
 \end{tabular}
-\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficient, 1 threads, and 100 test tuples.}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 1 threads, linear code with relative distance 0.07, and 100 test tuples.}
 \label{table:benchmark-pc-1}
 \end{table}
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{3em} |} 
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
  \hline
- Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Total Time [ms] \\ [0.5ex] 
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
  \hline\hline
- 2 & 1024   & 1762 & 10048 & 776 & 10825  \\
+ 2 & 1024   & 1762 & 10048 & 776 & 1.66 & 1206579  \\
  \hline
- 3 & 101    & 174 & 24314 & 165 & 24480 \\
+ 3 & 101    & 174 & 24314 & 165 & 1.97 & 235621 \\
  \hline
- 4 & 32     & 56 & 37961 & 63 & 38025  \\ 
+ 4 & 32     & 56 & 37961 & 63 & 1.99 & 114701  \\ 
  \hline
 \end{tabular}
-\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficient, 8 threads, and 100 test tuples.}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 8 threads, linear code with relative distance 0.07, and 100 test tuples.}
 \label{table:benchmark-pc-2}
 \end{table}
 
@@ -203,20 +203,20 @@ According to lemma \ref{lemma:pc-soundness}, we can compute the soundness error 
  
  \multirow{3}{*}{2} & 100 & 1762 & 0.07 & 1.66  \\
   & 1000 & 1762 & 0.07 & 0.37  \\
-  & 100 & 1762 & 0.55 & 0.0003  \\
+  & 100 & 1762 & 0.55* & 0.0003  \\
  \hline
  
  \multirow{3}{*}{3} & 100 & 174  & 0.07 & 1.97 \\
  & 1000 & 174  & 0.07 & 1.76 \\
- & 100 & 174  & 0.55 & 0.01 \\
+ & 100 & 174  & 0.55* & 0.01 \\
  \hline
  
  \multirow{3}{*}{4} & 100 & 56   & 0.07 & 1.99  \\
   & 1000 & 56   & 0.07 & 1.98  \\
-  & 100 & 56   & 0.55 & 0.10  \\ 
+  & 100 & 56   & 0.55* & 0.10  \\ 
  \hline
 \end{tabular}
-\caption{Soundness error of polynomial commitment scheme}
+\caption{Soundness error of polynomial commitment scheme. (* represents an imaginary linear code with relative distance 0.55)}
 \label{table:benchmark-pc-3}
 \end{table}
 
