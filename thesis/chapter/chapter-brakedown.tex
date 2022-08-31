@@ -1,13 +1,36 @@
 \chapter{Brakedown Linear Code}
 
+We use the practical linear code presented in paper \cite{brakedown} to implement and benchmark our polynomial commitment schemes.
 
 \section{Notation}
 
-$\alpha$ and $\beta$ are parameters with no explicit meanings. $r$ denotes the ratio between the length of codeword and the length of input message. $\delta$ denotes the relevant distance.
+Let $\alpha$ and $\beta$ be parameters with no explicit meanings. $r$ denotes the ratio between the length of codeword and the length of input message. $\delta$ denotes the relative distance. $n$ is the length of encoded message. Let $q$ be a prime power and $\mathbb{F}_q$ be the field of size $q$. And for $p \in [0, 1]$, we denote the binary entropy function as $H(p) = -p\log_2(p) - (1 - p)\log_2(1-p)$. Let $\mathcal{M}_{n, m, d}$ be a distribution of matrices $M \in \mathbb{F}^{n \times m}$, where in each row $d$ distinct uniformly random elements are assigned uniformly random non-zero elements of $\mathbb{F}$.
 
-\section{Theoretical Limits for Relevant Distance}
+\section{Construction}
 
-In Brakedown paper \cite{brakedown}, there're a few explicit constrains for parameter $\alpha$, $\beta$ and $r$. And since binary entropy function used in the linear code is only well-defined between 0 and 1, there's also one more implicit constrain. The full list of constrains are as follows,
+The encoding function $\textbf{Enc}_n$ works as follows. First we generate a random sparse matrix $A \leftarrow \mathcal{M}_{n, \alpha n, c_n}$ for 
+$$
+    c_n = \Bigl \lceil \min \Bigl( \max (1.28 \beta n, \beta n + 4), \frac{1}{\beta \log_2 \frac{\alpha}{1.28 \beta}} \bigl( \frac{110}{n} + H(\beta) + \alpha H (\frac{1.28 \beta}{\alpha}) \bigr) \Bigr) \Bigr \rceil
+$$
+And compute $y = x \cdot A \in \mathbb{F}^{\alpha n}$. Then we apply \textbf{Enc} function recursively to y, let $z = \textbf{Enc}_{\alpha n}(y) \in \mathbb{F}^{\alpha r n}$. Finally, we generate a random sparse matrix $B \leftarrow \mathcal{M}_{\alpha r n, (r - 1 - r \alpha, d_n)}$ for
+$$
+    d_n = \Bigl \lceil \min \Bigl( \bigl( 2\beta + \frac{(r-1) + \frac{110}{n}}{\log_2 q} \bigr)n, \frac{r \alpha H(\frac{\beta}{r}) + \mu H(\frac{\nu}{\mu}) + \frac{110}{n}}{\alpha \beta \log_2 \frac{\mu}{\nu}} \Bigr) \Bigr \rceil
+$$
+$$
+    \mu = r - 1 - r \alpha
+$$
+$$
+    \nu = \beta + \alpha \beta + 0.03
+$$
+Let $v = z \cdot B \in \mathbb{F}^{(r - 1 - r\alpha)n}$ The resulting codeword is the concatenation of $x, z$ and $v$.
+$$
+    w = \textbf{Enc}(x) := \left( \begin{array}{c} x \\ z \\ v \end{array} \right) 
+    \in \mathbb{F}^{rn}
+$$
+
+\section{Theoretical Limits for Relative Distance}
+
+In Brakedown paper \cite{brakedown}, there are a few explicit constrains for parameter $\alpha$, $\beta$ and $r$. And since binary entropy function used in the linear code is only well-defined between 0 and 1, there is also one more implicit constrain. The full list of constrains are as follows,
 
 \begin{align}
 & 0 < \alpha < 1 \nonumber \\
@@ -47,4 +70,4 @@ To make sure $\alpha$ has a valid value, we have,
 & \frac{r(1 - \delta) - 1.03}{r(1 + \delta)} > 1 - 2\delta - \frac{1}{r}  \label{eq:bddl9} \\
 \end{align}
 
-Equation \ref{eq:bddl8} and equation \ref{eq:bddl9} make the maximum possible relevant distance $\delta$ to be around 0.12.
+Equation \ref{eq:bddl8} and equation \ref{eq:bddl9} make the maximum possible relative distance $\delta$ to be around 0.12.

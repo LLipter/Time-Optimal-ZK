@@ -36,7 +36,7 @@ Let $M_0 = u$ and $M_0^{\prime} = \text{Enc}_1(\text{Enc}_2(M_0)) \in \mathbb{F}
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $3$ rounds, with each round reducing the dimension by 1.
+The testing phase consists of $2$ rounds, with each round reducing the dimension by 1.
 
 In round 1, the verifier will send a random value $r_1 \in \mathbb{F}^m$ to the prover.
 The prover will compute a linear combination $M_1 \in \mathbb{F}^{m \times m}$ of the 3rd dimension of matrix $M_0$.
@@ -50,12 +50,7 @@ Namely, $M_2[i] = \sum_{k=1}^{m} r_2[k] \cdot M_1[i, k]$.
 Let $M_2^\prime = M_2 \in \mathbb{F}^{m}$.
 Then the prover sends $M_2^\prime$ to the verifier.
 
-In round 3, the verifier will send a random value $r_3 \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_3 \in \mathbb{F}$ of the first dimension of matrix $M_2$.
-Namely, $M_3 = \sum_{k=1}^{m} r_3[k] \cdot M_1[k]$. 
-Then the prover sends $M_3$ to the verifier.
-
-Then the verifier will perform a probabilistic check to make sure $M_0^\prime $, $ M_1^\prime$, $M_2^\prime$ and $M_3$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, j_3)$ from space $[N] \times [N] \times [N]$. 
+Then the verifier will perform a probabilistic check to make sure $M_0^\prime $, $ M_1^\prime$ and $M_2^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, j_3)$ from space $[N] \times [N] \times [N]$. 
 For each tuple $(j_1, j_2, j_3)$, let $M_1^\prime[j_1, *]$ denotes the $j_1$-th row in $M_1^\prime$.
 The verifier will check whether the following equation holds:
 
@@ -64,9 +59,6 @@ $$
 $$
 $$
     \text{Enc}(M_2^\prime[*])[j_1] \stackrel{?}{=} \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[j_1,k]
-$$
-$$
-    M_3[*] \stackrel{?}{=} \sum_{k=1}^m r_3[k] \cdot M_2^{\prime}[k]
 $$
 
 \textbf{Evaluation Phase.}
@@ -83,7 +75,7 @@ Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots 
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $t$ rounds, with each round reducing the number of dimensions by 1.
+The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
 
 In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
 The prover will compute a linear combination $M_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of the last dimension of matrix $M_{i-1}$.
@@ -95,13 +87,11 @@ M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - 
 $$
 Then the prover sends $M_i^\prime$ to the verifier.
 
-Note that in the last round, $M_t$ is degenerate to a single value in $\mathbb{F}$ and no encoding takes place.
-
 Then the verifier will perform a probabilistic check to make sure 
 $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
 are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\overbrace{[N] \times [N] \times \cdots \times [N]}^{t \text{ times}}$. 
 For each tuple $(j_1, j_2, \cdots, j_t)$,
-the verifier will check whether the following equation holds for every $i \in [t]$:
+the verifier will check whether the following equation holds for every $i \in [t-1]$:
 
 $$
     \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
@@ -124,7 +114,7 @@ The testing phase (proximity test) has perfect completeness.
 \label{lemma:pc-soundness}
 The testing phase (proximity test) has soundness error:
 $$
-    \epsilon(\Delta_\otimes) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
+    \epsilon(\Delta_\otimes, t, l) = \frac{d(d^t-1)}{4(d-1)|\mathbb{F}|} + (1 - \text{ min}\{\frac{\delta^t}{4}, \Delta_\otimes \})^l
 $$
 where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 \end{lemma}
@@ -135,12 +125,99 @@ where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 
 \subsection{Merkle Tree Commitment}
 
+
+A Merkle Tree is a data structure that allows one to commit to $l = 2^{d}$ messages by a single hash value $h$, such that revealing any bit of the message require $d+1$ hash values. A Merkle hash tree is presented by a binary tree of depth $d$ where $l$ messages elements $m_1, m_2, \cdots, m_l$ are assigned to the leaves of the tree. The values assigned to internal nodes are computed by hashing the value of its two child nodes. To reveal $m_i$, we need to reveal $m_i$ together with the values on the path from $m_i$ to the root. We denote the algorithm as follows:
+
+\begin{enumerate}
+    \item $h \leftarrow \textsc{Merkle.Commit}(m_1, m_2, \cdots, m_l)$
+    \item $(m_i, \pi_i) \leftarrow \textsc{Merkle.Open}(m, i)$
+    \item $\{\textsc{accept}, \textsc{reject}\} \leftarrow \textsc{Merkle.Verify}(\pi_i, m_i, h)$
+\end{enumerate}
+
 Coefficient matrices $M_0^\prime, M_1^\prime, \cdots, M_{t-1}^\prime$ sent by the prover may be replaced by a Merkle tree commitment to that matrix, and each query the verifier makes to a matrix is answered by the prover with Merkle tree authentication path for the answer.
 
-And since each time the verifier will query a strip of elements in a matrix (i.e. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$), it's possible to zip such a strip of elements into a single node in Merkle-tree's leaf level to decrease runtime complexity and communication complexity.
+And since each time the verifier will query a strip of elements in a matrix (i.e. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$), it is possible to zip such a strip of elements into a single node in Merkle-tree's leaf level to decrease runtime complexity and communication complexity.
 
 \subsection{Parallelism}
 
-Most of the computations for the commitment scheme can be done in parallel in a natural fashion. There's little data dependence among them. Therefore, it's possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
+Most of the computations for the commitment scheme can be done in parallel in a natural fashion. There is little data dependence among them. Therefore, it is possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
 
 
+\section{Benchmark}
+
+\subsection{Runtime}
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
+ \hline
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
+ \hline\hline
+ 2 & 1024   & 1762 & 41737  & 3057  & 1.66 & 1206579 \\
+ \hline
+ 3 & 101    & 174 & 99642  & 623  & 1.97 & 235621  \\
+ \hline
+ 4 & 32     & 56 & 153558  & 204  & 1.99 & 114701   \\
+ \hline
+\end{tabular}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 1 threads, linear code with relative distance 0.07, and 100 test tuples.}
+\label{table:benchmark-pc-1}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
+ \hline
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
+ \hline\hline
+ 2 & 1024   & 1762 & 10048 & 776 & 1.66 & 1206579  \\
+ \hline
+ 3 & 101    & 174 & 24314 & 165 & 1.97 & 235621 \\
+ \hline
+ 4 & 32     & 56 & 37961 & 63 & 1.99 & 114701  \\ 
+ \hline
+\end{tabular}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 8 threads, linear code with relative distance 0.07, and 100 test tuples.}
+\label{table:benchmark-pc-2}
+\end{table}
+
+We benckmark the above polynomial commitment scheme on a computer with
+Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-pc-1} and table \ref{table:benchmark-pc-2}.
+
+
+Running the polynomial commitment scheme with the same setting, using 8-threads-parallelism can provides approximately a 4x speedup.
+
+As the dimension increases, it is generally require more time to complete the commit phase for the prover. And less time is required to complete the verify phase for the verifier.
+
+\subsection{Soundness Error}
+
+According to lemma \ref{lemma:pc-soundness}, we can compute the soundness error summarized in the table \ref{table:benchmark-pc-3}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{5em} | m{5em} | m{5em}  | m{5em}|} 
+ \hline
+ Dimension & Number of Test Tuples & Code Length & Code Relative Distance & Soundness Error \\ [0.5ex] 
+ \hline\hline
+ 
+ \multirow{3}{*}{2} & 100 & 1762 & 0.07 & 1.66  \\
+  & 1000 & 1762 & 0.07 & 0.37  \\
+  & 100 & 1762 & 0.55* & 0.0003  \\
+ \hline
+ 
+ \multirow{3}{*}{3} & 100 & 174  & 0.07 & 1.97 \\
+ & 1000 & 174  & 0.07 & 1.76 \\
+ & 100 & 174  & 0.55* & 0.01 \\
+ \hline
+ 
+ \multirow{3}{*}{4} & 100 & 56   & 0.07 & 1.99  \\
+  & 1000 & 56   & 0.07 & 1.98  \\
+  & 100 & 56   & 0.55* & 0.10  \\ 
+ \hline
+\end{tabular}
+\caption{Soundness error of polynomial commitment scheme. (* represents an imaginary linear code with relative distance 0.55)}
+\label{table:benchmark-pc-3}
+\end{table}
+
+The theoretically computed soundness error for the setting used in the above benchmark experiment is large, even above 1. The soundness error can be decreased by either increasing the number of tested tuples or by increasing the relative distance of the underlying linear code. However, the soundness error is not sensitive to the number of tested tuples and the length of the code is usually quite limited. Therefore, using a linear code with large relative distance is the only promising solution here.

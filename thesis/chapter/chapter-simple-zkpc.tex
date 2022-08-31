@@ -11,12 +11,15 @@ Let
 $$
     M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0 \oplus PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
 $$
+$$
+    PAD_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
+$$
 where $\oplus$ denotes elements-wise tensor addition.
-Send $M_0^{\prime}$ to the verifier.
+Send $M_0^{\prime}$ and $PAD_0\prime$ to the verifier.
 
 \textbf{Testing Phase.}
 
-The testing phase consists of $t$ rounds, with each round reducing the number of dimensions by 1.
+The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
 
 In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
 The prover will compute a linear combination for $M_i, PAD_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of their last dimension.
@@ -31,23 +34,43 @@ Let
 $$
 M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i \oplus PAD_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
 $$
+$$
+PAD_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(PAD_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
+$$
 where $\oplus$ denotes element-wise addition.
 
-Then the prover sends $M_i^{\prime}$ to the verifier.
+Then the prover sends $M_i^{\prime}$ and $PAD_i^\prime$ to the verifier.
 
-Note that in the last round, $M_t$ is degenerate to a single value in $\mathbb{F}$ and no encoding takes place. Additionally, the prover will send $PAD_t$ to the verifier in the last round. 
 
 Then the verifier will perform a probabilistic check to make sure 
-$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t}^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. 
-For each sampled tuple $(j_1, j_2, \cdots, j_t)$, the verifier will check the following equation holds for every $i \in [t]$.
+$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t}^\prime, PAD_0^\prime$, $PAD_1^\prime$, $PAD_2^\prime, \cdots, PAD_{t}^\prime$ are consistent with each other.
+
+Formally speaking, in step 1, the verifier will sample $l_1$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. Denote this set of tuples as $L_1$.
+For each sampled tuple $(j_1, j_2, \cdots, j_t)$, the verifier will check the following equation holds for every $i \in [t-1]$.
 $$
     \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
 $$
-
+Then, in step 2, the verifier will sample another $l_2$ random tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$ with the restriction that $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
+For each sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$, the verifier will check the following equation holds for every $1 \le i \le t-2$.
+$$
+    \text{Enc}(PAD_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
+$$
 
 \textbf{Evaluation Phase.}
 
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistent checks passed, then the verifier outputs $M_{t}^{\prime} - PAD_t$ as $g(x)$.
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except for the following difference.
+
+\begin{itemize}
+    \item One additional round is required. There are $t$ rounds in total. In round $t$, $M_t^\prime$ and $ PAD_t^\prime$ are degenerated to a single value.
+
+    \item In round $i$, the random value $r_i$ is replaced by $q_i$.
+    
+    \item For every sampled tuple $(j_1, j_2, \cdots, j_t)$ in step 1, the following restriction is required, $j_k \neq j_k^\prime$ for $\forall (j_1^\prime, j_2^\prime, \cdots, j_t^\prime) \in L_2$.
+
+    \item For every sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ in step 2, the following restriction is required, $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$.
+\end{itemize}
+
+If all consistent checks passed, then the verifier outputs $M_{t}^{\prime} - PAD_t^\prime$ as $g(x)$.
 
 \section{Formal Description}
 
@@ -70,21 +93,24 @@ Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{E
 
 In this section, we describe the testing phase in the above protocol formally in terms of a IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
 
-The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C, m, N, t)$ and witness $\mathbb{W} = (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t}^{\prime})$. The verifier $\textbf{V}$ takes as input the instance $\mathbb{X}$.
+The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C, m, N, t)$ and witness $\mathbb{W} = (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\prime}, PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime})$. The verifier $\textbf{V}$ takes as input the instance $\mathbb{X}$.
 
 \begin{enumerate}
     \item \textit{Interactive phase}. 
     
-    In the beginning, $\textbf{P}$ sends the proof message $M_0^{\prime}$ computed as:
+    In the beginning, $\textbf{P}$ sends the proof message $M_0^{\prime}$ and $PAD_0^{\prime}$ computed as:
 $$
     M_0 = u \in \mathbb{F}^{m^t}
 $$
 $$
     M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0 \oplus PAD_0) \in \mathbb{F}^{N^{t-1} \cdot m}
 $$
+$$
+    PAD_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(PAD_0) \in \mathbb{F}^{N^{t-1} \cdot m}
+$$
     Note that $PAD_0$ is a matrix with dimension identical to $M_0$ filled with random elements from $\mathbb{F}$. And $\oplus$ denotes elements-wise matrix addition.
     
-    For each round $i \in [t]$:
+    For each round $i \in [t-1]$:
     \begin{itemize}
         \item $\textbf{V}$ sends random challenge message $r_i \in \mathbb{F}^m$.
         \item $\textbf{P}$ sends the proof message $M_i^{\prime}$ computed as:
@@ -97,21 +123,39 @@ $$
 $$
     M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i \oplus PAD_I) \in \mathbb{F}^{N^{t-i-1} \cdot m}
 $$
-
-    Note that in the last round, $M_t$ is degenerate to a single value in $\mathbb{F}$ and no encoding takes place.
+$$
+    PAD_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(PAD_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
+$$
 
     \end{itemize}
-    \item \textit{Query phase}. The verifier $\textbf{V}$ samples $l$ tuples of the form $(j_1, \cdots, j_t)$ in space $[N]^t$.
+    \item \textit{Query phase}. 
+    
+    In step 1, the verifier $\textbf{V}$ samples $l_1$ tuples of the form $(j_1, \cdots, j_t)$ in space $[N]^t$. Denote this set of tuples as $L_1$.
     The verifier $\textbf{V}$ proceeds as follows for each sampled tuple.
     
-    For each $0 \le i \le t$, 
-    the verifier $\textbf{V}$ will query $M_{i}^{\prime}$ at $(j_1, \cdots, j_{t-i-1}, j_k)$ for each $i_k \in [m]$. 
+    For each $0 \le i \le t-1$, 
+    the verifier $\textbf{V}$ will query $M_{i}^{\prime}$ at $(j_1, \cdots, j_{t-i-1}, j_k)$ for each $j_k \in [m]$. 
     
-    Then the verifier $\textbf{V}$ will check the following equation for $i \in [t]$:
+    Then the verifier $\textbf{V}$ will check the following equation for $i \in [t-1]$:
 \begin{equation}
 \label{eq:szkpctc_eq}
     \text{Enc}_{t-i}(M_i^\prime)[i_1, \cdots, i_{t-i}] \stackrel{?}{=} \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) [i_1, \cdots, i_{t-i}]
 \end{equation}
+
+    In step 2, the verifier $\textbf{V}$ samples $l_2$ tuples of the form $(j_1^\prime, \cdots, j_t^\prime)$ in space $[N]^t$ with the restriction that $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
+    The verifier $\textbf{V}$ proceeds as follows for each sampled tuple.
+    
+    For each $0 \le i \le t-1$, 
+    the verifier $\textbf{V}$ will query $PAD_{i}^{\prime}$ at $(j_1^\prime, \cdots, j_{t-i-1}^\prime, j_k^\prime)$ for each $j_k^\prime \in [m]$. 
+    
+    Then the verifier $\textbf{V}$ will check the following equation for $i \in [t-2]$:
+\begin{equation}
+\label{eq:szkpctc_eq2}
+    \text{Enc}_{t-i}(PAD_i^\prime)[i_1, \cdots, i_{t-i}] \stackrel{?}{=} \textbf{Fold}_{t-i+1}(PAD_{i-1}^\prime, r_i) [i_1, \cdots, i_{t-i}]
+\end{equation}
+
+
+
 
 \end{enumerate}
 
@@ -124,7 +168,7 @@ IOPP = ($\textbf{P}$, $\textbf{V}$) has \textbf{perfect completeness}.
 
 \end{lemma}
 \begin{proof}
-We begin by noting that the queries made by $\textbf{V}$ suffice to perform the checks in the query phase (see equation \ref{eq:szkpctc_eq}).
+We begin by noting that the queries made by $\textbf{V}$ suffice to perform the checks in the query phase (see equation \ref{eq:szkpctc_eq} and \ref{eq:szkpctc_eq2}).
 
 Next, observe that the verifier $\textbf{V}$ checks the following equation:
 $$
@@ -143,7 +187,7 @@ And the right side of this equation is equivalent to:
 \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) 
 &= \textbf{Fold}_{t-i+1}(\textbf{Enc}_{1, \cdots, t- i}(M_{i-1} \oplus PAD_{i-1}), r_i) \label{lb:exp2} \\
 \end{align}
-Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other.
+Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. And similar argument applied to the equation \ref{eq:szkpctc_eq2}.
 The equations checked by the verifier $\textbf{V}$ holds.
 
 \end{proof}
@@ -159,47 +203,20 @@ The equations checked by the verifier $\textbf{V}$ holds.
 
 IOPP = ($\textbf{P}$, $\textbf{V}$) has soundness error at most:
 $$
-    \epsilon^\prime(\Delta_\otimes) = \epsilon(\Delta_\otimes)
+    \epsilon^\prime(\Delta_\otimes, t, l_1, l_2) = \epsilon(\Delta_\otimes, t, l_1) + \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}
 $$
 
 \end{lemma}
 \begin{proof}
 
-We prove this lemma by arguing that the soundness (lemma \ref{lemma:pc-soundness}) of original proximity test implies the soundness of the simple zero-knowledge proximity test. And we will prove this argument by doing a reduction formally described in figure \ref{img:red-soundness}.
+Equivalently speaking, this protocol performs two proximity test in parallel. One on $M_i^\prime$ tensor and the other on $PAD_i$ tensor. 
 
-\begin{figure}[ht]
-\centering
-\resizebox{\textwidth}{!}{
-\input{graph/soundness-reduction}
-}
-\caption{Reduction from Simple ZK Proximity Test to Original Proximity Test}
-\label{img:red-soundness}
-\end{figure}
+The soundness error introduced by the first proximity test is $\epsilon(\Delta_\otimes, t, l_1)$. 
 
-
-For the simple zero-knowledge proximity test, suppose we have an malicious prover algorithm $\tilde{\textbf{P}}_{ZK}$ that can pass the proximity test with probability $p$, we will run it as a black box and construct another malicious prover algorithm $\tilde{\textbf{P}}$ that can pass the original proximity test with the same probability $p$.
-
-\begin{itemize}
-    \item $\tilde{\textbf{P}}$ will receive an input $M$ representing the tensor. $\tilde{\textbf{P}}$ pass $M$ to $\tilde{\textbf{P}}_{ZK}$.
-    
-    \item $\tilde{\textbf{P}}_{ZK}$ sends out $M_0^{\prime}$ as the commitment to the underlying tensor. 
-    $\tilde{\textbf{P}}$ sends $M_0^\prime$ to the verifier \textbf{V}  as the commitment to the underlying tensor.
-    
-    \item For $i \in [t]$, verifier \textbf{V} will send the random linear combination coefficients $r_i$ to $\tilde{\textbf{P}}$. $\tilde{\textbf{P}}$ simply forward $r_i$ to $\tilde{\textbf{P}}_{ZK}$. $\tilde{\textbf{P}}_{ZK}$ will output $M_i^\prime$. $\tilde{\textbf{P}}$ then send $M_i^\prime$ to the verifier \textbf{V}. 
-    
-    \item If verifier \textbf{V} query $M_i^\prime$ at index $I$ for $0 \le i \le t$, $\tilde{\textbf{P}}$ forward the query to $\tilde{\textbf{P}}_{ZK}$ and forward the reply back to the verifier.
-\end{itemize}
-
-During the query phase, the original verifier \textbf{V} and the zero-knowledge verifier will check the same equation:
-$$
-    \text{Enc}_{t-i}(M_i^\prime) = \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i)
-$$
-As long as malicious prover $\tilde{\textbf{P}}_{ZK}$ can pass the check in zero-knowledge proximity test, our constructed prover $\tilde{\textbf{P}}$ can pass the check in original proximity test.
-
-Therefore, the soundness error of the simple zero-knowledge protocol is at most
-$$
-    \epsilon^\prime(\Delta_\otimes) = \epsilon(\Delta_\otimes) 
-$$
+The soundness error introduced by the second proximity test is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$. 
+In a complete proximity test, we use $E_1$ denote the event that the last round of test is passed. And we use $E_2$ denote the event that all other tests are passed.
+The soundness error is the probability the verifier is convinced by a malicious input.
+The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_1$ and event $E_2$ occurs. Therefore, $P_t = P_{E_1} \cdot P_{E_2}$. Note that $P_{E_1}$ is actually the soundness error when $t=2$, namely, $P_{E_1} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_2}$ is the soundness error introduced by the second proximity test here. Therefore, $P_{E_2} = \frac{P_{t}}{P_{E_1}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
 \end{proof}
 
@@ -222,22 +239,46 @@ IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{perfect zero-knowledge}
 
 For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier randomness $\rho$, we can construct the polynomial-time simulator algorithm $\textbf{S}$ as follows:
 
-\begin{itemize}
-    \item Query $M_0^{\prime\prime}$ or internally access $PAD_0$ at index $I$:
-    
-    If index I has never been accessed before, generate a random element $x$ from field $\mathbb{F}$. Store this value $x$ in a internal dictionary and return it.
-    
-    Otherwise lookup index $I$ in the internal dictionary and return the stored value.
-    
-    \item Query $M_i^{\prime\prime}$ and $PAD_i$ at index $I$ for $i \in [t-1]$:
 
-    If index I has never been accessed before, recursively access the corresponding values in $M_{i-1}^{\prime\prime}$ and $PAD_{i-1}$ and take the linear combination of them as $x$.
-    Store this value $x$ in a internal dictionary and return it.
+\begin{itemize}
+    \item Generate matrix $M_0$ and $PAD_0$ randomly from field $\mathbb{F}$. Then compute $M_0^\prime$ and $PAD_0^\prime$ as follows:
+    $$
+        M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0) \in \mathbb{F}^{N^{t-1} \cdot m}
+    $$
+    $$
+        PAD_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(PAD_0) \in \mathbb{F}^{N^{t-1} \cdot m}
+    $$
+    \item Then compute $M_i^{\prime}$ and $PAD_i^\prime$ for $i \in [t-1]$:
+    $$
+        PAD_i = \textbf{Fold}_{t-i+1}(PAD_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
+    $$
+    $$
+        M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i) \in \mathbb{F}^{m^{t-i}}
+    $$
+    $$
+        M_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(M_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
+    $$
+    $$
+        PAD_i^\prime =  \textbf{Enc}_{1, \cdots, t- i - 1}(PAD_i) \in \mathbb{F}^{N^{t-i-1} \cdot m}
+    $$
+\end{itemize}
+
+If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (i_1, i_2, \cdots, i_t)$:
+
+\begin{itemize}
+    \item If $i_k \le m$ for $\forall k \in [t]$,
     
-    Otherwise lookup index $I$ in the internal dictionary and return the stored value.    
+    The verifier will see a uniformly distributed random element from $\mathbb{F}$ both in simulator world and in real world.
+    
+    \item Otherwise,
+    
+    The verifier will see a random variable that is the result of encoding a number of random element from $\mathbb{F}$ both in simulator world and in real world.
+    
     
 \end{itemize}
 
-Both the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are uniformly distributed. They are identically distributed.
+
+
+The random variables in $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and in $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are indistinguishable to each other. They are identically distributed.
 
 \end{proof}

@@ -1,9 +1,11 @@
 \chapter{Zero-Knowledge Linear Code}
 
+In this chapter, we use the construction presented in paper \cite{10.1145/2554797.2554815} to add zero-knowledge property to a normal linear code.
+
 % http://www.cs.cmu.edu/~odonnell/toolkit13/lecture12.pdf
 \section{Random d-regular Bipartite Graph}
 \label{sec:randomgraph}
-To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it's possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
+First, we present a algorithm to generate a random d-regular bipartite graph. To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it is possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
 
 \RestyleAlgo{ruled}
 %% This is needed if you want to add comments in
@@ -44,7 +46,7 @@ For any $0 < \epsilon < 1$, there exist a degree $d$ such that a random $d$-regu
 
 \begin{proof}
 
-Negating the statement, we can say that the randomly generated graph $G$ doesn't satisfy the expansion property if and only if $\exists S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| \ge  \epsilon n$ such that there's no edge connecting between set $S$ and set $M$. We bound the probability that this negating statement is true as follows:
+Negating the statement, we can say that the randomly generated graph $G$ does not satisfy the expansion property if and only if $\exists S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| \ge  \epsilon n$ such that there is no edge connecting between set $S$ and set $M$. We bound the probability that this negating statement is true as follows:
 
 For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ and $b$ are not connected in the random graph $G$ is:
 
@@ -83,7 +85,7 @@ P_4 &= \sum_{s=\epsilon n}^{n} \binom{n}{s} P_3 \nonumber \\
     &= (e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n \nonumber \\
 \end{align}
 
-$P_4$ is the probability that a randomly generated graph $G$ doesn't satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n < p$.
+$P_4$ is the probability that a randomly generated graph $G$ does not satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{\ln 2 + H(\epsilon) \ln 2 - d \epsilon^2})^n < p$.
 By rearranging the above equation, we have $ d > \frac{\ln 2 + H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $370.86$.
@@ -105,8 +107,8 @@ For any $0 < \epsilon < 1$, there exist a degree $d$ such that a random $d$-regu
 
 \begin{proof}
 
-We use the same trick as in lemma \ref{lemma:randomgraph}. Negating the statement, we can say that the randomly generated graph $G$ doesn't satisfy the expansion property if and only if 
-for every $ S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| > \epsilon n$ such that there's no edge connecting between set $S$ and set $M$ with low probability. 
+We use the same trick as in lemma \ref{lemma:randomgraph}. Negating the statement, we can say that the randomly generated graph $G$ does not satisfy the expansion property if and only if 
+for every $ S \subseteq L$, $|S| \ge \epsilon n$, $\exists M \subseteq R$, $|M| > \epsilon n$ such that there is no edge connecting between set $S$ and set $M$ with low probability. 
 We bound the probability true as follows:
 
 For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ and $b$ are not connected in the random graph $G$ is:
@@ -130,7 +132,7 @@ P_3 &= \binom{n}{\epsilon n} (P_2)^{\epsilon n} \nonumber \\
     &= (e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} \nonumber \\
 \end{align}
 
-$P_3$ is the probability that a set $S$ in a randomly generated graph doesn't satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} < p$.
+$P_3$ is the probability that a set $S$ in a randomly generated graph does not satisfy the expansion property. Suppose we want the failing probability be smaller than $p$, let $(e^{ H(\epsilon)\ln 2 - d \epsilon^2})^{n} < p$.
 By rearranging the above equation, we have $ d > \frac{H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $93.60$.
@@ -141,6 +143,10 @@ Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} prod
 
 \section{Reversed Linear Code}
 
+According to Tellegen’s principle \cite{Tellegen}, it is generally possible to transpose a linear algorithm that performs a matrix-vector product, producing an algorithm that computes the transposed matrix-vector product.
+
+In this section, we transpose the Brakedown linear code to get a reverse encoding algorithm. Figure \ref{fig:lc} is the construction of Brakedown linear code. And figure \ref{fig:lc-rev} is the reversed construction.
+
 
 \begin{figure}[h]
 \centering
@@ -149,9 +155,69 @@ Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} prod
 \label{fig:lc}
 \end{figure}
 
+
+
 \begin{figure}[h]
 \centering
 \input{graph/lc-rev.tikz}
 \caption{Reversed Linear Code}
 \label{fig:lc-rev}
 \end{figure}
+
+
+\section{Construction}
+
+This construction transform an existing linear to another linear code. The linear code constructed will have better relative distance and is equipped with zero-knowledge property.
+
+\subsection{Redistribution}
+
+Given the normal encoding function \textbf{Enc()} and message $x$, we first compute the codeword $y = \textbf{Enc}(x) \in \mathbb{F}^n$. Then a random expander graph $G = (L, R, E)$ with degree $\Delta$ satisfying lemma \ref{lemma:randomgraph} will be generated. We will redistribute the symbols in $y$ according to $G$. More concretely, for everty $i \in [n]$ and $j \in [\Delta]$, let $\gamma(i, j)$ be the index of the $j$-th vertex in $R$. The $(i - 1) \cdot \Delta + j$-th entry of $z$ is defined to be the $y_{\gamma(i, j)}$.
+
+\subsection{Randomization}
+
+Given $z \in \mathbb{F}^{n \cdot \Delta}$, we generate a random block diagonal matrix $H$ with $n$ blocks each of size $\Delta \cdot \Delta$. We compute $v = H \cdot z \in \mathbb{F}^{n \cdot \Delta}$.
+
+\subsection{Reverse Encoding}
+
+Given the reverse encoding function $\textbf{Enc}^{-1}$, the final output is $w = \textbf{Enc}^{-1}(v)$.
+
+\section{Performance}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{graph/degree.pdf}
+    \caption{Runtime of Redistribution and Randomization Step}
+    \label{fig:degree}
+\end{figure}
+
+
+We have implement the above construction. We measure the runtime required for the redistribution step and the randomization step, whose execution is irrelevant to the actual underlying linear code.
+
+
+According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is every sensitive to the relative distance of underlying linear code. The larger the relative distance, the smaller the degree. And larger degree will cause the algorithm more time consuming.
+
+Figure \ref{fig:degree} presents the relation between relative distance and runtime. As relative distance approaches 0.1, the runtime increases dramatically. And even for larger relative distance, the construction is still significant slower than the original linear code, making this construction unacceptable in practice.
+
+\section{Improvement}
+
+The performance of our zero-knowledge linear code construction suffers from the degree of underlying random expander graph. Recently, we notice a idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
+
+We can prove a graph is not a expander graph by providing one counter example. The densest-subgraph algorihtm used by this detection algorithm can help us to find the counter example efficiently.
+Basically, if the graph is not a good expander graph, the detection algorithm in \cite{orion} can identify this situation with some probability $p$ using a random input $r$. And if the graph is a good expander graph, the detection algorithm will not falsely identify it (no false positive). Then we can run this detection algorithm $\lambda$ times with different random inputs and amplify the detection probability to $1 - (1 - p)^\lambda$. Additionally, if we find the graph is not a good expander graph, then we can simply discard it and generate a new random graph.
+
+
+And if we have a efficient detection algorithm like this, we can randomly generate the expander graph with a much smaller degree $d$ and run detection algorithm on it. Depending on the output of detection algorithm, we can either be convinced that it is a good expander graph or we can re-run the generation algorithm one more time. The redistribution step in our construction will be much more efficient with such a small degree expander graph.
+
+
+\begin{definition}
+\label{definition:randomgraph2}
+
+Let $\delta > 0$ and $0 < \epsilon < 1$ be a constant. Let $G=(L, R, E)$ be a $d$-regular bipartite graph with $|L| = n$. Graph $G$ is a expander graph if the following expansion property is satisfied:
+
+    \begin{itemize}
+        \item Expansion: For every set $X \subset L$ with $|X| \le \frac{\delta n}{d}$, if $Y$ is the set of neighbors of $X$ in $G$, then $|Y| \ge (1 - \epsilon) d |X|$.
+    \end{itemize}
+
+\end{definition}
+
+However, due to the difference in expander graph definition, it is fundamentally not possible to reuse this densest-subgraph based detection algorithm in our project to imporve efficiency. Definition \ref{definition:randomgraph2} is the expander graph used in \cite{orion} and lemma \ref{lemma:randomgraph} is the expander graph used in our project. The key difference is their expansion property. Informally speaking, definition \ref{definition:randomgraph2} needs the graph has good expansion property when we choose a small subset of vertices. And lemma \ref{lemma:randomgraph} needs the graph has good expansion property when we choose a large subset of vertices. The counter example found by the densest-subgraph algorithm may have a small subset of vertices. And this is enough to be a good counter example according to definition \ref{definition:randomgraph2}, but not enough according to lemma \ref{lemma:randomgraph}.
