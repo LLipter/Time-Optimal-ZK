@@ -65,7 +65,7 @@ where
     H
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             if i < m {
                 *x = array1[i];
             }else if i < 2 * m {
@@ -155,13 +155,13 @@ where
 
 
     // t: m
-    let mut t = Array::<F, _>::zeros((m));
+    let mut t = Array::<F, _>::zeros(m);
     t.par_iter_mut().for_each(|x| {
         let mut rng = rand::thread_rng();
         *x = F::random(&mut rng);
     });
 
-    let mut v2 = Array::<F, _>::zeros((m));
+    let mut v2 = Array::<F, _>::zeros(m);
     v2
         .axis_iter_mut(Axis(0))
         .into_par_iter()
@@ -172,7 +172,7 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
-    let mut v1 = Array::<F, _>::zeros((m));
+    let mut v1 = Array::<F, _>::zeros(m);
     v1
         .axis_iter_mut(Axis(0))
         .into_par_iter()
@@ -183,7 +183,7 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
-    let mut v0 = Array::<F, _>::zeros((m));
+    let mut v0 = Array::<F, _>::zeros(m);
     v0
         .axis_iter_mut(Axis(0))
         .into_par_iter()
@@ -197,9 +197,9 @@ where
     
 
     // At: n
-    let mut At = A.dot(&t);
+    let At = A.dot(&t);
 
-    let mut w2 = Array::<F, _>::zeros((n));
+    let mut w2 = Array::<F, _>::zeros(n);
     w2
         .axis_iter_mut(Axis(0))
         .into_par_iter()
@@ -210,7 +210,7 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
-    let mut w1 = Array::<F, _>::zeros((n));
+    let mut w1 = Array::<F, _>::zeros(n);
     w1
         .axis_iter_mut(Axis(0))
         .into_par_iter()
@@ -221,7 +221,7 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
-    let mut w0 = Array::<F, _>::zeros((n));
+    let mut w0 = Array::<F, _>::zeros(n);
     w0
         .axis_iter_mut(Axis(0))
         .into_par_iter()
@@ -235,9 +235,9 @@ where
         });
 
     // r0, r1, r2: lambda
-    let mut r0 = Array::<F, _>::zeros((lambda));
-    let mut r1 = Array::<F, _>::zeros((lambda));
-    let mut r2 = Array::<F, _>::zeros((lambda));
+    let mut r0 = Array::<F, _>::zeros(lambda);
+    let mut r1 = Array::<F, _>::zeros(lambda);
+    let mut r2 = Array::<F, _>::zeros(lambda);
     r0.par_iter_mut().for_each(|x| {
         let mut rng = rand::thread_rng();
         *x = F::random(&mut rng);
@@ -259,7 +259,7 @@ where
     
     let mut H2 = Vec::<F>::new();
     H2.resize(code_len, zero);
-    let mut all_zeros = Array::<F, _>::zeros((m));
+    let all_zeros = Array::<F, _>::zeros(m);
     fill_H_array::<F>(
         &mut H2, n, m, lambda, &all_zeros, &v2, &w2, &r2
     );
@@ -294,7 +294,7 @@ where
     fx
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = t[i].mul(X).add(s[i]);
         });
     let mut fx_copy = Vec::<F>::new();
@@ -302,7 +302,7 @@ where
     fx_copy
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = t[i].mul(X).add(s[i]);
         });
 
@@ -312,7 +312,7 @@ where
     rx
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = r2[i].mul(X).mul(X).add(
                 r1[i].mul(X)
             ).add(
@@ -348,7 +348,7 @@ where
     dx
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = u[i].sub(Afx[i]);
         });
 
@@ -358,7 +358,7 @@ where
     fxx
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = fx[i].mul(
                 fx[i].sub(one)
             ).mul(
@@ -374,7 +374,7 @@ where
     dxx
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = dx[i].mul(
                 dx[i].sub(one)
             ).mul(
@@ -404,7 +404,7 @@ where
     Hxx
         .par_iter_mut()
         .enumerate()
-        .for_each(|(i, mut x)|{
+        .for_each(|(i, x)|{
             *x = H2[i].mul(X).mul(X).add(
                 H1[i].mul(X)
             ).add(
