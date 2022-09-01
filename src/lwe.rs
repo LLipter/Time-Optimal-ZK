@@ -38,6 +38,35 @@ where
     
 }
 
+pub fn fill_H_array<F>(
+    H: &mut Vec::<F>,
+    n: usize,
+    m: usize,
+    lambda: usize,
+    array1: &Array<F, Dim<[usize; 1]>>,
+    array2: &Array<F, Dim<[usize; 1]>>,
+    array3: &Array<F, Dim<[usize; 1]>>,
+    array4: &Array<F, Dim<[usize; 1]>>,
+)
+where
+    F: PrimeField + Num + MulAcc,
+{
+    H
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            if i < m {
+                *x = array1[i];
+            }else if i < 2 * m {
+                *x = array2[i-m];
+            }else if i < 2 * m + n {
+                *x = array3[i-2*m];
+            }else if i < 2 * m + n + lambda {
+                *x = array4[i-2*m-n];
+            }
+        });
+}
+
 
 pub fn ternary_lwe<F, C>(
     n: usize,
@@ -194,54 +223,22 @@ where
     
     let mut H2 = Vec::<F>::new();
     H2.resize(code_len, zero);
-    H2
-        .par_iter_mut()
-        .enumerate()
-        .for_each(|(i, mut x)|{
-            if i < m {
-                *x = zero;
-            }else if i < 2 * m {
-                *x = v2[i-m];
-            }else if i < 2 * m + n {
-                *x = w2[i-2*m];
-            }else if i < 2 * m + n + lambda {
-                *x = r2[i-2*m-n];
-            }
-        });
+    let mut all_zeros = Array::<F, _>::zeros((m));
+    fill_H_array::<F>(
+        &mut H2, n, m, lambda, &all_zeros, &v2, &w2, &r2
+    );
 
     let mut H1 = Vec::<F>::new();
     H1.resize(code_len, zero);
-    H1
-        .par_iter_mut()
-        .enumerate()
-        .for_each(|(i, mut x)|{
-            if i < m {
-                *x = t[i];
-            }else if i < 2 * m {
-                *x = v1[i-m];
-            }else if i < 2 * m + n {
-                *x = w1[i-2*m];
-            }else if i < 2 * m + n + lambda {
-                *x = r1[i-2*m-n];
-            }
-        });
-
+    fill_H_array::<F>(
+        &mut H1, n, m, lambda, &t, &v1, &w1, &r1
+    );
+        
     let mut H0 = Vec::<F>::new();
     H0.resize(code_len, zero);
-    H0
-        .par_iter_mut()
-        .enumerate()
-        .for_each(|(i, mut x)|{
-            if i < m {
-                *x = s[i];
-            }else if i < 2 * m {
-                *x = v0[i-m];
-            }else if i < 2 * m + n {
-                *x = w0[i-2*m];
-            }else if i < 2 * m + n + lambda {
-                *x = r0[i-2*m-n];
-            }
-        });
+    fill_H_array::<F>(
+        &mut H0, n, m, lambda, &s, &v0, &w0, &r0
+    );
     
     // encoding
     encode(&mut H2, &precodes, &postcodes);
