@@ -2,10 +2,15 @@ use ff::Field;
 use ff::PrimeField;
 use ndarray::Array;
 use ndarray::Dim;
+use ndarray::Axis;
 use ndarray::parallel::prelude::*;
 use num_traits::Num;
 use sprs::MulAcc;
 use rand::Rng;
+use crate::codespec::CodeSpecification;
+use crate::codegen::generate;
+use crate::encode::codeword_length;
+use crate::encode::encode;
 
 
 pub fn generate_ternary_vector<F>(
@@ -34,14 +39,21 @@ where
 }
 
 
-pub fn ternary_lwe<F>(
+pub fn ternary_lwe<F, C>(
     n: usize,
     m: usize,
     lambda: usize,
+    seed: u64,
 )
 where
     F: PrimeField + Num + MulAcc,
+    C: CodeSpecification,
 {
+    let zero = <F as Field>::zero();
+    let one = <F as Field>::one();
+    let two = one.add(one);
+    let three = two.add(one);
+
     // A: n * m
     let mut A = Array::<F, _>::zeros((n, m));
     A.par_iter_mut().for_each(|x| {
@@ -56,12 +68,15 @@ where
 
     // u: n
     let mut u = A.dot(&s);
-    for i in 0..n {
-        u[i] = u[i].add(e[i]);
-    }
-    // u.par_iter_mut().zip(e.par_iter_mut()).for_each(|(x, y)| {
-    //     *x = (*x).add(*y);
-    // });
+    u
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = data.add(e[i]);
+            *x.first_mut().unwrap() = *data;
+        });
 
 
     // t: m
@@ -72,54 +87,87 @@ where
     });
 
     let mut v2 = Array::<F, _>::zeros((m));
-    for i in 0..m {
-        v2[i] = t[i].mul(t[i]).mul(t[i]);
-    }
+    v2
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = t[i].mul(t[i]).mul(t[i]);
+            *x.first_mut().unwrap() = *data;
+        });
 
-    let two = <F as Field>::one().add(<F as Field>::one());
     let mut v1 = Array::<F, _>::zeros((m));
-    for i in 0..m {
-        v1[i] = two.mul(s[i]).sub(<F as Field>::one()).mul(t[i]);
-        v1[i] = v1[i].add(
-            t[i].mul(t[i]).mul(
-                s[i].add(<F as Field>::one())
-            )
-        );
-    }
+    v1
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = two.mul(s[i]).sub(one).mul(t[i]);
+            *data = data.add(
+                t[i].mul(t[i]).mul(
+                    s[i].add(one)
+                )
+            );
+            *x.first_mut().unwrap() = *data;
+        });
 
     let mut v0 = Array::<F, _>::zeros((m));
-    for i in 0..m {
-        v0[i] = t[i].mul(s[i]).mul(
-            s[i].sub(<F as Field>::one())
-        );
-        v0[i] = v0[i].add(
-            two.mul(s[i]).sub(<F as Field>::one()).mul(
-                s[i].add(<F as Field>::one())
-            )
-        );
-    }
+    v0
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = s[i].sub(one).mul(s[i]).mul(t[i]);
+            *data = data.add(
+                two.mul(s[i]).sub(one).mul(
+                    s[i].add(one)
+                )
+            );
+            *x.first_mut().unwrap() = *data;
+        });
+
     
 
     // At: n
     let mut At = A.dot(&t);
 
-    let mut w2 = Array::<F, _>::zeros((m));
-    for i in 0..n {
-        w2[i] = <F as Field>::zero().sub(At[i].mul(At[i]).mul(At[i]));
-    }
+    let mut w2 = Array::<F, _>::zeros((n));
+    w2
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = zero.sub(At[i].mul(At[i]).mul(At[i]));
+            *x.first_mut().unwrap() = *data;
+        });
 
-    let three = <F as Field>::one().add(<F as Field>::one()).add(<F as Field>::one());
-    let mut w1 = Array::<F, _>::zeros((m));
-    for i in 0..n {
-        w1[i] = three.mul(e[i]).mul(At[i]).mul(At[i]);
-    }
+    let mut w1 = Array::<F, _>::zeros((n));
+    w1
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = three.mul(e[i]).mul(At[i]).mul(At[i]);
+            *x.first_mut().unwrap() = *data;
+        });
 
-    let mut w0 = Array::<F, _>::zeros((m));
-    for i in 0..n {
-        w0[i] = <F as Field>::one().sub(
-            three.mul(e[i]).mul(e[i])
-        ).mul(At[i]);
-    }
+    let mut w0 = Array::<F, _>::zeros((n));
+    w0
+        .axis_iter_mut(Axis(0))
+        .into_par_iter()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            let data = x.first_mut().unwrap();
+            *data = one.sub(
+                three.mul(e[i]).mul(e[i])
+            ).mul(At[i]);
+            *x.first_mut().unwrap() = *data;
+        });
 
     // r0, r1, r2: lambda
     let mut r0 = Array::<F, _>::zeros((lambda));
@@ -137,4 +185,67 @@ where
         let mut rng = rand::thread_rng();
         *x = F::random(&mut rng);
     });
+
+
+    // generate codes
+    let msg_len: usize = 2 * m + n + lambda;
+    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
+    let code_len = codeword_length::<F>(&precodes, &postcodes);
+    
+    let mut H2 = Vec::<F>::new();
+    H2.resize(code_len, zero);
+    H2
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            if i < m {
+                *x = zero;
+            }else if i < 2 * m {
+                *x = v2[i-m];
+            }else if i < 2 * m + n {
+                *x = w2[i-2*m];
+            }else if i < 2 * m + n + lambda {
+                *x = r2[i-2*m-n];
+            }
+        });
+
+    let mut H1 = Vec::<F>::new();
+    H1.resize(code_len, zero);
+    H1
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            if i < m {
+                *x = t[i];
+            }else if i < 2 * m {
+                *x = v1[i-m];
+            }else if i < 2 * m + n {
+                *x = w1[i-2*m];
+            }else if i < 2 * m + n + lambda {
+                *x = r1[i-2*m-n];
+            }
+        });
+
+    let mut H0 = Vec::<F>::new();
+    H0.resize(code_len, zero);
+    H0
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            if i < m {
+                *x = s[i];
+            }else if i < 2 * m {
+                *x = v0[i-m];
+            }else if i < 2 * m + n {
+                *x = w0[i-2*m];
+            }else if i < 2 * m + n + lambda {
+                *x = r0[i-2*m-n];
+            }
+        });
+    
+    // encoding
+    encode(&mut H2, &precodes, &postcodes);
+    encode(&mut H1, &precodes, &postcodes);
+    encode(&mut H0, &precodes, &postcodes);
+
 }
