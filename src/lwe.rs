@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+use std::sync::RwLock;
+use digest::Digest;
+use digest::Output;
 use ff::Field;
 use ff::PrimeField;
 use ndarray::Array;
@@ -11,6 +15,9 @@ use crate::codespec::CodeSpecification;
 use crate::codegen::generate;
 use crate::encode::codeword_length;
 use crate::encode::encode;
+use crate::helper::next_pow_2;
+use crate::merkle::build_merkle_tree;
+use crate::merkle::check_merkle_path;
 
 
 pub fn generate_ternary_vector<F>(
@@ -51,6 +58,10 @@ pub fn fill_H_array<F>(
 where
     F: PrimeField + Num + MulAcc,
 {
+    assert_eq!(array1.len(), m);
+    assert_eq!(array2.len(), m);
+    assert_eq!(array3.len(), n);
+    assert_eq!(array4.len(), lambda);
     H
         .par_iter_mut()
         .enumerate()
@@ -67,8 +78,41 @@ where
         });
 }
 
+pub fn merkle_tree_commit_lwe<F, D>(
+    code_len: usize,
+    H2: &Vec::<F>,
+    H1: &Vec::<F>,
+    H0: &Vec::<F>,
+) -> Vec<Output<D>>
+where
+    F: PrimeField,
+    D: Digest,
+{
+    assert_eq!(code_len, H2.len());
+    assert_eq!(code_len, H1.len());
+    assert_eq!(code_len, H0.len());
 
-pub fn ternary_lwe<F, C>(
+    let mut hashes_vec = Vec::<Output<D>>::new();
+    let item_no = code_len;
+    let np2 = next_pow_2(item_no);
+    hashes_vec.resize_with(2*np2-1, Default::default);
+    (&mut hashes_vec)
+        .into_par_iter()
+        .enumerate()
+        .filter(|(i, _)| i >= &(np2-1) && i < &(np2-1+item_no))
+        .for_each(|(i, x)| {
+        let mut digest = D::new();
+        let idx = i-(np2-1);
+        digest.update(H2[idx].to_repr());
+        digest.update(H1[idx].to_repr());
+        digest.update(H0[idx].to_repr());
+        *x = digest.finalize();
+    });
+    build_merkle_tree::<D>(&mut hashes_vec, np2);
+    return hashes_vec;
+}
+
+pub fn ternary_lwe<F, C, D>(
     n: usize,
     m: usize,
     lambda: usize,
@@ -77,11 +121,13 @@ pub fn ternary_lwe<F, C>(
 where
     F: PrimeField + Num + MulAcc,
     C: CodeSpecification,
+    D: Digest,
 {
     let zero = <F as Field>::zero();
     let one = <F as Field>::one();
     let two = one.add(one);
     let three = two.add(one);
+    let mut rng = rand::thread_rng();
 
     // A: n * m
     let mut A = Array::<F, _>::zeros((n, m));
@@ -91,9 +137,9 @@ where
     });
 
     // s: m
-    let mut s = generate_ternary_vector::<F>(m);
+    let s = generate_ternary_vector::<F>(m);
     // e: n
-    let mut e = generate_ternary_vector::<F>(n);
+    let e = generate_ternary_vector::<F>(n);
 
     // u: n
     let mut u = A.dot(&s);
@@ -133,12 +179,7 @@ where
         .enumerate()
         .for_each(|(i, mut x)|{
             let data = x.first_mut().unwrap();
-            *data = two.mul(s[i]).sub(one).mul(t[i]);
-            *data = data.add(
-                t[i].mul(t[i]).mul(
-                    s[i].add(one)
-                )
-            );
+            *data = three.mul(s[i]).mul(t[i]).mul(t[i]);
             *x.first_mut().unwrap() = *data;
         });
 
@@ -149,12 +190,7 @@ where
         .enumerate()
         .for_each(|(i, mut x)|{
             let data = x.first_mut().unwrap();
-            *data = s[i].sub(one).mul(s[i]).mul(t[i]);
-            *data = data.add(
-                two.mul(s[i]).sub(one).mul(
-                    s[i].add(one)
-                )
-            );
+            *data = three.mul(s[i]).mul(s[i]).sub(one).mul(t[i]);
             *x.first_mut().unwrap() = *data;
         });
 
@@ -244,5 +280,141 @@ where
     encode(&mut H2, &precodes, &postcodes);
     encode(&mut H1, &precodes, &postcodes);
     encode(&mut H0, &precodes, &postcodes);
+
+    let hashes_E = merkle_tree_commit_lwe::<F, D>(code_len, &H2, &H1, &H0);
+
+
+    // X
+    let X = F::random(&mut rng);
+    let X_invert = X.invert().unwrap();
+
+    // fx: m
+    let mut fx = Vec::<F>::new();
+    fx.resize(m, zero);
+    fx
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = t[i].mul(X).add(s[i]);
+        });
+    let mut fx_copy = Vec::<F>::new();
+    fx_copy.resize(m, zero);
+    fx_copy
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = t[i].mul(X).add(s[i]);
+        });
+
+    // rx: lambda
+    let mut rx = Vec::<F>::new();
+    rx.resize(lambda, zero);
+    rx
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = r2[i].mul(X).mul(X).add(
+                r1[i].mul(X)
+            ).add(
+                r0[i]
+            );
+        });
+
+    // verifier sampling idx
+    let mut idx = Vec::<usize>::new();
+    idx.resize_with(lambda, || rng.gen_range(0..code_len));
+
+    let mut E_map = HashMap::<usize, Output<D>>::new();
+    E_map.insert(0, hashes_E[0].clone());
+    let E_map_rwlock = RwLock::new(E_map);
+
+    (0..lambda).into_par_iter().for_each(|i| {
+        // verify the merkle path for E
+        let j = idx[i];
+        let mut digest = D::new();
+        digest.update(H2[j].to_repr());
+        digest.update(H1[j].to_repr());
+        digest.update(H0[j].to_repr());
+        let cur_hash = digest.finalize();
+        let item_no = code_len;
+        let np2 = next_pow_2(item_no);
+        let k = j + np2 - 1;
+        assert!(check_merkle_path::<D>(cur_hash, k, &E_map_rwlock, &hashes_E));
+    });
+
+    let mut Afx = A.dot(&Array::from(fx_copy));
+    let mut dx = Vec::<F>::new();
+    dx.resize(n, zero);
+    dx
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = u[i].sub(Afx[i]);
+        });
+
+    // fxx: m
+    let mut fxx = Vec::<F>::new();
+    fxx.resize(m, zero);
+    fxx
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = fx[i].mul(
+                fx[i].sub(one)
+            ).mul(
+                fx[i].add(one)
+            ).mul(
+                X_invert
+            );
+        });
+
+    // dxx: n
+    let mut dxx = Vec::<F>::new();
+    dxx.resize(n, zero);
+    dxx
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = dx[i].mul(
+                dx[i].sub(one)
+            ).mul(
+                dx[i].add(one)
+            ).mul(
+                X_invert
+            );
+        });
+
+
+    let mut Hx = Vec::<F>::new();
+    Hx.resize(code_len, zero);
+    fill_H_array::<F>(
+        &mut Hx, n, m, lambda, 
+        &Array::from(fx), 
+        &Array::from(fxx), 
+        &Array::from(dxx), 
+        &Array::from(rx)
+    );
+    
+    // encoding
+    encode(&mut Hx, &precodes, &postcodes);
+
+
+    let mut Hxx = Vec::<F>::new();
+    Hxx.resize(code_len, zero);
+    Hxx
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, mut x)|{
+            *x = H2[i].mul(X).mul(X).add(
+                H1[i].mul(X)
+            ).add(
+                H0[i]
+            );
+        });
+
+    (0..lambda).into_par_iter().for_each(|i| {
+        let j = idx[i];
+        assert_eq!(Hx[j], Hxx[j]);
+    });
 
 }
