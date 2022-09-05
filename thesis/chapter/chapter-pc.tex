@@ -154,33 +154,17 @@ Most of the computations for the commitment scheme can be done in parallel in a 
  \hline
  Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
  \hline\hline
- 2 & 1024   & 1762 & 41737  & 3057  & 1.66 & 1206579 \\
+ 2 & 1024   & 1762 & 41737  & 3057  & 0.37 & 1206579 \\
  \hline
- 3 & 101    & 174 & 99642  & 623  & 1.97 & 235621  \\
+ 3 & 101    & 174 & 99642  & 623  & 1.76 & 235621  \\
  \hline
- 4 & 32     & 56 & 153558  & 204  & 1.99 & 114701   \\
+ 4 & 32     & 56 & 153558  & 204  & 1.98 & 114701   \\
  \hline
 \end{tabular}
-\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 1 threads, linear code with relative distance 0.07, and 100 test tuples.}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 1 threads, linear code with relative distance 0.07, and 1000 test tuples.}
 \label{table:benchmark-pc-1}
 \end{table}
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
- \hline
- Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
- \hline\hline
- 2 & 1024   & 1762 & 10048 & 776 & 1.66 & 1206579  \\
- \hline
- 3 & 101    & 174 & 24314 & 165 & 1.97 & 235621 \\
- \hline
- 4 & 32     & 56 & 37961 & 63 & 1.99 & 114701  \\ 
- \hline
-\end{tabular}
-\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 8 threads, linear code with relative distance 0.07, and 100 test tuples.}
-\label{table:benchmark-pc-2}
-\end{table}
 
 We benckmark the above polynomial commitment scheme on a computer with
 Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-pc-1} and table \ref{table:benchmark-pc-2}.
@@ -188,7 +172,25 @@ Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kab
 
 Running the polynomial commitment scheme with the same setting, using 8-threads-parallelism can provides approximately a 4x speedup.
 
-As the dimension increases, it is generally require more time to complete the commit phase for the prover. And less time is required to complete the verify phase for the verifier.
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
+ \hline
+ Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
+ \hline\hline
+ 2 & 1024   & 1762 & 10048 & 776 & 0.37 & 1206579  \\
+ \hline
+ 3 & 101    & 174 & 24314 & 165 & 1.76 & 235621 \\
+ \hline
+ 4 & 32     & 56 & 37961 & 63 & 1.98 & 114701  \\ 
+ \hline
+\end{tabular}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 8 threads, linear code with relative distance 0.07, and 1000 test tuples.}
+\label{table:benchmark-pc-2}
+\end{table}
+
+
+As the dimension increases, it is generally require more time to complete the commit phase for the prover. And less time is required to complete the verify phase for the verifier. Also high dimensional polynomial commitment scheme will have less communication complexity. However, since the relative distance is decreasing as the tensor code's dimension is increasing, the soundness error will also increase. In fact, the soundness error for 3-dimensional and 4-dimensional polynomial commitment scheme is higher than 1, which is unusable in practice.
 
 \subsection{Soundness Error}
 
@@ -220,4 +222,4 @@ According to lemma \ref{lemma:pc-soundness}, we can compute the soundness error 
 \label{table:benchmark-pc-3}
 \end{table}
 
-The theoretically computed soundness error for the setting used in the above benchmark experiment is large, even above 1. The soundness error can be decreased by either increasing the number of tested tuples or by increasing the relative distance of the underlying linear code. However, the soundness error is not sensitive to the number of tested tuples and the length of the code is usually quite limited. Therefore, using a linear code with large relative distance is the only promising solution here.
+The theoretically computed soundness error for the setting used in the above benchmark experiment is large, even above 1, making it not usable in practice. The soundness error can be decreased by either increasing the number of tested tuples or by increasing the relative distance of the underlying linear code. However, the soundness error is not sensitive to the number of tested tuples and the length of the code is usually quite limited. Therefore, using a linear code with large relative distance is the only promising solution here. One of our conclusion would be high dimension polynomial commitment scheme is not worth using unless we can improve the relative distance of these linear code used in the constructions significantly. However, improving relative distance seems to be a difficult task.
