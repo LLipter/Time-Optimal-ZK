@@ -214,9 +214,9 @@ Equivalently speaking, this protocol performs two proximity test in parallel. On
 The soundness error introduced by the first proximity test is $\epsilon(\Delta_\otimes, t, l_1)$. 
 
 The soundness error introduced by the second proximity test is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$. 
-In a complete proximity test, we use $E_1$ denote the event that the last round of test is passed. And we use $E_2$ denote the event that all other tests are passed.
+In a complete proximity test, we use $E_{last}$ denote the event that the last round of test is passed. And we use $E_{other}$ denote the event that all other tests are passed.
 The soundness error is the probability the verifier is convinced by a malicious input.
-The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_1$ and event $E_2$ occurs. Therefore, $P_t = P_{E_1} \cdot P_{E_2}$. Note that $P_{E_1}$ is actually the soundness error when $t=2$, namely, $P_{E_1} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_2}$ is the soundness error introduced by the second proximity test here. Therefore, $P_{E_2} = \frac{P_{t}}{P_{E_1}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
+The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_{last}$ and event $E_{other}$ occurs. Therefore, $P_t = P_{E_{last}} \cdot P_{E_{last}}$. Note that $P_{E_{last}}$ is actually the soundness error when $t=2$, namely, $P_{E_{last}} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_{other}}$ is the soundness error introduced by the second proximity test here, where the input is malicious and all tests except the last one are passed. Therefore, $P_{E_{other}} = \frac{P_{t}}{P_{E_{last}}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
 \end{proof}
 
@@ -268,11 +268,17 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (i_1, i_2, 
 \begin{itemize}
     \item If $i_k \le m$ for $\forall k \in [t]$,
     
-    The verifier will see a uniformly distributed random element from $\mathbb{F}$ both in simulator world and in real world.
+    In the simulation world, both $M_0^\prime[I]$ and $PAD_0^\prime[I]$ are uniformly random variables. And both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combination of a set of uniformly random variables, which are also uniformly random variables.
+    
+    In the real world, $PAD_0^\prime[I]$ is a uniformly random variable by definition. $M_0^\prime[I]$ is also a uniformly random variable because $M_0^\prime[I] = u[I] + PAD_0^\prime[I]$. Similarly, both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combination of a set of uniformly random variables, which are also uniformly random variables.
+    
+    Therefore, the verifier will see a uniformly distributed random element from $\mathbb{F}$ both in simulation world and in real world.
     
     \item Otherwise,
     
-    The verifier will see a random variable that is the result of encoding a number of random element from $\mathbb{F}$ both in simulator world and in real world.
+    In the simulation world and in the real world, $M_i^\prime[I]$ can be determined by a set of random elements in $M_i$. Denote this computation equation as $\textsc{Func}$, namely, $M_i^\prime[I] = \textsc{Func}(M_i[I_1], \cdots, M_i[I_x])$. And $M_i^\prime[I]$ will represent a distribution that is uniquely determined by function \textsc{Func} and the distribution of variables $M_i[I_1], \cdots, M_i[I_x]$. Similarly, $PAD_i^\prime[I]$ will represent a distribution that is uniquely determined by function \textsc{Func} and the distribution of variables $PAD_i[I_1], \cdots, PAD_i[I_x]$.
+    
+    Note that both in simulation world and in the real world, $M_i[I_1], \cdots, M_i[I_x]$ and $PAD_i[I_1], \cdots, PAD_i[I_x]$ will represent uniformly random variables. And since the function \textsc{Func} is identical in both cases, distribution of $M_i^\prime[I]$ and $PAD_i^\prime[I]$ will be identical in two worlds.
     
     
 \end{itemize}
