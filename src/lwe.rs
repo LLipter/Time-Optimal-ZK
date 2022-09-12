@@ -20,6 +20,36 @@ use crate::helper::next_pow_2;
 use crate::merkle::build_merkle_tree;
 use crate::merkle::check_merkle_path;
 
+pub fn encode_reed_solomon<F>(
+    msg: &mut Vec<F>,
+    msg_len: usize,
+    code_len: usize,
+)
+where 
+    F: PrimeField + Num + MulAcc,
+{
+    let mut res = Vec::<F>::new();
+    res.resize(code_len, <F as Field>::zero());
+
+    let mut coef = Vec::<F>::new();
+    let mut cur = <F as Field>::zero();
+    for i in (0..code_len){
+        cur += <F as Field>::one();
+        coef.push(cur);
+    }
+    res
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, x)|{
+            for j in (0..msg_len).rev() {
+                *x *= coef[i];
+                *x += msg[j];
+            }
+        });
+    for i in (0..code_len){
+        msg[i] = res[i];
+    }
+}
 
 pub fn generate_ternary_vector<F>(
     size: usize,
@@ -118,6 +148,7 @@ pub fn ternary_lwe<F, C, D>(
     m: usize,
     lambda: usize,
     seed: u64,
+    RS_code: bool
 )
 where
     F: PrimeField + Num + MulAcc,
@@ -278,9 +309,15 @@ where
     );
     
     // encoding
-    encode(&mut H2, &precodes, &postcodes);
-    encode(&mut H1, &precodes, &postcodes);
-    encode(&mut H0, &precodes, &postcodes);
+    if RS_code {
+        encode_reed_solomon(&mut H2, msg_len, code_len);
+        encode_reed_solomon(&mut H1, msg_len, code_len);
+        encode_reed_solomon(&mut H0, msg_len, code_len);
+    }else{
+        encode(&mut H2, &precodes, &postcodes);
+        encode(&mut H1, &precodes, &postcodes);
+        encode(&mut H0, &precodes, &postcodes);
+    }
 
     let hashes_E = merkle_tree_commit_lwe::<F, D>(code_len, &H2, &H1, &H0);
 
@@ -399,7 +436,11 @@ where
     );
     
     // encoding
-    encode(&mut Hx, &precodes, &postcodes);
+    if RS_code {
+        encode_reed_solomon(&mut Hx, msg_len, code_len);
+    }else{
+        encode(&mut Hx, &precodes, &postcodes);
+    }
 
     (0..lambda).into_par_iter().for_each(|i| {
         let j = idx[i];
@@ -413,7 +454,7 @@ where
 
     let verified_time = Instant::now();
 
-    println!("n:{:?} m:{:?} lambda:{:?}", n, m, lambda);
+    println!("RD_code:{:?} n:{:?} m:{:?} lambda:{:?}", RS_code, n, m, lambda);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
