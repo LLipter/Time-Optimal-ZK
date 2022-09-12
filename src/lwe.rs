@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
+use std::time::Instant;
 use digest::Digest;
 use digest::Output;
 use ff::Field;
@@ -129,6 +130,11 @@ where
     let three = two.add(one);
     let mut rng = rand::thread_rng();
 
+    // generate codes
+    let msg_len: usize = 2 * m + n + lambda;
+    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
+    let code_len = codeword_length::<F>(&precodes, &postcodes);
+
     // A: n * m
     let mut A = Array::<F, _>::zeros((n, m));
     A.par_iter_mut().for_each(|x| {
@@ -153,6 +159,7 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
+    let start_time = Instant::now();
 
     // t: m
     let mut t = Array::<F, _>::zeros(m);
@@ -250,12 +257,6 @@ where
         let mut rng = rand::thread_rng();
         *x = F::random(&mut rng);
     });
-
-
-    // generate codes
-    let msg_len: usize = 2 * m + n + lambda;
-    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
-    let code_len = codeword_length::<F>(&precodes, &postcodes);
     
     let mut H2 = Vec::<F>::new();
     H2.resize(code_len, zero);
@@ -319,6 +320,8 @@ where
                 r0[i]
             );
         });
+
+    let committed_time = Instant::now();
 
     // verifier sampling idx
     let mut idx = Vec::<usize>::new();
@@ -398,23 +401,22 @@ where
     // encoding
     encode(&mut Hx, &precodes, &postcodes);
 
-
-    let mut Hxx = Vec::<F>::new();
-    Hxx.resize(code_len, zero);
-    Hxx
-        .par_iter_mut()
-        .enumerate()
-        .for_each(|(i, x)|{
-            *x = H2[i].mul(X).mul(X).add(
-                H1[i].mul(X)
-            ).add(
-                H0[i]
-            );
-        });
-
     (0..lambda).into_par_iter().for_each(|i| {
         let j = idx[i];
-        assert_eq!(Hx[j], Hxx[j]);
+        let x = H2[j].mul(X).mul(X).add(
+            H1[j].mul(X)
+        ).add(
+            H0[j]
+        );
+        assert_eq!(Hx[j], x);
     });
+
+    let verified_time = Instant::now();
+
+    println!("n:{:?} m:{:?} lambda:{:?}", n, m, lambda);
+    println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
+    println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
+    println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
+
 
 }
