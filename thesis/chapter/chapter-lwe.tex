@@ -1,0 +1,8 @@
+\chapter{Zero-Knowledge Proofs for LWE}
+
+\section{Introduction}
+
+LWE (Learning with error) problem is the fundamental lattice problem upon which most of the lattice-based cryptography rests. LWE states that it is hard to distinguish a uniformly random tuple $(A, u)$ and $(A, u = As+e)$, where all elements of $s$ and $e$ are small. In this chapter, we explore a protocol in \cite{lwe} that makes use of polynomials to prove knowledge of $s$ and $e$ with small elements that satisfy:
+$$
+    As + e = u
+$$

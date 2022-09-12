@@ -10,10 +10,20 @@
 
 % Secondly, while \cite{brakedown} rely on strong assumptions in order to achieve zero-knowledge, \cite{cryptoeprint:2020/1426} \cite{BCL22} use codes with extra zero-knowledge properties. Codes with zero-knowledge properties are easy to obtain from plain codes via simple transformations that is similar to one-time-pad encryption, and codes with stronger zero-knowledge properties use more complex transformations, as described in \cite{10.1145/2554797.2554815}. The second goal of this project is to investigate the performance impact of adding zero-knowledge to the \cite{brakedown} polynomial commitment scheme using zero-knowledge codes, using the plain codes implemented by \cite{brakedown} as a starting point, and assess which transformations are more practical.
 
-Interactive zero-knowledge proofs allow an untrusted prover to convince a sceptical verifier that a statement is true without revealing any further information about why the statement is true. Polynomial commitment scheme is the key component of many proof systems, which allows the prover to commit to a polynomial, and later reveal the evaluation of the polynomial at a given point, while allowing the verifier can check that the evaluation is correct. After years of researching, many schemes with linear prover time have been proposed, however, there is little work on their concrete efficiency and performance.
+Interactive zero-knowledge proofs allow an untrusted prover to convince a skeptical verifier that a statement is true without revealing any
+further information about why the statement is true. The polynomial commitment scheme is the key component of many proof systems, which
+allows the prover to commit to a polynomial, and later reveal the evaluation of the polynomial at a given point, while allowing the verifier can
+check that the evaluation is correct. After years of research, many
+schemes with linear prover time have been proposed, however, there is
+little work on their concrete efficiency and performance.
 
-In this thesis, we want to investigate the concrete efficiency of those polynomial commitment schemes, especially in high dimensional situations. We implement the protocol in Rust, benchmark the performance and analyse the result. Additionally, we would investigate various ways to add zero-knowledge property into the polynomial commitment scheme and research their advantages and limitations.
+In this thesis, we want to investigate the concrete efficiency of those
+polynomial commitment schemes, especially in high-dimensional situations. We implement the protocol in Rust, benchmark the performance and analyze the result. Additionally, we would investigate various ways to add zero-knowledge property into the polynomial commitment scheme and research their advantages and limitations.
 
-We conclude that the efficiency and the soundness error of high dimensional polynomial commitment schemes are not acceptable to be used in practice because of the lack of linear code that is both efficient in encoding and provides large relative distance guarantee. And we can add zero-knowledge property into the polynomial commitment schemes at the cost of increasing prover time, verifier time, and proof size by roughly a factor of two.
+We conclude that the efficiency and the soundness error of high dimensional polynomial commitment schemes are not acceptable to be
+used in practice because of the lack of linear code that is both efficient in encoding and provides a large relative distance guarantee. And
+we can add zero-knowledge property into the polynomial commitment
+schemes at the cost of increasing prover time, verifier time, and proof
+size by roughly a factor of two.
 
 \end{abstract}
