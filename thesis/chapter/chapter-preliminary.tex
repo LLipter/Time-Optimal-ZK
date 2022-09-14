@@ -27,7 +27,7 @@ An \textbf{Interactive Oracle Proof (IOP)} is defined by a pair of interactive r
 algorithms \textbf{IOP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
 During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. Then the prover will response with $\pi[I]$.
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[I]$ through this query.
 The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message and for each query only elements in a single point will be responded.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 
@@ -47,7 +47,7 @@ An \textbf{Interactive Oracle Proof of Proximity (IOPP)} is defined by a pair of
 algorithms \textbf{IOPP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
 During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover. 
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[I]$ through this query.
 The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 The protocol's goal is to show that a particular string is close to a valid witness.
@@ -60,6 +60,14 @@ An interactive oracle proof of proximity IOPP = (P, V) for a relation R has comp
     \item \textbf{Soundness.}
     For every instance $\mathbb{X} \not\in L(R)$ and malicious prover $\tilde{P}$, the probability that $\tilde{P}$ convince $V^{\mathbb{W}}(\mathbb{X})$ to accept is at most $\epsilon(\Delta(\mathbb{W}, R|_{\mathbb{X}}))$. Here the soundness error $\epsilon$ is a function of the $\Delta$-distance of $\mathbb{W}$ to the set of valid witnesses $R|_{\mathbb{X}} := \{ \mathbb{W}^\prime | (\mathbb{X}, \mathbb{W}^\prime) \in R \}$.
 \end{enumerate}
+\end{definition}
+
+In practice, we use Merkle tree commitment to compile the IOP or IOPP to an real argument system. Each element in the large array message $\pi$ sent by the prover will be considered to be a leaf node of a Merkle tree. And the corresponding Merkle tree root will be sent to the verifier instead. For each query at position $I$, the prover will responds with $\pi[I]$ and the corresponding Merkle tree path, which will be authenticated later by the verifier.
+
+\begin{definition}
+
+A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{perfect zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
+ 
 \end{definition}
 
 \section{Polynomial}
@@ -81,23 +89,26 @@ A \textbf{multivariate} polynomial is called a \textbf{multilinear} polynomial i
 \end{definition}
 
 \begin{definition}[Polynomial Commitment]
-A \textbf{Polynomial Commitment} consists of three algorithms:
+A \textbf{Polynomial Commitment} consists of three algorithms (\textsc{PC.Commit}, \textsc{PC.Prove}, \textsc{PC.Verify}) and an evaluation protocol \textsc{PC.Eval}, where:
 
 \begin{itemize}
     \item \textsc{PC.Commit}$(\phi(\cdot))$:the algorithm outputs a commitment $\mathcal{R}$ of the polynomial $\phi(\cdot)$.
     \item \textsc{PC.Prove}$(\phi, x, \mathcal{R})$: given an evaluation point $x$, the algorithm outputs a tuple $(x, \phi(x),\pi_x)$, where $\pi_x$ is the proof.
     \item \textsc{PC.Verify}$(\pi_x, x, \phi(x), \mathcal{R})$:given $\pi_x, x, \phi(x), \mathcal{R}$, the algorithm checks if $\phi(x)$ is the correct evaluation. The algorithm outputs \textsc{accept} or \textsc{reject}.
+    \item \textsc{PC.Eval}$(\mathcal{P}(\phi(\cdot)), \mathcal{V}(\mathcal{R}, x, y))$: this is an  interactive protocol between a prove $\mathcal{P}$ who has the polynomial $\phi(\cdot)$ as private input and a verifier $\mathcal{V}$ who has $(\mathcal{R}, x, y)$ as common public input. The verifier outputs \textsc{accept} or \textsc{reject} and the prover has no output. The purpose of the protocol is to convince the verifier that $\phi(x) = y$.
 \end{itemize}
 
 \end{definition}
 
-\textbf{Completeness.} Let $\mathcal{R} \leftarrow \textsc{PC.Commit}(\phi(\cdot))$ be the commitment of a polynomial. Any output $(x, \phi(x),\pi_x)$ generated by an honest prover using algorithm \textsc{PC.Prove}$(\phi, x, \mathcal{R})$, will be successfully verified by algorithm \textsc{PC.Verify}$(\pi_x, x, \phi(x), \mathcal{R})$.
+\textbf{Completeness.} Let $\mathcal{R} \leftarrow \textsc{PC.Commit}(\phi(\cdot))$ be the commitment of a polynomial. Any output $(x, \phi(x),\pi_x)$ generated by an honest prover using algorithm \textsc{PC.Prove}$(\phi, x, \mathcal{R})$, will be successfully verified by algorithm \textsc{PC.Verify}$(\pi_x, x, \phi(x), \mathcal{R})$. And likewise, the verifier $\mathcal{V}$ will output \textsc{accept} in interaction protocol with the prover $\mathcal{P}$. The formal completeness requirement is:
 $$
 Pr
 \begin{pmatrix}
- \mathcal{R} \leftarrow \textsc{PC.Commit}(\phi(\cdot)): \\
- (x, \phi(x),\pi_x) = \textsc{PC.Prove}(\phi, x, \mathcal{R}) \wedge \\
- \textsc{PC.Verify}(\pi_x, x, \phi(x), \mathcal{R}) = \textsc{accept }
+ b_1 = \textsc{accept} \wedge b_2 = \textsc{accept}: \\
+ \mathcal{R} \leftarrow \textsc{PC.Commit}(\phi(\cdot)) \\
+ (x, y,\pi_x) \leftarrow \textsc{PC.Prove}(\phi, x, \mathcal{R}) \wedge \\
+ b_1 \leftarrow \textsc{PC.Verify}(\pi_x, x, y, \mathcal{R}) \\
+ (\perp, b_2)\leftarrow \textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(\mathcal{R}, x, y))
 \end{pmatrix}
 = 1
 $$
@@ -107,14 +118,30 @@ $$
 $$
 \epsilon = Pr
 \begin{pmatrix}
- (\mathcal{R}, (\phi(\cdot), \pi_x), (\phi^\prime(\cdot)), \pi_x^\prime) \leftarrow \mathcal{A}(x): \\
- \textsc{PC.Verify}(\pi_x, x, \phi(x), \mathcal{R}) = \textsc{accept } \wedge \\
- \textsc{PC.Verify}(\pi_x^\prime, x, \phi^\prime(x), \mathcal{R}) = \textsc{accept } \wedge \\
- \phi(x) \neq \phi^\prime(x)
+ b_1 = \textsc{accept } \wedge \\
+ b_2 = \textsc{accept } \wedge \\
+ \phi(\cdot) \neq \phi^\prime(\cdot): \\
+ (\mathcal{R}, \phi(\cdot), \pi_x, \phi^\prime(\cdot), \pi_x^\prime) \leftarrow \mathcal{A}(x) \\
+ b_1 \leftarrow \textsc{PC.Verify}(\pi_x, x, \phi(x), \mathcal{R}) \\
+ b_2 \leftarrow \textsc{PC.Verify}(\pi_x^\prime, x, \phi^\prime(x), \mathcal{R})
 \end{pmatrix}
 $$
 
-\textbf{Zero-knowledge.} At the end of the protocol, the verifier will know the evaluation result of the polynomial at some evaluation points, but nothing more than that.
+\textbf{Zero-knowledge.} At the end of the protocol, the verifier will know the evaluation result of the polynomial at some evaluation points, but nothing more than that. The polynomial commitment scheme is zero-knowledge if the commitments to distinct polynomials are statistically indistinguishable. Formally speaking, for all probabilistic polynomial time adversaries $\mathcal{A} = (\mathcal{A}_0, \mathcal{A}_1)$, the following expression should be negligible.
+
+$$
+\Bigg|
+1 - 2 \cdot Pr
+\begin{pmatrix}
+ b = b^\prime : \\
+ (\phi_0(\cdot), \phi_1(\cdot)) \leftarrow \mathcal{A}_0 \\
+ b \overset{{\scriptscriptstyle\$}}{\leftarrow} \{0, 1\} \\
+ \mathcal{R} \leftarrow \textsc{PC.Commit}(\phi_b(\cdot)) \\
+ b^\prime \leftarrow \mathcal{A}_1(\mathcal{R})
+\end{pmatrix}
+\Bigg|
+$$
+
 
 \section{Linear Code}
 

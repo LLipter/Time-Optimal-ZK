@@ -6,3 +6,67 @@ LWE (Learning with error) problem is the fundamental lattice problem upon which 
 $$
     As + e = u
 $$
+
+\section{LWE Protocol}
+
+Prover $\mathcal{P}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$ and $e \in \{-1, 0, 1\}^{n}$ such that $u = As + e$.
+
+Verifier $\mathcal{V}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$.
+
+The protocol proceeds as follows.
+
+
+
+\begin{itemize}
+    \item $\mathcal{P}$ samples $t \leftarrow \mathbb{F}^{m}$ and computes the polynomials $f(X)=tX+s$ and $d(X)=u-Af(X)$.
+    \item $\mathcal{P}$ computes the polynomials:
+\begin{equation}
+\label{eq:lwe1}
+    \frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m] = v_2X^2 + v_1X + v_0
+\end{equation}
+\begin{equation}
+\label{eq:lwe2}
+    \frac{1}{X} d(X) \circ [d(X) - 1^m] \circ [d(X) + 1^m] = w_2X^2 + w_1X + w_0
+\end{equation}
+
+    \item $\mathcal{P}$ sends $(t, s), (-At, u-As), (v_2, v_1, v_0), (w_2, w_1, w_0)$ to $\mathcal{V}$, and $\mathcal{V}$ has linear query access to each of these tuples.
+    
+    \item $\mathcal{V}$ sample a random challenge $x \leftarrow \mathbb{F}^*$.
+    
+    \item $\mathcal{V}$ sends linear query to $(t, s)$ with coefficient vector $(x, 1)$. Denote the response as $f$.
+    \item $\mathcal{V}$ sends linear query to $(-At, u-As)$ with coefficient vector $(x, 1)$. Denote the response as $d$.
+    \item $\mathcal{V}$ sends linear query to $(v_2, v_1, v_0)$ with coefficient vector $(x^2, x, 1)$. Denote the response as $g$.
+    \item $\mathcal{V}$ sends linear query to $(w_2, w_1, w_0)$ with coefficient vector $(x^2, x, 1)$. Denote the response as $h$.
+    
+    \item $\mathcal{V}$ will check whether the following equation holds:
+$$
+    g \overset{?}{=} \frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])
+$$
+$$
+    h \overset{?}{=} \frac{1}{x} (d \circ [d - 1^m] \circ [d + 1^m])
+$$
+\end{itemize}
+
+\begin{lemma}
+\label{lemma:szkpctcc}
+
+LWE = ($\textbf{P}$, $\textbf{V}$) has \textbf{perfect completeness}.
+
+\end{lemma}
+\begin{proof}
+
+According to equation \ref{eq:lwe1}, the first checking will succeed. And according to equation \ref{eq:lwe2}, the second checking will succeed.
+
+\end{proof}
+
+\begin{lemma}
+\label{lemma:szkpctcc}
+
+LWE = ($\textbf{P}$, $\textbf{V}$) has has soundness error at most $\frac{2}{q}$, where $q$ is the size of the underlying field.
+
+\end{lemma}
+\begin{proof}
+
+Suppose $g$ is a polynomial that is different from $\frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])$. Note that they're polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 positions. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is $\frac{2}{q}$.
+
+\end{proof}

@@ -137,13 +137,29 @@ By rearranging the above equation, we have $ d > \frac{H(\epsilon) \ln 2 - \frac
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $93.60$.
 
-Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfy the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such set is hard to be found. Similar with hash functions, hash collision must exist somewhere, but this collision is hard to be found.
+Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfy the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such set is hard to found. Similar with hash functions, hash collision must exist somewhere, but this collision is hard to be found.
 
 \end{proof}
 
 \section{Reversed Linear Code}
 
-According to Tellegen’s principle \cite{Tellegen}, it is generally possible to transpose a linear algorithm that performs a matrix-vector product, producing an algorithm that computes the transposed matrix-vector product.
+The transposition principle, sometimes referred to as Tellegen’s principle \cite{Tellegen}, asserts that a linear algorithm that performs a matrix-vector product can be transposed, producing an algorithm that computes the transposed matrix-vector product. Further, the transposed algorithm has almost the same complexity as the original one.
+
+The following example illustrates this principle, using the
+computation graph representation, where $\bullet$ represents a fan-out gate and $+$ represents a addition gate. Taking $x_1, x_2$ as input, it computes $y_1 = ax_1 + bx_2$, $y_2 = cx_1 + dx_2$; edges perform multiplications by the constant values $a, b, c, d$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{graph/t1.png}
+\end{figure}
+
+Reversing all arrows and exchanging vertices $+$ and $\bullet$ yield the following graph:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{graph/t2.png}
+\end{figure}
+Taking $y_1$, $y_2$ as input, it computes the transposed map $x_1 = ay_1 + cy_2, x_2 = by_1 + dy_2$.
 
 In this section, we transpose the Brakedown linear code to get a reverse encoding algorithm. Figure \ref{fig:lc} is the construction of Brakedown linear code. And figure \ref{fig:lc-rev} is the reversed construction.
 
@@ -151,7 +167,7 @@ In this section, we transpose the Brakedown linear code to get a reverse encodin
 \begin{figure}[h]
 \centering
 \input{graph/lc.tikz}
-\caption{Linear Code}
+\caption{Brakedown Linear Code}
 \label{fig:lc}
 \end{figure}
 
@@ -160,7 +176,7 @@ In this section, we transpose the Brakedown linear code to get a reverse encodin
 \begin{figure}[h]
 \centering
 \input{graph/lc-rev.tikz}
-\caption{Reversed Linear Code}
+\caption{Reversed Brakedown Linear Code}
 \label{fig:lc-rev}
 \end{figure}
 
@@ -179,7 +195,7 @@ Given $z \in \mathbb{F}^{n \cdot \Delta}$, we generate a random block diagonal m
 
 \subsection{Reverse Encoding}
 
-Given the reverse encoding function $\textbf{Enc}^{-1}$, the final output is $w = \textbf{Enc}^{-1}(v)$.
+Given the reverse encoding function $\textbf{Enc}^{\top}$, the final output is $w = \textbf{Enc}^{\top}(v)$.
 
 \section{Performance}
 
