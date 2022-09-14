@@ -1,0 +1,34 @@
+RD_code:false n:128 m:128 lambda:100
+commit_time: 83 ms
+verify_time: 46 ms
+total_time: 130 ms
+
+RD_code:false n:256 m:128 lambda:100
+commit_time: 131 ms
+verify_time: 61 ms
+total_time: 193 ms
+
+RD_code:false n:512 m:128 lambda:100
+commit_time: 156 ms
+verify_time: 89 ms
+total_time: 246 ms
+
+RD_code:false n:1024 m:128 lambda:100
+commit_time: 264 ms
+verify_time: 158 ms
+total_time: 422 ms
+
+RD_code:false n:1024 m:256 lambda:100
+commit_time: 471 ms
+verify_time: 329 ms
+total_time: 801 ms
+
+RD_code:false n:1024 m:512 lambda:100
+commit_time: 691 ms
+verify_time: 507 ms
+total_time: 1199 ms
+
+RD_code:false n:1024 m:1024 lambda:100
+commit_time: 1197 ms
+verify_time: 932 ms
+total_time: 2129 ms

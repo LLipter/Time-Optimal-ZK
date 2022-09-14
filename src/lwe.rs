@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
+use std::time::Instant;
 use digest::Digest;
 use digest::Output;
 use ff::Field;
@@ -19,6 +20,36 @@ use crate::helper::next_pow_2;
 use crate::merkle::build_merkle_tree;
 use crate::merkle::check_merkle_path;
 
+pub fn encode_reed_solomon<F>(
+    msg: &mut Vec<F>,
+    msg_len: usize,
+    code_len: usize,
+)
+where 
+    F: PrimeField + Num + MulAcc,
+{
+    let mut res = Vec::<F>::new();
+    res.resize(code_len, <F as Field>::zero());
+
+    let mut coef = Vec::<F>::new();
+    let mut cur = <F as Field>::zero();
+    for i in (0..code_len){
+        cur += <F as Field>::one();
+        coef.push(cur);
+    }
+    res
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, x)|{
+            for j in (0..msg_len).rev() {
+                *x *= coef[i];
+                *x += msg[j];
+            }
+        });
+    for i in (0..code_len){
+        msg[i] = res[i];
+    }
+}
 
 pub fn generate_ternary_vector<F>(
     size: usize,
@@ -117,6 +148,7 @@ pub fn ternary_lwe<F, C, D>(
     m: usize,
     lambda: usize,
     seed: u64,
+    RS_code: bool
 )
 where
     F: PrimeField + Num + MulAcc,
@@ -128,6 +160,11 @@ where
     let two = one.add(one);
     let three = two.add(one);
     let mut rng = rand::thread_rng();
+
+    // generate codes
+    let msg_len: usize = 2 * m + n + lambda;
+    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
+    let code_len = codeword_length::<F>(&precodes, &postcodes);
 
     // A: n * m
     let mut A = Array::<F, _>::zeros((n, m));
@@ -153,6 +190,7 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
+    let start_time = Instant::now();
 
     // t: m
     let mut t = Array::<F, _>::zeros(m);
@@ -250,12 +288,6 @@ where
         let mut rng = rand::thread_rng();
         *x = F::random(&mut rng);
     });
-
-
-    // generate codes
-    let msg_len: usize = 2 * m + n + lambda;
-    let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
-    let code_len = codeword_length::<F>(&precodes, &postcodes);
     
     let mut H2 = Vec::<F>::new();
     H2.resize(code_len, zero);
@@ -277,9 +309,15 @@ where
     );
     
     // encoding
-    encode(&mut H2, &precodes, &postcodes);
-    encode(&mut H1, &precodes, &postcodes);
-    encode(&mut H0, &precodes, &postcodes);
+    if RS_code {
+        encode_reed_solomon(&mut H2, msg_len, code_len);
+        encode_reed_solomon(&mut H1, msg_len, code_len);
+        encode_reed_solomon(&mut H0, msg_len, code_len);
+    }else{
+        encode(&mut H2, &precodes, &postcodes);
+        encode(&mut H1, &precodes, &postcodes);
+        encode(&mut H0, &precodes, &postcodes);
+    }
 
     let hashes_E = merkle_tree_commit_lwe::<F, D>(code_len, &H2, &H1, &H0);
 
@@ -319,6 +357,8 @@ where
                 r0[i]
             );
         });
+
+    let committed_time = Instant::now();
 
     // verifier sampling idx
     let mut idx = Vec::<usize>::new();
@@ -396,25 +436,28 @@ where
     );
     
     // encoding
-    encode(&mut Hx, &precodes, &postcodes);
-
-
-    let mut Hxx = Vec::<F>::new();
-    Hxx.resize(code_len, zero);
-    Hxx
-        .par_iter_mut()
-        .enumerate()
-        .for_each(|(i, x)|{
-            *x = H2[i].mul(X).mul(X).add(
-                H1[i].mul(X)
-            ).add(
-                H0[i]
-            );
-        });
+    if RS_code {
+        encode_reed_solomon(&mut Hx, msg_len, code_len);
+    }else{
+        encode(&mut Hx, &precodes, &postcodes);
+    }
 
     (0..lambda).into_par_iter().for_each(|i| {
         let j = idx[i];
-        assert_eq!(Hx[j], Hxx[j]);
+        let x = H2[j].mul(X).mul(X).add(
+            H1[j].mul(X)
+        ).add(
+            H0[j]
+        );
+        assert_eq!(Hx[j], x);
     });
+
+    let verified_time = Instant::now();
+
+    println!("RD_code:{:?} n:{:?} m:{:?} lambda:{:?}", RS_code, n, m, lambda);
+    println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
+    println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
+    println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
+
 
 }
