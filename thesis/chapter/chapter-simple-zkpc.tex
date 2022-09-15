@@ -2,11 +2,22 @@
 
 In this chapter, we describe a simple method to add the zero-knowledge property to a given polynomial commitment scheme. This method uses random numbers to hide the actual coefficients and it works similarly to one-time pad encryption.
 
-\section{Protocol}
+\section{Proximity Test}
 
-\textbf{Commitment Phase.}
+Prover $\mathcal{P}$'s input: 
+$$
+    M_0 \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}
+$$
+$$
+    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1}(M_0 \oplus PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
+$$
 
-Let $M_0 = u$ and $PAD_0$ be a tensor with dimensions identical to $M_0$ filled with random elements from $\mathbb{F}$.
+Verifier $\mathcal{V}$'s input: nothing.
+
+In high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
+
+\begin{itemize}
+    \item Let $M_0 = u$ and $PAD_0$ be a tensor with dimensions identical to $M_0$ filled with random elements from $\mathbb{F}$.
 Let 
 $$
     M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0 \oplus PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
@@ -15,34 +26,31 @@ $$
     PAD_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
 $$
 where $\oplus$ denotes elements-wise tensor addition.
-Send $M_0^{\prime}$ and $PAD_0\prime$ to the verifier.
+$\mathcal{P}$ sends $M_0^{\prime}$ and $PAD_0\prime$ to $\mathcal{V}$.
 
-\textbf{Testing Phase.}
-
-The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
-
-In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination for $M_i, PAD_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of their last dimension.
-Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+    \item Round $i$ for $i \in [t-1]$
+    
+    \begin{itemize}
+        \item $\mathcal{V}$ sample a random variable $r_i \in \mathbb{F}^m$ and send $r_i$ to $\mathcal{P}$.
+        \item $\mathcal{P}$ computes a linear combination for $M_i, PAD_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of their last dimension.
+        Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
 $$
     M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
 $$
 $$
     PAD_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot PAD_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
 $$
-Let 
+        \item $\mathcal{P}$ computes
 $$
 M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i \oplus PAD_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
 $$
 $$
 PAD_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(PAD_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
 $$
-where $\oplus$ denotes element-wise addition.
-
-Then the prover sends $M_i^{\prime}$ and $PAD_i^\prime$ to the verifier.
-
-
-Then the verifier will perform a probabilistic check to make sure 
+        \item $\mathcal{P}$ sends $M_i^{\prime}$ and $PAD_i^\prime$ to $\mathcal{V}$.
+    \end{itemize}
+    
+    \item $\mathcal{V}$ will perform a probabilistic check to make sure 
 $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t}^\prime, PAD_0^\prime$, $PAD_1^\prime$, $PAD_2^\prime, \cdots, PAD_{t}^\prime$ are consistent with each other.
 
 Formally speaking, in step 1, the verifier will sample $l_1$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. Denote this set of tuples as $L_1$.
@@ -55,22 +63,25 @@ For each sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$, the verif
 $$
     \text{Enc}(PAD_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
 $$
-
-\textbf{Evaluation Phase.}
-
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except for the following difference.
-
-\begin{itemize}
-    \item One additional round is required. There are $t$ rounds in total. In round $t$, $M_t^\prime$ and $ PAD_t^\prime$ are degenerated to a single value.
-
-    \item In round $i$, the random value $r_i$ is replaced by $q_i$.
     
-    \item For every sampled tuple $(j_1, j_2, \cdots, j_t)$ in step 1, the following restriction is required, $j_k \neq j_k^\prime$ for $\forall (j_1^\prime, j_2^\prime, \cdots, j_t^\prime) \in L_2$.
-
-    \item For every sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ in step 2, the following restriction is required, $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$.
 \end{itemize}
 
-If all consistent checks passed, then the verifier outputs $M_{t}^{\prime} - PAD_t^\prime$ as $g(x)$.
+
+% \textbf{Evaluation Phase.}
+
+% Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except for the following difference.
+
+% \begin{itemize}
+%     \item One additional round is required. There are $t$ rounds in total. In round $t$, $M_t^\prime$ and $ PAD_t^\prime$ are degenerated to a single value.
+
+%     \item In round $i$, the random value $r_i$ is replaced by $q_i$.
+    
+%     \item For every sampled tuple $(j_1, j_2, \cdots, j_t)$ in step 1, the following restriction is required, $j_k \neq j_k^\prime$ for $\forall (j_1^\prime, j_2^\prime, \cdots, j_t^\prime) \in L_2$.
+
+%     \item For every sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ in step 2, the following restriction is required, $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$.
+% \end{itemize}
+
+% If all consistent checks passed, then the verifier outputs $M_{t}^{\prime} - PAD_t^\prime$ as $g(x)$.
 
 \section{Formal Description}
 
@@ -89,7 +100,7 @@ $$
 
 Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{i}$.
 
-\subsection{Testing Phase (Proximity Test)}
+\subsection{Proximity Test}
 
 In this section, we describe the testing phase in the above protocol formally in terms of a IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
 
@@ -159,7 +170,7 @@ $$
 
 \end{enumerate}
 
-\subsection{Testing Phase Completeness}
+\subsection{Proximity Test Completeness}
 
 \begin{lemma}
 \label{lemma:szkpctcc}
@@ -195,7 +206,7 @@ The equations checked by the verifier $\textbf{V}$ holds.
 
 
 
-\subsection{Testing Phase Soundness}
+\subsection{Proximity Test Soundness}
 
 \begin{lemma}
 \label{lemma:szkpctc-soundness}
@@ -221,7 +232,7 @@ The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otim
 \end{proof}
 
 
-\subsection{Testing Phase Zero-Knowledge}
+\subsection{Proximity Test Zero-Knowledge}
 
 \begin{lemma}
 \label{lemma:szkpc-zk}
