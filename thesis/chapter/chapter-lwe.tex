@@ -10,7 +10,7 @@ $$
 \begin{definition}[Relation $R_{LWE}$]
 The relation $R_{LWE}$ is the sets of tuples
 $$
-    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))
+    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))
 $$ 
 such that $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$, $e \in \{-1, 0, 1\}^{n}$ and $As + e = u$.
 \end{definition}
@@ -77,7 +77,8 @@ LWE = ($\mathcal{P}$, $\mathcal{V}$) has has soundness error at most $\frac{2}{q
 \end{lemma}
 \begin{proof}
 
-Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. Then either $\frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m]$ and $v_2X^2 + v_1X + v_0$ are different polynomials, or $\frac{1}{X} d(X) \circ [d(X) - 1^m] \circ [d(X) + 1^m]$ and $w_2X^2 + w_1X + w_0$ are different polynomials. Note that they are polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 positions. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is at most $\frac{2}{q}$.
+Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. 
+Then at least at one position $i$, either $\frac{1}{X} f_i(X)[f_i(X) - 1][f_i(X) + 1]$ and $v_{2, i}X^2 + v_{1, i}X + v_{0, i}$ are different polynomials, or $\frac{1}{X} d_i(X)[d_i(X) - 1][d_i(X) + 1]$ and $w_{2, i}X^2 + w_{1, i}X + w_{0, i}$ are different polynomials. Note that they are polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 positions. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is at most $\frac{2}{q}$.
 
 Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is in relation $R_{LWE}$, but the prover $\mathbb{P}$ sends a incorrect polynomials $g^\prime$ or $h^\prime$. Likewise, since they are polynomials with degree equal 2, according to Schwartz-Zippel lemma, they can agree on at most 2 positions. The probability that the verifier accepts the protocol is also at most $\frac{2}{q}$.
 

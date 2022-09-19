@@ -220,11 +220,21 @@ $$
 \end{lemma}
 \begin{proof}
 
-Equivalently speaking, this protocol performs two proximity test in parallel. One on $M_i^\prime$ tensor and the other on $PAD_i$ tensor. 
 
-The soundness error introduced by the first proximity test is $\epsilon(\Delta_\otimes, t, l_1)$. 
+This protocol performs two proximity tests in parallel. One on $M_i^\prime$ tensor and the other on $PAD_i$ tensor. The soundness error would be the sum of the soundness error introduced by the first proximity test and the second proximity test.
 
-The soundness error introduced by the second proximity test is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$. 
+
+Formally speaking, suppose 
+$$
+    ((\mathbb{F}, C, m, N, t), (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\prime}, PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime}))
+$$ 
+is not in relation $R_\otimes$. Then either $((\mathbb{F}, C, m, N, t), (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\prime}))$ is not in relation $R_\otimes$, 
+or $((\mathbb{F}, C, m, N, t), (PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime}))$ is not in relation $R_\otimes$.
+
+If $((\mathbb{F}, C, m, N, t), (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\prime}))$ is not in relation $R_\otimes$, then, the soundness error introduced by this part is $\epsilon(\Delta_\otimes, t, l_1)$. 
+
+If $((\mathbb{F}, C, m, N, t), (PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime}))$ is not in relation $R_\otimes$, then, the soundness error introduced by this part is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
+
 In a complete proximity test, we use $E_{last}$ denote the event that the last round of test is passed. And we use $E_{other}$ denote the event that all other tests are passed.
 The soundness error is the probability the verifier is convinced by a malicious input.
 The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_{last}$ and event $E_{other}$ occurs. Therefore, $P_t = P_{E_{last}} \cdot P_{E_{last}}$. Note that $P_{E_{last}}$ is actually the soundness error when $t=2$, namely, $P_{E_{last}} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_{other}}$ is the soundness error introduced by the second proximity test here, where the input is malicious and all tests except the last one are passed. Therefore, $P_{E_{other}} = \frac{P_{t}}{P_{E_{last}}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
