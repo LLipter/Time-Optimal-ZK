@@ -7,7 +7,17 @@ $$
     As + e = u
 $$
 
+\begin{definition}[Relation $R_{LWE}$]
+The relation $R_{LWE}$ is the sets of tuples
+$$
+    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))
+$$ 
+such that $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$, $e \in \{-1, 0, 1\}^{n}$ and $As + e = u$.
+\end{definition}
+
 \section{LWE Protocol}
+
+In this protocol, the prover $\mathcal{P}$ is allowed to send a tuple $a = (a_1, \cdots, a_l)$ where $a_i \in \mathbb{F}^k$. And the verifier $\mathcal{V}$ has linear query access to it by send a coefficient tuple $b = (b_1, \cdots, b_l)$ where $b_i \in \mathbb{F}$. The response will a array $e$ where $e_j = \langle (a_1[j], \cdots, a_l[j]), b  \rangle$.
 
 Prover $\mathcal{P}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$ and $e \in \{-1, 0, 1\}^{n}$ such that $u = As + e$.
 
@@ -48,9 +58,9 @@ $$
 \end{itemize}
 
 \begin{lemma}
-\label{lemma:szkpctcc}
+\label{lemma:lwepc}
 
-LWE = ($\textbf{P}$, $\textbf{V}$) has \textbf{perfect completeness}.
+LWE = ($\mathcal{P}$, $\mathcal{V}$) has \textbf{perfect completeness}.
 
 \end{lemma}
 \begin{proof}
@@ -60,13 +70,43 @@ According to equation \ref{eq:lwe1}, the first checking will succeed. And accord
 \end{proof}
 
 \begin{lemma}
-\label{lemma:szkpctcc}
+\label{lemma:lwese}
 
-LWE = ($\textbf{P}$, $\textbf{V}$) has has soundness error at most $\frac{2}{q}$, where $q$ is the size of the underlying field.
+LWE = ($\mathcal{P}$, $\mathcal{V}$) has has soundness error at most $\frac{2}{q}$, where $q$ is the size of the underlying field.
 
 \end{lemma}
 \begin{proof}
 
-Suppose $g$ is a polynomial that is different from $\frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])$. Note that they're polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 positions. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is $\frac{2}{q}$.
+Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. Then either $\frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m]$ and $v_2X^2 + v_1X + v_0$ are different polynomials, or $\frac{1}{X} d(X) \circ [d(X) - 1^m] \circ [d(X) + 1^m]$ and $w_2X^2 + w_1X + w_0$ are different polynomials. Note that they are polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 positions. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is at most $\frac{2}{q}$.
+
+Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is in relation $R_{LWE}$, but the prover $\mathbb{P}$ sends a incorrect polynomials $g^\prime$ or $h^\prime$. Likewise, since they are polynomials with degree equal 2, according to Schwartz-Zippel lemma, they can agree on at most 2 positions. The probability that the verifier accepts the protocol is also at most $\frac{2}{q}$.
+
+
+\end{proof}
+
+\begin{lemma}
+\label{lemma:lwezk}
+
+LWE = ($\mathcal{P}$, $\mathcal{V}$) is zero-knowledge.
+
+\end{lemma}
+\begin{proof}
+
+The simulator $\mathcal{S}(A, u)$ can generate the transcript as follows:
+
+\begin{itemize}
+    \item $\mathcal{S}$ samples $f \in \mathbb{F}^m$ uniformly at random.
+    \item $\mathcal{S}$ samples $x \in \mathbb{F}$ uniformly at random.
+    \item $\mathcal{S}$ computes $d = u - Af$.
+    \item $\mathcal{S}$ computes $g = \frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])$
+    \item $\mathcal{S}$ computes $h = \frac{1}{x} (d \circ [d - 1^m] \circ [d + 1^m])$
+    \item $\mathcal{S}$ outputs $(x, f, d, g, h)$
+\end{itemize}
+
+$x$ is uniformly random both in the simulator $\mathcal{S}(A, u)$ and in the real world. 
+
+$f$ is uniformly random in the simulator $\mathcal{S}(A, u)$. In the real world, $f$ looks random because $t$ is sampled uniformly at random.
+
+$d, g, h$ are computed using the same equation both in the simulator $\mathcal{S}(A, u)$ and in the real world. They are indistinguishable to each other.
 
 \end{proof}
