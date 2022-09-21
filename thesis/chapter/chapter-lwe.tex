@@ -15,9 +15,272 @@ $$
 such that $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$, $e \in \{-1, 0, 1\}^{n}$ and $As + e = u$.
 \end{definition}
 
+% \section{LWE Protocol}
+
+% In this protocol, the prover $\mathcal{P}$ is allowed to send a tuple $a = (a_1, \cdots, a_l)$ where $a_i \in \mathbb{F}^k$. And the verifier $\mathcal{V}$ has linear query access to it by send a coefficient tuple $b = (b_1, \cdots, b_l)$ where $b_i \in \mathbb{F}$. The response will a array $e$ where $e_j = \langle (a_1[j], \cdots, a_l[j]), b  \rangle$.
+
+% \subsection{Formal Description}
+
+% Prover $\mathcal{P}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$ and $e \in \{-1, 0, 1\}^{n}$ such that $u = As + e$.
+
+% Verifier $\mathcal{V}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$.
+
+% The protocol proceeds as follows.
+
+
+
+% \begin{itemize}
+%     \item $\mathcal{P}$ samples $t \leftarrow \mathbb{F}^{m}$ and computes the polynomials $f(X)=tX+s$ and $d(X)=u-Af(X)$.
+%     \item $\mathcal{P}$ computes the polynomials:
+% \begin{equation}
+% \label{eq:lwe1}
+%     \frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m] = v_2X^2 + v_1X + v_0
+% \end{equation}
+% \begin{equation}
+% \label{eq:lwe2}
+%     \frac{1}{X} d(X) \circ [d(X) - 1^n] \circ [d(X) + 1^n] = w_2X^2 + w_1X + w_0
+% \end{equation}
+
+%     \item $\mathcal{P}$ sends $(f_1, f_0), (d_1, d_0), (v_2, v_1, v_0), (w_2, w_1, w_0)$ to $\mathcal{V}$, and $\mathcal{V}$ has linear query access to each of these tuples. If the prover is honest, $(f_1, f_0)$ should equal to $(t, s)$ and $(d_1, d_0)$ should equal to $(-At, u-As)$.
+    
+%     \item $\mathcal{V}$ sample a random challenge $x \leftarrow \mathbb{F}^*$.
+    
+%     \item $\mathcal{V}$ sends linear query to $(f_1, f_0)$ with coefficient vector $(x, 1)$. Denote the response as $f \in \mathbb{F}^m$.
+%     \item $\mathcal{V}$ sends linear query to $(d_1, d_0)$ with coefficient vector $(x, 1)$. Denote the response as $d \in \mathbb{F}^n$.
+%     \item $\mathcal{V}$ sends linear query to $(v_2, v_1, v_0)$ with coefficient vector $(x^2, x, 1)$. Denote the response as $g \in \mathbb{F}^m$.
+%     \item $\mathcal{V}$ sends linear query to $(w_2, w_1, w_0)$ with coefficient vector $(x^2, x, 1)$. Denote the response as $h \in \mathbb{F}^n$.
+    
+%     \item $\mathcal{V}$ will check whether the following equation holds:
+% $$
+%     g \overset{?}{=} \frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])
+% $$
+% $$
+%     h \overset{?}{=} \frac{1}{x} (d \circ [d - 1^n] \circ [d + 1^n])
+% $$
+% \end{itemize}
+
+% \begin{lemma}
+% \label{lemma:lwepc}
+
+% LWE = ($\mathcal{P}$, $\mathcal{V}$) has \textbf{perfect completeness}.
+
+% \end{lemma}
+% \begin{proof}
+
+% According to equation \ref{eq:lwe1}, the first checking will succeed. And according to equation \ref{eq:lwe2}, the second checking will succeed.
+
+% \end{proof}
+
+% \begin{lemma}
+% \label{lemma:lwese}
+
+% LWE = ($\mathcal{P}$, $\mathcal{V}$) has has soundness error at most $\frac{2}{q}$, where $q$ is the size of the underlying field.
+
+% \end{lemma}
+% \begin{proof}
+
+% Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. 
+% Then at least at one position $i$, either $\frac{1}{X} f_i(X)[f_i(X) - 1][f_i(X) + 1]$ and $v_{2, i}X^2 + v_{1, i}X + v_{0, i}$ are different polynomials, or $\frac{1}{X} d_i(X)[d_i(X) - 1][d_i(X) + 1]$ and $w_{2, i}X^2 + w_{1, i}X + w_{0, i}$ are different polynomials. Note that they are polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is at most $\frac{2}{q}$.
+
+% Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is in relation $R_{LWE}$, but the prover $\mathbb{P}$ sends a incorrect polynomials $g^\prime$ or $h^\prime$. Likewise, since they are polynomials with degree equal 2, according to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. The probability that the verifier accepts the protocol is also at most $\frac{2}{q}$.
+
+
+% \end{proof}
+
+% \begin{lemma}
+% \label{lemma:lwezk}
+
+% LWE = ($\mathcal{P}$, $\mathcal{V}$) is zero-knowledge.
+
+% \end{lemma}
+% \begin{proof}
+
+% The simulator $\mathcal{S}(A, u)$ can generate the verifier $\mathcal{V}$'s view as follows:
+
+% \begin{itemize}
+%     \item $\mathcal{S}$ samples $f \in \mathbb{F}^m$ uniformly at random.
+%     \item $\mathcal{S}$ samples $x \in \mathbb{F}$ uniformly at random.
+%     \item $\mathcal{S}$ computes $d = u - Af$.
+%     \item $\mathcal{S}$ computes $g = \frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])$
+%     \item $\mathcal{S}$ computes $h = \frac{1}{x} (d \circ [d - 1^n] \circ [d + 1^n])$
+%     \item $\mathcal{S}$ outputs $(x, f, d, g, h)$
+% \end{itemize}
+
+% $x$ is uniformly random both in the simulator $\mathcal{S}(A, u)$ and in the real world. 
+
+% $f$ is uniformly random in the simulator $\mathcal{S}(A, u)$. In the real world, $f$ looks random because $t$ is sampled uniformly at random.
+
+% $d, g, h$ are computed using the same equation both in the simulator $\mathcal{S}(A, u)$ and in the real world. They are indistinguishable to each other.
+
+% \end{proof}
+
+
+
+
+
+
+% ------------------------------------------------------------
+
+% \section{LWE Protocol}
+
+% % In this protocol, the prover $\mathcal{P}$ is allowed to send a tuple $a = (a_1, \cdots, a_l)$ where $a_i \in \mathbb{F}^k$. And the verifier $\mathcal{V}$ has linear query access to it by send a coefficient tuple $b = (b_1, \cdots, b_l)$ where $b_i \in \mathbb{F}$. The response will a array $e$ where $e_j = \langle (a_1[j], \cdots, a_l[j]), b  \rangle$.
+
+% \subsection{Formal Description}
+
+% Prover $\mathcal{P}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$ and $e \in \{-1, 0, 1\}^{n}$ such that $u = As + e$.
+
+% Verifier $\mathcal{V}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$.
+
+% The protocol proceeds as follows.
+
+
+
+% \begin{itemize}
+%     \item $\mathcal{P}$ samples $t \leftarrow \mathbb{F}^{m}$ and computes the polynomials:
+% \begin{equation}
+% \label{eq:lwe3}
+%     f(X) = tX+s = f_1 X + f_0
+% \end{equation}
+% \begin{equation}
+% \label{eq:lwe4}
+%     d(X)=u-Af(X) = d_1 X + d_0
+% \end{equation}
+% If the prover is honest, $(f_1, f_0) \in (\mathbb{F}^m, \mathbb{F}^m)$ should equal to $(t, s)$ and $(d_1, d_0) \in (\mathbb{F}^n, \mathbb{F}^n)$ should equal to $(-At, u-As)$.
+
+%     \item $\mathcal{P}$ computes the polynomials:
+% \begin{equation}
+% \label{eq:lwe1}
+%     \frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m] = v_2X^2 + v_1X + v_0
+% \end{equation}
+% \begin{equation}
+% \label{eq:lwe2}
+%     \frac{1}{X} d(X) \circ [d(X) - 1^n] \circ [d(X) + 1^n] = w_2X^2 + w_1X + w_0
+% \end{equation}
+% % If the prover is honest, the following equations should hold:
+% % \begin{align*}
+% %     (v_2, v_1, v_0) &= (t \circ t \circ t, 3^m \circ t \circ t \circ s, (3^m \circ s \circ s - 1^m) \circ t) \in (\mathbb{F}^m, \mathbb{F}^m, \mathbb{F}^m) \\
+% %     H_1 &= f_1, v_1, w_1 \in \mathbb{F}^{2m+n} \\
+% %     H_0 &= f_0, v_0, w_0 \in \mathbb{F}^{2m+n}
+% % \end{align*}
+% where $(v_2, v_1, v_0) \in (\mathbb{F}^m, \mathbb{F}^m, \mathbb{F}^m)$ and $(w_2, w_1, w_0) \in (\mathbb{F}^n, \mathbb{F}^n, \mathbb{F}^n)$.
+
+%     \item $\mathcal{P}$ computes the encodings:
+% \begin{equation*}
+% \label{eq:lwe5}
+%     H_2^\prime = \textsc{Enc}(H_2) \in \mathbb{F}^{N}
+% \end{equation*}
+% \begin{equation*}
+% \label{eq:lwe6}
+%     H_1^\prime = \textsc{Enc}(H_1) \in \mathbb{F}^{N}
+% \end{equation*}
+% \begin{equation*}
+% \label{eq:lwe7}
+%     H_0^\prime = \textsc{Enc}(H_0) \in \mathbb{F}^{N}
+% \end{equation*}
+% where, 
+% \begin{align*}
+%     H_2 &= 0^m, v_2, w_2 \in \mathbb{F}^{2m+n} \\
+%     H_1 &= f_1, v_1, w_1 \in \mathbb{F}^{2m+n} \\
+%     H_0 &= f_0, v_0, w_0 \in \mathbb{F}^{2m+n}
+% \end{align*}
+
+%     \item $\mathcal{P}$ sends $H_2^\prime, H_1^\prime, H_0^\prime$ to $\mathcal{V}$, and $\mathcal{V}$ has point query access to each of these messages.
+    
+%     \item $\mathcal{V}$ samples a random challenge $x \leftarrow \mathbb{F}^*$ and sends it to $\mathcal{P}$.
+    
+%     \item $\mathcal{P}$ computes $\overline{f} = f(x) \in \mathbb{F}^m$ and sends it to $\mathcal{V}$.
+    
+%     \item $\mathcal{V}$ computes:
+% \begin{align*}
+%     \overline{d} &= u - A\overline{f} \in \mathbb{F}^n \\
+%     \overline{g} &= \frac{1}{x} (\overline{f} \circ [\overline{f} - 1^m] \circ [\overline{f} + 1^m]) \in \mathbb{F}^m \\
+%     \overline{h} &= \frac{1}{x} (\overline{d} \circ [\overline{d} - 1^n] \circ [\overline{d} + 1^n]) \in \mathbb{F}^n \\
+%     \overline{H} &= \textsc{Enc}(\overline{f}, \overline{g}, \overline{h}) \in \mathbb{F}^N
+% \end{align*}
+
+%     \item $\mathcal{V}$ samples $\lambda$ indexes. For each index $i \in [N]$, $\mathcal{V}$ will check whether the following equation holds through point queries to $H_2^\prime, H_1^\prime$ and $H_0^\prime$.
+% $$
+%     \overline{H}[i] 
+%     \stackrel{?}{=} 
+%     H_2^\prime[i] x^2 + H_1^\prime[i] x + H_0^\prime[i]
+% $$
+
+% \end{itemize}
+
+% \begin{lemma}
+% \label{lemma:lwepc}
+
+% LWE = ($\mathcal{P}$, $\mathcal{V}$) has \textbf{perfect completeness}.
+
+% \end{lemma}
+% \begin{proof}
+
+% There are four parts in $H_2^\prime, H_1^\prime$, $H_0^\prime$ and $\overline{H}$.
+
+% The first part is the $f$ part. Because $\mathcal{P}$ computes $\overline{f} = f(x)$ honestly, it will succeed.
+
+% The second part is the $g$ part. Because $\mathcal{P}$ computes it honestly according to equation \ref{eq:lwe1}, it will succeed.
+
+% The third part is the $h$ part. Because $\mathcal{P}$ computes it honestly according to equation \ref{eq:lwe2}, it will succeed.
+
+% The remaining part will also succeed because the first three parts succeed and the linearity of the codeword.
+
+% \end{proof}
+
+% \begin{lemma}
+% \label{lemma:lwese}
+
+% LWE = ($\mathcal{P}$, $\mathcal{V}$) has has soundness error at most $\frac{2}{q}$, where $q$ is the size of the underlying field.
+
+% \end{lemma}
+% \begin{proof}
+
+% % Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. 
+% % Then at least at one position $i$, either $\frac{1}{X} f_i(X)[f_i(X) - 1][f_i(X) + 1]$ and $v_{2, i}X^2 + v_{1, i}X + v_{0, i}$ are different polynomials, or $\frac{1}{X} d_i(X)[d_i(X) - 1][d_i(X) + 1]$ and $w_{2, i}X^2 + w_{1, i}X + w_{0, i}$ are different polynomials. Note that they are polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is at most $\frac{2}{q}$.
+
+% % Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is in relation $R_{LWE}$, but the prover $\mathbb{P}$ sends a incorrect polynomials $g^\prime$ or $h^\prime$. Likewise, since they are polynomials with degree equal 2, according to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. The probability that the verifier accepts the protocol is also at most $\frac{2}{q}$.
+
+
+% \end{proof}
+
+% \begin{lemma}
+% \label{lemma:lwezk}
+
+% LWE = ($\mathcal{P}$, $\mathcal{V}$) is zero-knowledge.
+
+% \end{lemma}
+% \begin{proof}
+
+% The simulator $\mathcal{S}(A, u)$ can generate the verifier $\mathcal{V}$'s view as follows:
+
+% \begin{itemize}
+%     \item $\mathcal{S}$ samples $\overline{f} \in \mathbb{F}^m$ uniformly at random.
+    
+%     \item $\mathcal{S}$ samples $x \in \mathbb{F}$ uniformly at random.
+    
+%     \item $\mathcal{S}$ computes $\overline{d} = u - A\overline{f} \in \mathbb{F}^n$.
+    
+%     \item $\mathcal{S}$ computes $\overline{g} = \frac{1}{x} (\overline{f} \circ [\overline{f} - 1^m] \circ [\overline{f} + 1^m]) \in \mathbb{F}^m$
+    
+%     \item $\mathcal{S}$ computes $\overline{h} = \frac{1}{x} (\overline{d} \circ [\overline{d} - 1^n] \circ [\overline{d} + 1^n]) \in \mathbb{F}^n$
+    
+%     % \item $\mathcal{S}$ outputs $(x, f, d, g, h)$
+% \end{itemize}
+
+% % $x$ is uniformly random both in the simulator $\mathcal{S}(A, u)$ and in the real world. 
+
+% % $f$ is uniformly random in the simulator $\mathcal{S}(A, u)$. In the real world, $f$ looks random because $t$ is sampled uniformly at random.
+
+% % $d, g, h$ are computed using the same equation both in the simulator $\mathcal{S}(A, u)$ and in the real world. They are indistinguishable to each other.
+
+% \end{proof}
+
+
 \section{LWE Protocol}
 
-In this protocol, the prover $\mathcal{P}$ is allowed to send a tuple $a = (a_1, \cdots, a_l)$ where $a_i \in \mathbb{F}^k$. And the verifier $\mathcal{V}$ has linear query access to it by send a coefficient tuple $b = (b_1, \cdots, b_l)$ where $b_i \in \mathbb{F}$. The response will a array $e$ where $e_j = \langle (a_1[j], \cdots, a_l[j]), b  \rangle$.
+% In this protocol, the prover $\mathcal{P}$ is allowed to send a tuple $a = (a_1, \cdots, a_l)$ where $a_i \in \mathbb{F}^k$. And the verifier $\mathcal{V}$ has linear query access to it by send a coefficient tuple $b = (b_1, \cdots, b_l)$ where $b_i \in \mathbb{F}$. The response will a array $e$ where $e_j = \langle (a_1[j], \cdots, a_l[j]), b  \rangle$.
+
+\subsection{Formal Description}
 
 Prover $\mathcal{P}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$ and $e \in \{-1, 0, 1\}^{n}$ such that $u = As + e$.
 
@@ -28,7 +291,17 @@ The protocol proceeds as follows.
 
 
 \begin{itemize}
-    \item $\mathcal{P}$ samples $t \leftarrow \mathbb{F}^{m}$ and computes the polynomials $f(X)=tX+s$ and $d(X)=u-Af(X)$.
+    \item $\mathcal{P}$ samples $t \leftarrow \mathbb{F}^{m}$ and computes the polynomials:
+\begin{equation}
+\label{eq:lwe3}
+    f(X) = tX+s = f_1 X + f_0
+\end{equation}
+\begin{equation}
+\label{eq:lwe4}
+    d(X)=u-Af(X) = d_1 X + d_0
+\end{equation}
+If the prover is honest, $(f_1, f_0) \in (\mathbb{F}^m, \mathbb{F}^m)$ should equal to $(t, s)$ and $(d_1, d_0) \in (\mathbb{F}^n, \mathbb{F}^n)$ should equal to $(-At, u-As)$.
+
     \item $\mathcal{P}$ computes the polynomials:
 \begin{equation}
 \label{eq:lwe1}
@@ -36,25 +309,65 @@ The protocol proceeds as follows.
 \end{equation}
 \begin{equation}
 \label{eq:lwe2}
-    \frac{1}{X} d(X) \circ [d(X) - 1^m] \circ [d(X) + 1^m] = w_2X^2 + w_1X + w_0
+    \frac{1}{X} d(X) \circ [d(X) - 1^n] \circ [d(X) + 1^n] = w_2X^2 + w_1X + w_0
+\end{equation}
+where $(v_2, v_1, v_0) \in (\mathbb{F}^m, \mathbb{F}^m, \mathbb{F}^m)$ and $(w_2, w_1, w_0) \in (\mathbb{F}^n, \mathbb{F}^n, \mathbb{F}^n)$.
+
+    \item $\mathcal{P}$ computes the encodings:
+\begin{equation*}
+    H_2^\prime = \textsc{Enc}(H_2) \in \mathbb{F}^{N}
+\end{equation*}
+\begin{equation*}
+    H_1^\prime = \textsc{Enc}(H_1) \in \mathbb{F}^{N}
+\end{equation*}
+\begin{equation*}
+    H_0^\prime = \textsc{Enc}(H_0) \in \mathbb{F}^{N}
+\end{equation*}
+where, 
+\begin{align*}
+    H_2 &= f_2, v_2, w_2 \in \mathbb{F}^{2m+n} (f_2 = 0^m) \\
+    H_1 &= f_1, v_1, w_1 \in \mathbb{F}^{2m+n} \\
+    H_0 &= f_0, v_0, w_0 \in \mathbb{F}^{2m+n}
+\end{align*}
+
+    \item $\mathcal{P}$ sends $H_2^\prime, H_1^\prime, H_0^\prime$ to $\mathcal{V}$, and $\mathcal{V}$ has point query access to each of these messages.
+    
+    \item $\mathcal{V}$ samples a random challenge $x \leftarrow \mathbb{F}^*$ and sends it to $\mathcal{P}$.
+    
+    \item $\mathcal{P}$ computes $\overline{H} \in \mathbb{F}^{2m+n}$ where,
+$$
+    \overline{H}[i] = H_2[i] x^2 + H_1[i] x + H_0[i] 
+$$
+
+    \item $\mathcal{P}$ sends $\overline{H}$ to $\mathcal{V}$.
+
+    \item $\mathcal{V}$ samples $\lambda$ indexes. For each index $i \in [N]$, $\mathcal{V}$ will check whether the following equation holds through point queries to $H_2^\prime, H_1^\prime$ and $H_0^\prime$.
+\begin{equation}
+\label{eq:lwe5}
+    \textsc{Enc}(\overline{H})[i] 
+    \stackrel{?}{=} 
+    H_2^\prime[i] x^2 + H_1^\prime[i] x + H_0^\prime[i]
 \end{equation}
 
-    \item $\mathcal{P}$ sends $(t, s), (-At, u-As), (v_2, v_1, v_0), (w_2, w_1, w_0)$ to $\mathcal{V}$, and $\mathcal{V}$ has linear query access to each of these tuples.
-    
-    \item $\mathcal{V}$ sample a random challenge $x \leftarrow \mathbb{F}^*$.
-    
-    \item $\mathcal{V}$ sends linear query to $(t, s)$ with coefficient vector $(x, 1)$. Denote the response as $f$.
-    \item $\mathcal{V}$ sends linear query to $(-At, u-As)$ with coefficient vector $(x, 1)$. Denote the response as $d$.
-    \item $\mathcal{V}$ sends linear query to $(v_2, v_1, v_0)$ with coefficient vector $(x^2, x, 1)$. Denote the response as $g$.
-    \item $\mathcal{V}$ sends linear query to $(w_2, w_1, w_0)$ with coefficient vector $(x^2, x, 1)$. Denote the response as $h$.
+
+
+    \item Let $(\overline{f}, \overline{g}, \overline{h}) \leftarrow \overline{H}$, where $(\overline{f}, \overline{g}, \overline{h}) \in (\mathbb{F}^m, \mathbb{F}^m, \mathbb{F}^n)$. 
+    $\mathcal{V}$ computes: 
+$$
+    \overline{d} = u - A\overline{f}
+$$
     
     \item $\mathcal{V}$ will check whether the following equation holds:
-$$
-    g \overset{?}{=} \frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])
-$$
-$$
-    h \overset{?}{=} \frac{1}{x} (d \circ [d - 1^m] \circ [d + 1^m])
-$$
+\begin{equation}
+\label{eq:lwe6}
+    \overline{g} \overset{?}{=} \frac{1}{x} (\overline{f} \circ [\overline{f} - 1^m] \circ [\overline{f} + 1^m])
+\end{equation}
+\begin{equation}
+\label{eq:lwe7}
+    \overline{h} \overset{?}{=} \frac{1}{x} (\overline{d} \circ [\overline{d} - 1^n] \circ [\overline{d} + 1^n])
+\end{equation}
+    
+
 \end{itemize}
 
 \begin{lemma}
@@ -65,24 +378,48 @@ LWE = ($\mathcal{P}$, $\mathcal{V}$) has \textbf{perfect completeness}.
 \end{lemma}
 \begin{proof}
 
-According to equation \ref{eq:lwe1}, the first checking will succeed. And according to equation \ref{eq:lwe2}, the second checking will succeed.
+There are four parts in $H_2^\prime, H_1^\prime$, $H_0^\prime$ and $\textsc{Enc}(\overline{H})$.
+
+The first part is the $f$ part. Because $\mathcal{P}$ computes $\overline{f} = f(x) = tx + s$ honestly, it will succeed.
+
+The second part is the $g$ part. Because $\mathcal{P}$ computes it honestly according to equation \ref{eq:lwe1}, it will succeed.
+
+The third part is the $h$ part. Because $\mathcal{P}$ computes it honestly according to equation \ref{eq:lwe2}, it will succeed.
+
+The remaining part will also succeed because the first three parts succeed and the linearity of the codeword.
 
 \end{proof}
 
 \begin{lemma}
 \label{lemma:lwese}
 
-LWE = ($\mathcal{P}$, $\mathcal{V}$) has has soundness error at most $\frac{2}{q}$, where $q$ is the size of the underlying field.
+LWE = ($\mathcal{P}$, $\mathcal{V}$) has has soundness error at most 
+$$
+    \max\{\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda, (1 - \delta)^\lambda\}
+$$
+where $q$ is the size of the underlying field.
 
 \end{lemma}
 \begin{proof}
 
-Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. 
-Then at least at one position $i$, either $\frac{1}{X} f_i(X)[f_i(X) - 1][f_i(X) + 1]$ and $v_{2, i}X^2 + v_{1, i}X + v_{0, i}$ are different polynomials, or $\frac{1}{X} d_i(X)[d_i(X) - 1][d_i(X) + 1]$ and $w_{2, i}X^2 + w_{1, i}X + w_{0, i}$ are different polynomials. Note that they are polynomials with degree equal 2. According to Schwartz-Zippel lemma, they can agree on at most 2 positions. Since challenge $x$ is sampled randomly from $\mathbb{F}$, the probability this event appears is at most $\frac{2}{q}$.
+Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is in relation $R_{LWE}$, but the prover $\mathcal{P}$ sends incorrect messages. 
+\begin{itemize}
+    % \item If $f_1$ or $f_0$ is incorrect, denote the incorrect polynomial as $f^\prime$. Since $f$ and $f^\prime$ are polynomials with degree 1. According to Schwartz-Zippel lemma, they can agree on at most 1 evaluation point. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{1}{q}$. If this event does not happen, then according to the relative distance property of the encoding function \textsc{Enc}, at least $\delta$ portion of $\textsc{Enc}(\overline{H})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{1}{q} + \frac{q-1}{q}(1 - \delta)^\lambda$.
 
-Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is in relation $R_{LWE}$, but the prover $\mathbb{P}$ sends a incorrect polynomials $g^\prime$ or $h^\prime$. Likewise, since they are polynomials with degree equal 2, according to Schwartz-Zippel lemma, they can agree on at most 2 positions. The probability that the verifier accepts the protocol is also at most $\frac{2}{q}$.
+    % \item If $\overline{f}$ is incorrect, then according to the relative distance property of the encoding function \textsc{Enc}, at least $\delta$ portion of $\textsc{Enc}(\overline{H})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$.
+    
+    \item If $f_2, f_1, f_0, v_2, v_1, v_0, w_2, w_1$ or $w_0$ is incorrect, denote the incorrect polynomial as $f^\prime$, $g^\prime$ or $h^\prime$. Since $f$ and $f^\prime$, $g$ and $g^\prime$ or $h$ and $h^\prime$ are polynomials with degree 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{2}{q}$. If this event does not happen, then according to the relative distance property of the encoding function \textsc{Enc}, at least $\delta$ portion of $\textsc{Enc}(\overline{H})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda$.
 
+    \item If $\overline{f}, \overline{g}$ or $\overline{h}$ is incorrect, then according to the relative distance property of the encoding function \textsc{Enc}, at least $\delta$ portion of $\textsc{Enc}(\overline{H})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$.
+\end{itemize}
 
+Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m), (A, u, s, e))$ is not in relation $R_{LWE}$. Then at least one of the following condition is not satisfied:
+\begin{itemize}
+    \item $s \in \{-1, 0, 1\}^{m}$ or $e \in \{-1, 0, 1\}^{n}$: Then either there is an $v_{-1} X^{-1}$ term in $\frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m]$, or there is an  $w_{-1} X^{-1}$ in $\frac{1}{X} d(X) \circ [d(X) - 1^n] \circ [d(X) + 1^n]$. Therefore, polynomial $g$ or $h$ is incorrect, denote the incorrect polynomial as $g^\prime$ or $h^\prime$. Likewise, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens so that equation \ref{eq:lwe6} or \ref{eq:lwe7} is satisfied is at most $\frac{2}{q}$. 
+    
+    \item $u = As + e$: Then polynomial $d$ will be incorrect, denote the incorrect polynomial as $d^\prime$. Then, $\overline{h}$ and $\frac{1}{x} (d^\prime \circ [d^\prime - 1^n] \circ [d^\prime + 1^n])$ can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens so that equation \ref{eq:lwe7} is satisfied is at most $\frac{2}{q}$. 
+    
+\end{itemize}
 \end{proof}
 
 \begin{lemma}
@@ -93,21 +430,29 @@ LWE = ($\mathcal{P}$, $\mathcal{V}$) is zero-knowledge.
 \end{lemma}
 \begin{proof}
 
-The simulator $\mathcal{S}(A, u)$ can generate the transcript as follows:
+I have trouble writing this proof. I think this protocol is no longer zero-knowledge. It will leak information.
 
-\begin{itemize}
-    \item $\mathcal{S}$ samples $f \in \mathbb{F}^m$ uniformly at random.
-    \item $\mathcal{S}$ samples $x \in \mathbb{F}$ uniformly at random.
-    \item $\mathcal{S}$ computes $d = u - Af$.
-    \item $\mathcal{S}$ computes $g = \frac{1}{x} (f \circ [f - 1^m] \circ [f + 1^m])$
-    \item $\mathcal{S}$ computes $h = \frac{1}{x} (d \circ [d - 1^m] \circ [d + 1^m])$
-    \item $\mathcal{S}$ outputs $(x, f, d, g, h)$
-\end{itemize}
+% The simulator $\mathcal{S}(A, u)$ can generate the verifier $\mathcal{V}$'s view as follows:
 
-$x$ is uniformly random both in the simulator $\mathcal{S}(A, u)$ and in the real world. 
+% \begin{itemize}
+    % \item $\mathcal{S}$ samples $\overline{f} \in \mathbb{F}^m$ uniformly at random.
+    
+    % \item $\mathcal{S}$ samples $x \in \mathbb{F}$ uniformly at random.
+    
+    % \item $\mathcal{S}$ computes $\overline{d} = u - A\overline{f} \in \mathbb{F}^n$.
+    
+    % \item $\mathcal{S}$ computes $\overline{g} = \frac{1}{x} (\overline{f} \circ [\overline{f} - 1^m] \circ [\overline{f} + 1^m]) \in \mathbb{F}^m$
+    
+    % \item $\mathcal{S}$ computes $\overline{h} = \frac{1}{x} (\overline{d} \circ [\overline{d} - 1^n] \circ [\overline{d} + 1^n]) \in \mathbb{F}^n$
+    
+    % \item $\mathcal{S}$ outputs $(x, f, d, g, h)$
+% \end{itemize}
 
-$f$ is uniformly random in the simulator $\mathcal{S}(A, u)$. In the real world, $f$ looks random because $t$ is sampled uniformly at random.
+% $x$ is uniformly random both in the simulator $\mathcal{S}(A, u)$ and in the real world. 
 
-$d, g, h$ are computed using the same equation both in the simulator $\mathcal{S}(A, u)$ and in the real world. They are indistinguishable to each other.
+% $f$ is uniformly random in the simulator $\mathcal{S}(A, u)$. In the real world, $f$ looks random because $t$ is sampled uniformly at random.
+
+% $d, g, h$ are computed using the same equation both in the simulator $\mathcal{S}(A, u)$ and in the real world. They are indistinguishable to each other.
 
 \end{proof}
+

@@ -278,10 +278,10 @@ For every $(\mathbb{X}, \mathbb{W}) \in R_\otimes$ and choice of verifier random
     $$
 \end{itemize}
 
-If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (i_1, i_2, \cdots, i_t)$:
+If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (j_1, j_2, \cdots, j_t)$:
 
 \begin{itemize}
-    \item If $i_k \le m$ for $\forall k \in [t]$,
+    \item If $j_k \le m$ for $\forall k \in [t]$ (this is the message part),
     
     In the simulation world, both $M_0^\prime[I]$ and $PAD_0^\prime[I]$ are uniformly random variables. And both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combination of a set of uniformly random variables, which are also uniformly random variables.
     
@@ -301,5 +301,7 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (i_1, i_2, 
 
 
 The random variables in $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and in $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are indistinguishable to each other. They are identically distributed.
+
+Note that although $PAD_i$ and $M_i$ are correlated (the subtraction of them is the underlying polynomial coefficients), the verifier $\mathcal{V}$ will not be able to observe this correlation because verifier is not allowed to query both $PAD_i$ and $M_i$ at the same index. The verifier is only allowed to query one of them.
 
 \end{proof}

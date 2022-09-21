@@ -31,7 +31,9 @@ And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_
 
 \section{Proximity Test for Arbitrary t}
 
-Proximity test is the core component of the polynomial commitment scheme. The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tenser code $C^{\otimes t}$.
+Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tenser code $C^{\otimes t}$.
+
+\subsection{Formal Description}
 
 Prover $\mathcal{P}$'s input: 
 $$
@@ -76,7 +78,9 @@ $$
 
 \section{Consistency Test}
 
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The consistency test is identical to the proximity test, except that in round $i$, the random linear combination $r_i$ is replaced by $q_i$. The full description of the consistency test is written below.
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The consistency test is identical to the proximity test, except that in round $i$, the random linear combination $r_i$ is replaced by $q_i$. It will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_{cons}$ (definition \ref{def:relation-cons}). The full description of the consistency test is written below.
+
+\subsection{Formal Description}
 
 Prover $\mathcal{P}$'s input: 
 $$
@@ -118,30 +122,6 @@ $$
     \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m q_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
 $$
 \end{itemize}
-
-\section{Polynomial Commitment for t = 3}
-
-Prover $\mathcal{P}$'s input: $u \in \mathbb{F}^{m \times m \times m}$.
-
-Verifier $\mathcal{V}$'s input: $x, y \in \mathbb{F}$.
-
-\textbf{Commitment Phase.}
-
-Let $M_0 = u \in \mathbb{F}^{m \times m \times m}$ and $M_0^{\prime} = \text{Enc}_1(\text{Enc}_2(M_0)) \in \mathbb{F}^{N \times N \times m}$. $\mathcal{P}$ sends $M_0^{\prime}$ to $\mathcal{V}$.
-
-
-\textbf{Evaluation Phase.}
-
-Execute the consistency test protocol. The prover $\mathcal{P}$'s input is $(M_0, M_0^{\prime})$ and the verifier $\mathcal{V}$'s input is $(q_1, q_2, q_3)$ such that $g(x) =\langle q_1 \otimes q_2 \otimes q_3, u \rangle$.
-If all consistency checks passed, then the verifier $\mathcal{V}$ will consider $\langle q_3, M_{2} \rangle$ as the evaluation result $g(x)$. 
-
-\textbf{Testing Phase.}
-
-Execute the proximity test protocol. The prover $\mathcal{P}$'s input is $(M_0, M_0^{\prime})$.
-
-Execute the proximity test protocol. The prover $\mathcal{P}$'s input is $(M_1, M_1^{\prime})$.
-
-If all tests passed, the verifier $\mathcal{V}$ will output the evaluation result. Otherwise, the verifier $\mathcal{V}$ will reject the protocol.
 
 \section{Polynomial Commitment for Arbitrary t}
 
