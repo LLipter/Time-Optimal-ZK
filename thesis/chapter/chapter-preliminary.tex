@@ -18,7 +18,7 @@ $[n]$ is the shorthand for the set $\{i: 1 \le i \le n\}$
 
 \begin{definition}[Relation]
 
-An \textbf{relation} $R$ is a set of pairs $(\mathbb{X}, \mathbb{W})$ where $\mathbb{X}$ is the instance and $\mathbb{W}$ is the witness. The corresponding \textbf{language} $L(R)$ is the set of instances $\mathbb{X}$ for which there exists a witness $\mathbb{W}$ such that $(\mathbb{X}, \mathbb{W}) \in R$.
+A \textbf{relation} $R$ is a set of pairs $(\mathbb{X}, \mathbb{W})$ where $\mathbb{X}$ is the instance and $\mathbb{W}$ is the witness. The corresponding \textbf{language} $L(R)$ is the set of instances $\mathbb{X}$ for which there exists a witness $\mathbb{W}$ such that $(\mathbb{X}, \mathbb{W}) \in R$.
 
 \end{definition}
 
@@ -85,6 +85,12 @@ In practice, we use Merkle tree commitment to compile the IOP or IOPP to an real
 
 \begin{definition}
 
+A interactive oracle proof IOP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{semi-honest verifier zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
+ 
+\end{definition}
+
+\begin{definition}
+
 A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{semi-honest verifier zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
  
 \end{definition}
@@ -122,28 +128,30 @@ A \textbf{multivariate} polynomial is called a \textbf{multilinear} polynomial i
 
 \begin{definition}[Polynomial Commitment]
 A \textbf{Polynomial Commitment} is an interactive proof (IP), which defines a relation $R = ((C, x, y), (\phi(\cdot))$. 
-And it consists of two algorithms (\textsc{PC.Commit}, \textsc{PC.Verify}) and an evaluation protocol \textsc{PC.Eval}, where:
+And it consists of three algorithms (\textsc{PC.Setup}, \textsc{PC.Commit}, \textsc{PC.Verify}) and an evaluation protocol \textsc{PC.Eval}, where:
 
 \begin{itemize}
-    \item \textsc{PC.Commit}$(\phi(\cdot))$: the algorithm outputs a commitment $\mathcal{C}$ of the polynomial $\phi(\cdot)$.
+    \item \textsc{PC.Setup}$(\lambda, d)$: the algorithm outputs public parameters $pp$ for committing to polynomials of degree $d$. The parameters $pp$ include a specification of an field $\mathbb{F}$.
     
-    \item \textsc{PC.Verify}$(\phi(\cdot), \mathcal{C})$: given $\phi(\cdot), \mathcal{C}$, the algorithm checks if $\mathcal{C}$ is a valid commitment for polynomial $\phi(\cdot)$. The algorithm outputs \textsc{accept} or \textsc{reject}.
+    \item \textsc{PC.Commit}$(pp, \phi(\cdot))$: the algorithm outputs a commitment $\mathcal{C}$ of the polynomial $\phi(\cdot)$ with degree at most $d$.
     
-    \item \textsc{PC.Eval}$(\mathcal{P}(\phi(\cdot)), \mathcal{V}(\mathcal{C}, x, y))$ : this is an  interactive protocol between a prover $\mathcal{P}$ who has the polynomial $\phi(\cdot)$ as private input and a verifier $\mathcal{V}$ who has $(\mathcal{R}, x, y)$ as common public input. The purpose of the protocol is to convince the verifier that $\phi(x) = y$.
+    \item \textsc{PC.Verify}$(pp, \phi(\cdot), \mathcal{C})$: given $\phi(\cdot), \mathcal{C}$, the algorithm checks if $\mathcal{C}$ is a valid commitment for polynomial $\phi(\cdot)$  with degree at most $d$. The algorithm outputs \textsc{accept} or \textsc{reject}.
+    
+    \item \textsc{PC.Eval}$(\mathcal{P}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))$ : this is an  interactive protocol between a prover $\mathcal{P}$ who has the polynomial $\phi(\cdot)$ as private input and a verifier $\mathcal{V}$ who has $(\mathcal{R}, x, y)$ as common public input. The purpose of the protocol is to convince the verifier that $\phi(x) = y$ and the degree of $\phi(\cdot)$ is at most $d$.
 \end{itemize}
 
 \end{definition}
 
-\textbf{Completeness.} Let $\mathcal{C} \leftarrow \textsc{PC.Commit}(\phi(\cdot))$ be the commitment of a polynomial. 
-For all polynomials $\phi(\cdot)$ and all points $x$, with probability 1 the verification \textsc{PC.Verify}$(\phi(\cdot), \mathcal{C})$ outputs \textsc{accept}. And likewise, $\mathcal{V}$ output \textsc{accept} in interaction with $\mathcal{P}$ in the \textsc{PC.Eval} protocol on valid inputs. The formal completeness requirement is:
+\textbf{Completeness.} Let $\mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot))$ be the commitment of a polynomial. 
+For all polynomials $\phi(\cdot)$ and all points $x$, with probability 1 the verification \textsc{PC.Verify}$(pp, \phi(\cdot), \mathcal{C})$ outputs \textsc{accept}. And likewise, $\mathcal{V}$ output \textsc{accept} in interaction with $\mathcal{P}$ in the \textsc{PC.Eval} protocol on valid inputs. The formal completeness requirement is:
 $$
 Pr
 \begin{pmatrix}
  b_1 = \textsc{accept} \wedge b_2 = \textsc{accept}: \\
- \forall \phi(\cdot), x \\
- \mathcal{C} \leftarrow \textsc{PC.Commit}(\phi(\cdot)) \\
- b_1 \leftarrow \textsc{PC.Verify}(\phi(\cdot), \mathcal{C}) \\
- (\perp, b_2)\leftarrow \textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(\mathcal{C}, x, y))
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot)) \\
+ b_1 \leftarrow \textsc{PC.Verify}(pp, \phi(\cdot), \mathcal{C}) \\
+ (\perp, b_2)\leftarrow \textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))
 \end{pmatrix}
 = 1
 $$
@@ -156,10 +164,10 @@ $$
  b_1 = \textsc{accept } \wedge \\
  b_2 = \textsc{accept } \wedge \\
  \phi(\cdot) \neq \phi^\prime(\cdot): \\
- \forall \mathcal{A}(\cdot) \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
  (\mathcal{C}, \phi(\cdot), \phi^\prime(\cdot)) \leftarrow \mathcal{A}(x) \\
- b_1 \leftarrow \textsc{PC.Verify}(\phi(\cdot), \mathcal{C}) \\
- b_2 \leftarrow \textsc{PC.Verify}(\phi^\prime(\cdot), \mathcal{C})
+ b_1 \leftarrow \textsc{PC.Verify}(pp, \phi(\cdot), \mathcal{C}) \\
+ b_2 \leftarrow \textsc{PC.Verify}(pp, \phi^\prime(\cdot), \mathcal{C})
 \end{pmatrix}
 $$
 
@@ -171,10 +179,10 @@ $$
 \epsilon_{hide} = Pr
 \begin{pmatrix}
  b = b^\prime : \\
- \forall \mathcal{A} = (\mathcal{A}_0, \mathcal{A}_1) \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
  (\phi_0(\cdot), \phi_1(\cdot)) \leftarrow \mathcal{A}_0 \\
  b \overset{{\scriptscriptstyle\$}}{\leftarrow} \{0, 1\} \\
- \mathcal{C} \leftarrow \textsc{PC.Commit}(\phi_b(\cdot)) \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi_b(\cdot)) \\
  b^\prime \leftarrow \mathcal{A}_1(\mathcal{C})
 \end{pmatrix}
 $$
@@ -185,10 +193,10 @@ $$
 \epsilon_{sound} = Pr
 \begin{pmatrix}
  b = \textsc{accept } \wedge \\
- \phi(x) \neq y: \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
  \forall \tilde{\mathcal{P}} \\
- \mathcal{C} \leftarrow \textsc{PC.Commit}(\phi(\cdot)) \\
- (\perp, b)\leftarrow \textsc{PC.Eval}(\tilde{\mathcal{P}}(\phi(\cdot)), \mathcal{V}(\mathcal{C}, x, y))
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot)) \\
+ (\perp, b)\leftarrow \textsc{PC.Eval}(\tilde{\mathcal{P}}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))
 \end{pmatrix}
 $$
 
@@ -199,11 +207,11 @@ $$
 \epsilon_{zk} = Pr
 \begin{pmatrix}
  b = b^\prime : \\
- \forall \mathcal{A} \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
  b \overset{{\scriptscriptstyle\$}}{\leftarrow} \{0, 1\} \\
- \mathcal{C} \leftarrow \textsc{PC.Commit}(\phi(\cdot)) \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot)) \\
  t_0 \leftarrow \mathcal{S} \\
- t_1 \leftarrow \textsc{View}(\textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(\mathcal{C}, x, y))) \\
+ t_1 \leftarrow \textsc{View}(\textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))) \\
  b^\prime \leftarrow \mathcal{A}(t_b, C)
 \end{pmatrix}
 $$
