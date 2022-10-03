@@ -801,7 +801,7 @@ where $(v_2, v_1, v_0) \in (\mathbb{F}^m, \mathbb{F}^m, \mathbb{F}^m)$ and $(w_2
 \end{equation*}
 where, 
 \begin{align*}
-    \widetilde{\textsc{Enc}}(H, r) &= \textsc{Enc}(H) + r, r \\ 
+    \widetilde{\textsc{Enc}}(H, r) &= (\textsc{Enc}(H) + r, r) \\ 
     H_2 &= f_2, v_2, w_2
     \in \mathbb{F}^{2m+n} \quad (f_2 = 0^m) \\
     H_1 &= f_1, v_1, w_1
@@ -879,9 +879,9 @@ We cite the following lemma from paper \cite{lwe} to complete the soundness proo
 \begin{lemma}
 \label{lemma:lweseproof}
 
-If there exist some $c^* \in \mathbb{F}^3$ such that $d(C, c^*E^*) \ge \frac{\delta}{3}$, then
+If there exist some $c^* \in \mathbb{F}^3$ such that $d(C, c^*E^*) \ge \frac{\delta}{10}$, then
 $$
-    Pr\biggl[ d(C, (x^2, x, 1)E^*) \le \frac{\delta}{9} \biggr] \le \frac{2}{q-1}
+    Pr\biggl[ d(C, (x^2, x, 1)E^*) \le \frac{\delta}{30} \biggr] \le \frac{2}{q-1}
 $$
 where $q$ is the size of the underlying field, $d$ is the relative distance function and $C$ is the codeword.
 
@@ -896,7 +896,8 @@ $$
     \biggl\{
     \frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda, 
     (1 - \delta)^\lambda, 
-    \frac{2}{q-1} + \frac{q-3}{q-1}(1 - \frac{8\delta}{9})^\lambda
+    \frac{2}{q-1} + \frac{q-3}{q-1}(1 - \frac{29\delta}{30})^\lambda,
+    (1 - \frac{7\delta}{10})^\lambda
     \biggr\}
 $$
 where $q$ is the size of the underlying field and $\delta$ is the relative distance of the codeword represented by the encoding function $\widetilde{\textsc{Enc}}$.
@@ -904,9 +905,9 @@ where $q$ is the size of the underlying field and $\delta$ is the relative dista
 \end{lemma}
 \begin{proof}
 
-Suppose $H_2^\prime$, $H_1^\prime$ or $H_0^\prime$ is at least $\frac{\delta}{3}$ far away from a valid codeword. Without loss of generality, we assume $H_2^\prime$ is not a valid codeword. Then let $c^* = (1, 0, 0)$, according to lemma \ref{lemma:lweseproof}, the probability that a structured linear combination of $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ is $\frac{\delta}{9}$ close to a codeword is bound by $\frac{2}{q-1}$. Therefore, the soundness error is at most $\frac{2}{q-1} + \frac{q-3}{q-1}(1 - \frac{8\delta}{9})^\lambda$.
+Suppose $H_2^\prime$, $H_1^\prime$ or $H_0^\prime$ is at least $\frac{\delta}{10}$ far away from a valid codeword. Without loss of generality, we assume $H_2^\prime$ is not a valid codeword. Then let $c^* = (1, 0, 0)$, according to lemma \ref{lemma:lweseproof}, the probability that a structured linear combination of $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ is $\frac{\delta}{30}$ close to a codeword is bound by $\frac{2}{q-1}$. Therefore, the soundness error is at most $\frac{2}{q-1} + \frac{q-3}{q-1}(1 - \frac{29\delta}{30})^\lambda$.
 
-Otherwise, $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ are $\frac{\delta}{3}$ close to a valid codeword, and it is possible to decode them to a instance/witness $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$. 
+Otherwise, $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ are $\frac{\delta}{10}$ close to a valid codeword, and it is possible to decode them to a instance/witness $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$. 
 
 Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$ is not in relation $R_{LWE}$. Then at least one of the following conditions is satisfied:
 \begin{itemize}
@@ -923,7 +924,12 @@ Suppose the malicious prover $\mathcal{P}$ sends incorrect messages.
     
     \item If $f_2, f_1, f_0, v_2, v_1, v_0, w_2, w_1$ or $w_0$ is incorrect, denote the incorrect polynomial as $f^\prime$, $g^\prime$ or $h^\prime$. Since $f$ and $f^\prime$, $g$ and $g^\prime$ or $h$ and $h^\prime$ are polynomials with degree at most 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{2}{q}$. If this event does not happen, then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda$.
 
-    \item If $\overline{f}, \overline{g}$, or $\overline{h}$ is incorrect, then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$.
+    \item If $\overline{f}, \overline{g}$, or $\overline{h}$ is incorrect, 
+    then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, 
+    at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and
+    $x^2\widetilde{\textsc{Enc}}(\overline{H_2}, \overline{r_2}) + x\widetilde{\textsc{Enc}}(\overline{H_1}, \overline{r_1}) + \widetilde{\textsc{Enc}}(\overline{H_0}, \overline{r_0})$.
+    And since $\widetilde{\textsc{Enc}}(\overline{H_i}, \overline{r_i})$ and $H_i^\prime$ are $\frac{\delta}{10}$ close to each other, at least $\frac{7\delta}{10}$ portion of $\widetilde{\textsc{Enc}}$ and 
+    $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \frac{7\delta}{10})^\lambda$.
     
 
 \end{itemize}
@@ -989,3 +995,49 @@ For both the simulated transcripts and the real transcripts, $r_2, r_1, r_0$ are
 In the real transcripts, $H_2^\prime, H_1^\prime$, and $H_0^\prime$ look random because the mask $r_2, r_1, r_0$ are randomly sampled and all other elements are hided by the random mask. In the simulated transcripts, for the same reason, $H_2^\prime, H_1^\prime$, and $H_0^\prime$ also look random. Therefore, as long as $\forall i_1, i_2 \in I, |i_1 - i_2| \neq N$, they are indistinguishable to each other.
 
 \end{proof}
+
+
+\section{Benchmark}
+
+We benckmark the above LWE protocol on a computer with
+Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-lwe}.
+
+
+As $n$ and $m$ increases, it is generally require more time to complete
+the committing phase for the prover and the checking phase for the verifier. Also, larger $n$ and $m$ will result in larger communication complexity.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|m{4em}|m{4em}|m{4em}|m{7em}|}
+\hline
+
+\multicolumn{1}{|l|}{n}                     & m    & Prover Time {[}ms{]} & Verifier Time {[}ms{]} & Communication Complexity {[}Field Element{]} \\ \hline\hline
+\multirow{5}{*}{128}                        & 128  & 56                   & 42                     & 1328                                         \\ \cline{2-5} 
+                                            & 256  & 116                  & 66                     & 1556                                         \\ \cline{2-5} 
+                                            & 512  & 168                  & 130                    & 1812                                         \\ \cline{2-5} 
+                                            & 1024 & 453                  & 178                    & 2424                                         \\ \cline{2-5} 
+                                            & 2048 & 564                  & 329                    & 3548                                         \\ \hline
+\multirow{5}{*}{256}                        & 128  & 80                   & 60                     & 1348                                         \\ \cline{2-5} 
+                                            & 256  & 131                  & 102                    & 1556                                         \\ \cline{2-5} 
+                                            & 512  & 231                  & 165                    & 1912                                         \\ \cline{2-5} 
+                                            & 1024 & 545                  & 344                    & 2424                                         \\ \cline{2-5} 
+                                            & 2048 & 824                  & 653                    & 3548                                         \\ \hline
+\multirow{5}{*}{512}                        & 128  & 155                  & 103                    & 1428                                         \\ \cline{2-5} 
+                                            & 256  & 220                  & 162                    & 1556                                         \\ \cline{2-5} 
+                                            & 512  & 385                  & 295                    & 1912                                         \\ \cline{2-5} 
+                                            & 1024 & 904                  & 654                    & 2524                                         \\ \cline{2-5} 
+                                            & 2048 & 1450                 & 1229                   & 3548                                         \\ \hline
+\multicolumn{1}{|l|}{\multirow{5}{*}{1024}} & 128  & 292                  & 192                    & 1528                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 256  & 533                  & 276                    & 1656                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 512  & 743                  & 647                    & 1912                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 1024 & 1403                 & 1166                   & 2524                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 2048 & 2679                 & 2166                   & 3648                                         \\ \hline
+\multicolumn{1}{|l|}{\multirow{5}{*}{2048}} & 128  & 526                  & 399                    & 1528                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 256  & 916                  & 603                    & 1756                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 512  & 1334                 & 922                    & 2012                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 1024 & 2178                 & 2097                   & 2524                                         \\ \cline{2-5} 
+\multicolumn{1}{|l|}{}                      & 2048 & 4078                 & 3746                   & 3648                                         \\ \hline
+\end{tabular}
+\caption{Runtime of LWE protocol with 1 thread and 100 test tuples. The soundness error is around 0.007.}
+\label{table:benchmark-lwe}
+\end{table}

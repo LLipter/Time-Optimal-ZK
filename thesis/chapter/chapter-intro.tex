@@ -1,0 +1,45 @@
+\chapter{Background}
+
+% zero-knowledge in general
+
+In cryptography, a \textbf{zero-knowledge proof} is a protocol which allow an untrusted prover $\mathcal{P}$ to convince a sceptical verifier $\mathcal{V}$ that a statement is true without revealing any further information about why the statement is true. 
+Example use-cases include verifiable computing, where a powerful, but untrusted server proves, to a computationally weak client, that they performed a large calculation correctly. 
+The essence of zero-knowledge proofs is that it is trivial to prove that one possesses knowledge of certain information by simply revealing it; the challenge is to prove such possession without revealing the information itself or any additional information.
+
+% linear-time zero-knowledge
+
+Efficiency is crucial for large and complex statements especially when we want to deploy those protocols in practice. Important efficiency parameters include but not limited to the time complexity of the prover, the time complexity of the verifier, the amount of communication measured in bits, and the number of rounds the prover and verifier need to interact. In particular, we are interested in the protocol where the prover time is linear to the size of the statement. We call such protocols \textbf{linear-time zero-knowledge protocols}.
+
+% interactive oracle proofs
+% https://www.iacr.org/archive/tcc2016b/99850156/99850156.pdf
+After years of researching, lots of new proof system models have been introduced. 
+One of the most well-known models is \textbf{Interactive proofs (IPs)}. Interactive proofs were introduced by Goldwasser, Micali, and Rackoff in \cite{DBLP:books/acm/19/GoldwasserMR19}, in which a probabilistic polynomial-time verifier exchanges $k$-rounds of messages with an all-powerful prover, and then accepts or rejects the statements.  
+Another famous model is \textbf{Probabilistically checkable proofs (PCPs)}. Probabilistically checkable proofs were introduced by \cite{DBLP:journals/tcs/FortnowRS94} \cite{DBLP:conf/stoc/BabaiFLS91}. In a probabilistically-checkable proof, a probabilistic polynomial-time verifier has oracle access to a proof string.
+Later, \textbf{Interactive oracle proofs (IOPs)} was introduced by \cite{DBLP:conf/tcc/Ben-SassonCS16}, which naturally combines aspects of IPs and PCPs and also generalizes interactive PCPs. Namely, an IOP is a ``multi-round PCP'' that generalizes an interactive proof as follows:
+the verifier $\mathcal{V}$ has oracle access to the prover $\mathcal{P}$’s messages, and may probabilistically query them (rather than having to read them in full). In more detail, a $k$-round IOP comprises $k$ rounds of interaction. In the $i$-th round of interaction: the verifier $\mathcal{V}$ sends a message $m_i$ to the prover $\mathcal{P}$, which he reads in full; then the prover $\mathcal{P}$ replies with a message $f_i$ to the verifier $\mathcal{V}$, which he can query, as an oracle proof string, in this and all later rounds. After the $k$ rounds of interaction, the verifier $\mathcal{V}$ either accepts or rejects the statement.
+
+
+% polynomial commitment schemes
+% https://eprint.iacr.org/2020/1536.pdf
+In this thesis, we focus on \textbf{polynomial commitment schemes}, which is the core component of many famous interactive protocols. A polynomial commitment schemes provides the ability to commit to a polynomial over a finite field and prove its evaluation at points.
+
+% linear time encodable codes
+In coding theory, a linear code is an error-correcting code for which any linear combination of codewords is also a codeword. The encoding function maps vectors in space $\mathbb{F}^k$ to vectors in space $\mathbb{F}^n$, where $\mathbb{F}$ is a finite field with $q$ elements. The relative distance is defined to be the minimum distance between any valid codewords divided by $n$, the length of the codeword. 
+In particular, we are interested in \textbf{linear-time encodable codes}, whose encoding function runs in linear with the size of $k$, the length of input vectors.
+Many protocols rely on special families of linear-time encodable codes, whose properties influence the final performance of the proof systems. For example, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The lower the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs.
+
+% Start by gathering references
+% Then fill in the new section with as much text as you can so that we can discuss it together.
+% Explain what the object is. Why it is useful.
+% List best papers/history and what they contribute.
+
+
+% An interactive argument (or computationally sound proof system) is a relaxation of an interactive proof, introduced in \cite{10.1145/22145.22178}. The difference is that the prover is restricted to be a polynomial-time algorithm for an interactive argument, whereas no such restrictions on the prover apply for an interactive proof. In this thesis, we focus on the practical usage of \textbf{linear time} interactive argument with or without zero-knowledge property. Additionally, many interactive argument systems use polynomial commitment as a fundamental building block. And polynomial commitment can imply a general interactive argument system. Hence, we will investigate the linear time polynomial commitment instead.
+
+%   After years of research improving the proof size and verifier run-time of zero-knowledge proofs, prover runtime remains a major bottleneck.
+
+% A line of work \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} attempts to address this with zero-knowledge protocols where prover runtime is a constant multiplied by the time taken to perform the calculation. The only one of these works which investigates the practical efficiency of their constructions is \cite{brakedown}, which makes stronger security assumptions than the other works to achieve zero-knowledge and good verifier runtime. On the other hand, \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on specialised constructions of error correcting codes, hash functions, and sub-protocols whose practical performance is unknown.
+
+% The protocols in these works rely on special families of linear-time error-correcting codes, whose properties influence the final performance of the proof systems. Firstly, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The lower the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs. The implementation of \cite{brakedown} uses low dimension. The first goal of this project is to extend the implementation of \cite{brakedown} to higher dimension and investigate the impact of dimension on performance, at various different security levels.
+
+% Secondly, while \cite{brakedown} rely on strong assumptions in order to achieve zero-knowledge, \cite{cryptoeprint:2020/1426} \cite{BCL22} use codes with extra zero-knowledge properties. Codes with zero-knowledge properties are easy to obtain from plain codes via simple transformations that is similar to one-time-pad encryption, and codes with stronger zero-knowledge properties use more complex transformations, as described in \cite{10.1145/2554797.2554815}. The second goal of this project is to investigate the performance impact of adding zero-knowledge to the \cite{brakedown} polynomial commitment scheme using zero-knowledge codes, using the plain codes implemented by \cite{brakedown} as a starting point, and assess which transformations are more practical.
