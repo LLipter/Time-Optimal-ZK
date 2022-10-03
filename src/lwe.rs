@@ -80,11 +80,9 @@ pub fn fill_H_array<F>(
     H: &mut Vec::<F>,
     n: usize,
     m: usize,
-    lambda: usize,
     array1: &Array<F, Dim<[usize; 1]>>,
     array2: &Array<F, Dim<[usize; 1]>>,
     array3: &Array<F, Dim<[usize; 1]>>,
-    array4: &Array<F, Dim<[usize; 1]>>,
 )
 where
     F: PrimeField + Num + MulAcc,
@@ -92,7 +90,6 @@ where
     assert_eq!(array1.len(), m);
     assert_eq!(array2.len(), m);
     assert_eq!(array3.len(), n);
-    assert_eq!(array4.len(), lambda);
     H
         .par_iter_mut()
         .enumerate()
@@ -103,8 +100,6 @@ where
                 *x = array2[i-m];
             }else if i < 2 * m + n {
                 *x = array3[i-2*m];
-            }else if i < 2 * m + n + lambda {
-                *x = array4[i-2*m-n];
             }
         });
 }
@@ -162,7 +157,7 @@ where
     let mut rng = rand::thread_rng();
 
     // generate codes
-    let msg_len: usize = 2 * m + n + lambda;
+    let msg_len: usize = 2 * m + n;
     let (precodes, postcodes) = generate::<F, C>(msg_len, seed);
     let code_len = codeword_length::<F>(&precodes, &postcodes);
 
@@ -272,40 +267,24 @@ where
             *x.first_mut().unwrap() = *data;
         });
 
-    // r0, r1, r2: lambda
-    let mut r0 = Array::<F, _>::zeros(lambda);
-    let mut r1 = Array::<F, _>::zeros(lambda);
-    let mut r2 = Array::<F, _>::zeros(lambda);
-    r0.par_iter_mut().for_each(|x| {
-        let mut rng = rand::thread_rng();
-        *x = F::random(&mut rng);
-    });
-    r1.par_iter_mut().for_each(|x| {
-        let mut rng = rand::thread_rng();
-        *x = F::random(&mut rng);
-    });
-    r2.par_iter_mut().for_each(|x| {
-        let mut rng = rand::thread_rng();
-        *x = F::random(&mut rng);
-    });
     
     let mut H2 = Vec::<F>::new();
     H2.resize(code_len, zero);
     let all_zeros = Array::<F, _>::zeros(m);
     fill_H_array::<F>(
-        &mut H2, n, m, lambda, &all_zeros, &v2, &w2, &r2
+        &mut H2, n, m, &all_zeros, &v2, &w2
     );
 
     let mut H1 = Vec::<F>::new();
     H1.resize(code_len, zero);
     fill_H_array::<F>(
-        &mut H1, n, m, lambda, &t, &v1, &w1, &r1
+        &mut H1, n, m, &t, &v1, &w1
     );
         
     let mut H0 = Vec::<F>::new();
     H0.resize(code_len, zero);
     fill_H_array::<F>(
-        &mut H0, n, m, lambda, &s, &v0, &w0, &r0
+        &mut H0, n, m, &s, &v0, &w0
     );
     
     // encoding
@@ -344,20 +323,6 @@ where
             *x = t[i].mul(X).add(s[i]);
         });
 
-    // rx: lambda
-    let mut rx = Vec::<F>::new();
-    rx.resize(lambda, zero);
-    rx
-        .par_iter_mut()
-        .enumerate()
-        .for_each(|(i, x)|{
-            *x = r2[i].mul(X).mul(X).add(
-                r1[i].mul(X)
-            ).add(
-                r0[i]
-            );
-        });
-
     let committed_time = Instant::now();
 
     // verifier sampling idx
@@ -391,6 +356,8 @@ where
         .for_each(|(i, x)|{
             *x = u[i].sub(Afx[i]);
         });
+
+    let mid_time = Instant::now();
 
     // fxx: m
     let mut fxx = Vec::<F>::new();
@@ -428,11 +395,10 @@ where
     let mut Hx = Vec::<F>::new();
     Hx.resize(code_len, zero);
     fill_H_array::<F>(
-        &mut Hx, n, m, lambda, 
+        &mut Hx, n, m, 
         &Array::from(fx), 
         &Array::from(fxx), 
         &Array::from(dxx), 
-        &Array::from(rx)
     );
     
     // encoding
@@ -456,8 +422,10 @@ where
 
     println!("RD_code:{:?} n:{:?} m:{:?} lambda:{:?}", RS_code, n, m, lambda);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
+    println!("mid_time: {} ms", mid_time.duration_since(committed_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
-    println!("total_time: {} ms\n", verified_time.duration_since(start_time).as_millis());
+    println!("total_time: {} ms", verified_time.duration_since(start_time).as_millis());
+    println!("CC: {} \n", m + (100 as usize) * (3 + ((code_len as f64).log2()) as usize));
 
 
 }
