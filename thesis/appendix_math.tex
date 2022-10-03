@@ -11,7 +11,7 @@ $\binom{n}{m} \le (\frac{en}{m})^m$, for $n, m \in \mathbb{Z}^+$
 \begin{proof}
 \begin{align}
 \log m! 
-    &= \log 1 + \log 2 + \cdots + \log m \nonumber \\
+    &= \sum_{i=1}^{m} \log i \nonumber \\
     &\ge \int_1^m \log x \, dx \nonumber \\
     &= [x \log x - x]_1^m \nonumber \\
     &= m \log m - m + 1 \label{eq:logm!}

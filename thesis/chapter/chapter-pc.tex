@@ -28,78 +28,123 @@ And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_
 
 \end{lemma}
 
-\section{Polynomial Commitment for t = 3}
 
-\textbf{Commitment Phase.}
+\section{Proximity Test for Arbitrary t}
 
-Let $M_0 = u$ and $M_0^{\prime} = \text{Enc}_1(\text{Enc}_2(M_0)) \in \mathbb{F}^{N \times N \times m}$. Send $M_0^{\prime}$ to the verifier.
+Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tenser code $C^{\otimes t}$.
 
-\textbf{Testing Phase.}
+\subsection{Formal Description}
 
-The testing phase consists of $2$ rounds, with each round reducing the dimension by 1.
-
-In round 1, the verifier will send a random value $r_1 \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_1 \in \mathbb{F}^{m \times m}$ of the 3rd dimension of matrix $M_0$.
-Namely, $M_1[i,j] = \sum_{k=1}^{m} r_1[k] \cdot M_0[i,j,k]$ for $1 \le i, j \le m$. 
-Let $M_1^\prime = \text{Enc}_1(M_1) \in \mathbb{F}^{N \times m}$.
-Then the prover sends $M_1^\prime$ to the verifier.
-
-In round 2, the verifier will send a random value $r_2 \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_2 \in \mathbb{F}^{m}$ of the 2nd dimension of matrix $M_1$.
-Namely, $M_2[i] = \sum_{k=1}^{m} r_2[k] \cdot M_1[i, k]$. 
-Let $M_2^\prime = M_2 \in \mathbb{F}^{m}$.
-Then the prover sends $M_2^\prime$ to the verifier.
-
-Then the verifier will perform a probabilistic check to make sure $M_0^\prime $, $ M_1^\prime$ and $M_2^\prime$ are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, j_3)$ from space $[N] \times [N] \times [N]$. 
-For each tuple $(j_1, j_2, j_3)$, let $M_1^\prime[j_1, *]$ denotes the $j_1$-th row in $M_1^\prime$.
-The verifier will check whether the following equation holds:
-
+Prover $\mathcal{P}$'s input: 
 $$
-    \text{Enc}(M_1^\prime[j_1, *])[i_2] \stackrel{?}{=} \sum_{k=1}^m r_1[k] \cdot M_0^{\prime}[j_1,j_2,k]
+    M_0 \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}
 $$
 $$
-    \text{Enc}(M_2^\prime[*])[j_1] \stackrel{?}{=} \sum_{k=1}^m r_2[k] \cdot M_1^{\prime}[j_1,k]
+    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1}(M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
 $$
 
-\textbf{Evaluation Phase.}
+Verifier $\mathcal{V}$'s input: nothing.
 
-Let $q_1, q_2, q_3 \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes q_3, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistency checks passed, then the verifier outputs $M_{3}$ as $g(x)$.
+In high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
+
+\begin{itemize}
+    \item $\mathcal{P}$ sends $M_0^{\prime}$ to $\mathcal{V}$.
+    
+    \item Round $i$ for $i \in [t-1]$
+    
+    \begin{itemize}
+        \item $\mathcal{V}$ sample a random variable $r_i \in \mathbb{F}^m$ and send $r_i$ to $\mathcal{P}$.
+        \item $\mathcal{P}$ computes a linear combination 
+        $M_i \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$ of the last dimension of matrix $M_{i-1}$.
+        Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+$$
+    M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
+$$
+
+        \item $\mathcal{P}$ computes 
+$$
+    M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
+$$    
+        and sends $M_i^\prime$ to $\mathcal{V}$.
+    \end{itemize}
+    
+    \item $\mathcal{V}$ performs a probabilistic check to make sure $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ are consistent with each other. Formally speaking, $\mathcal{V}$ will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\overbrace{[N] \times [N] \times \cdots \times [N]}^{t \text{ times}}$. 
+    For each tuple $(j_1, j_2, \cdots, j_t)$, 
+    $\mathcal{V}$ will check whether the following equation holds for every $i \in [t-1]$:
+$$
+    \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
+$$
+\end{itemize}
+
+\section{Consistency Test}
+
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The consistency test is identical to the proximity test, except that in round $i$, the random linear combination $r_i$ is replaced by $q_i$. It will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_{cons}$ (definition \ref{def:relation-cons}). The full description of the consistency test is written below.
+
+\subsection{Formal Description}
+
+Prover $\mathcal{P}$'s input: 
+$$
+    M_0 \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}
+$$
+$$
+    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1}(M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
+$$
+
+Verifier $\mathcal{V}$'s input: $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle$.
+
+In high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
+
+\begin{itemize}
+    \item $\mathcal{P}$ sends $M_0^{\prime}$ to $\mathcal{V}$.
+    
+    \item Round $i$ for $i \in [t-1]$
+    
+    \begin{itemize}
+        \item $\mathcal{V}$ send $q_i$ to $\mathcal{P}$.
+        \item $\mathcal{P}$ computes a linear combination 
+        $M_i \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$ of the last dimension of matrix $M_{i-1}$.
+        Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+$$
+    M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} q_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
+$$
+
+        \item $\mathcal{P}$ computes 
+$$
+    M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
+$$    
+        and sends $M_i^\prime$ to $\mathcal{V}$.
+    \end{itemize}
+    
+    \item $\mathcal{V}$ performs a probabilistic check to make sure $M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ are consistent with each other. Formally speaking, $\mathcal{V}$ will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\overbrace{[N] \times [N] \times \cdots \times [N]}^{t \text{ times}}$. 
+    For each tuple $(j_1, j_2, \cdots, j_t)$, 
+    $\mathcal{V}$ will check whether the following equation holds for every $i \in [t-1]$:
+$$
+    \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m q_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
+$$
+\end{itemize}
 
 \section{Polynomial Commitment for Arbitrary t}
+
+Prover $\mathcal{P}$'s input: $u \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}$.
+
+Verifier $\mathcal{V}$'s input: $x, y \in \mathbb{F}$.
 
 \subsection{Protocol}
 
 \textbf{Commitment Phase.}
 
-Let $M_0 = u$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$. Send $M_0^{\prime}$ to the verifier.
-
-\textbf{Testing Phase.}
-
-The testing phase consists of $t-1$ rounds, with each round reducing the number of dimensions by 1.
-
-In round i, the verifier will send a random value $r_i \in \mathbb{F}^m$ to the prover.
-The prover will compute a linear combination $M_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of the last dimension of matrix $M_{i-1}$.
-Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
-$$M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]$$
-Let 
-$$
-M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
-$$
-Then the prover sends $M_i^\prime$ to the verifier.
-
-Then the verifier will perform a probabilistic check to make sure 
-$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t-1}^\prime$ 
-are consistent with each other. Formally speaking, the verifier will sample $l$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\overbrace{[N] \times [N] \times \cdots \times [N]}^{t \text{ times}}$. 
-For each tuple $(j_1, j_2, \cdots, j_t)$,
-the verifier will check whether the following equation holds for every $i \in [t-1]$:
-
-$$
-    \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
-$$
+Let $M_0 = u \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}$ and $ M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$. $\mathcal{P}$ sends $M_0^{\prime}$ to $\mathcal{V}$.
 
 \textbf{Evaluation Phase.}
 
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except that in round $i$, the random value $r_i$ is replaced by $q_i$. If all consistency checks passed, then the verifier outputs $M_{t}^{\prime}$ as $g(x)$.
+Execute the consistency test protocol. The prover $\mathcal{P}$'s input is $(M_0, M_0^{\prime})$ and the verifier $\mathcal{V}$'s input is $(q_1, q_2, \cdots, q_t)$ such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $.
+If all consistency checks passed, then the verifier $\mathcal{V}$ will consider $\langle q_t, M_{t-1} \rangle$ as the evaluation result $g(x)$. 
+
+\textbf{Testing Phase.}
+
+For each $0 \le i \le t-1$, execute the proximity test protocol. The prover $\mathcal{P}$'s input is $(M_i, M_i^{\prime})$.
+
+If all tests passed, the verifier $\mathcal{V}$ will output the evaluation result. Otherwise, the verifier $\mathcal{V}$ will reject the protocol.
 
 \section{Analysis}
 
@@ -121,26 +166,7 @@ where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 
 
 
-\section{Implementation Details}
 
-\subsection{Merkle Tree Commitment}
-
-
-A Merkle Tree is a data structure that allows one to commit to $l = 2^{d}$ messages by a single hash value $h$, such that revealing any bit of the message require $d+1$ hash values. A Merkle hash tree is presented by a binary tree of depth $d$ where $l$ messages elements $m_1, m_2, \cdots, m_l$ are assigned to the leaves of the tree. The values assigned to internal nodes are computed by hashing the value of its two child nodes. To reveal $m_i$, we need to reveal $m_i$ together with the values on the path from $m_i$ to the root. We denote the algorithm as follows:
-
-\begin{enumerate}
-    \item $h \leftarrow \textsc{Merkle.Commit}(m_1, m_2, \cdots, m_l)$
-    \item $(m_i, \pi_i) \leftarrow \textsc{Merkle.Open}(m, i)$
-    \item $\{\textsc{accept}, \textsc{reject}\} \leftarrow \textsc{Merkle.Verify}(\pi_i, m_i, h)$
-\end{enumerate}
-
-Coefficient matrices $M_0^\prime, M_1^\prime, \cdots, M_{t-1}^\prime$ sent by the prover may be replaced by a Merkle tree commitment to that matrix, and each query the verifier makes to a matrix is answered by the prover with Merkle tree authentication path for the answer.
-
-And since each time the verifier will query a strip of elements in a matrix (i.e. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$), it is possible to zip such a strip of elements into a single node in Merkle-tree's leaf level to decrease runtime complexity and communication complexity.
-
-\subsection{Parallelism}
-
-Most of the computations for the commitment scheme can be done in parallel in a natural fashion. There is little data dependence among them. Therefore, it is possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
 
 
 \section{Benchmark}

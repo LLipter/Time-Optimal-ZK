@@ -14,12 +14,31 @@ $[n]$ is the shorthand for the set $\{i: 1 \le i \le n\}$
 
 \end{definition}
 
-\section{Interactive Oracle Proof}
+\section{Interactive Oracle Proofs}
 
 \begin{definition}[Relation]
 
-An \textbf{relation} $R$ is a set of pairs $(\mathbb{X}, \mathbb{W})$ where $\mathbb{X}$ is the instance and $\mathbb{W}$ is the witness. The corresponding \textbf{language} $L(R)$ is the set of instances $\mathbb{X}$ for which there exists a witness $\mathbb{W}$ such that $(\mathbb{X}, \mathbb{W}) \in R$.
+A \textbf{relation} $R$ is a set of pairs $(\mathbb{X}, \mathbb{W})$ where $\mathbb{X}$ is the instance and $\mathbb{W}$ is the witness. The corresponding \textbf{language} $L(R)$ is the set of instances $\mathbb{X}$ for which there exists a witness $\mathbb{W}$ such that $(\mathbb{X}, \mathbb{W}) \in R$.
 
+\end{definition}
+
+\begin{definition}[Interactive Proof (IP)]
+An \textbf{Interactive Proof (IP)} is defined by a pair of interactive randomized
+algorithms \textbf{IP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
+The number of rounds of interaction is called the \textbf{round complexity} of the system. 
+During a single round, the prover sends a message to the verifier, and the verifier reply a message back to the prover. 
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover.
+We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
+
+An interactive proof IP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ if the following holds.
+
+\begin{enumerate}
+    \item \textbf{Completeness.}
+    For every pair $(\mathbb{X}, \mathbb{W}) \in R$, the probability that $P(\mathbb{X}, \mathbb{W})$ convinces $V(\mathbb{X})$ to accept is 1.
+    
+    \item \textbf{Soundness.}
+    For every instance $\mathbb{X} \not\in L(R)$ and malicious prover $\tilde{P}$, the probability that $\tilde{P}$ convinces $V(\mathbb{X})$ to accept is at most $\epsilon$.
+\end{enumerate}
 \end{definition}
 
 \begin{definition}[Point Query Interactive Oracle Proof (IOP)]
@@ -27,8 +46,8 @@ An \textbf{Interactive Oracle Proof (IOP)} is defined by a pair of interactive r
 algorithms \textbf{IOP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
 During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. Then the prover will response with $\pi[I]$.
-The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message and for each query only elements in a single point will be responded.
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $i \in [N]^t$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[i]$ through this query.
+The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover messages.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 
 An interactive oracle proof IOP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ if the following holds.
@@ -38,7 +57,7 @@ An interactive oracle proof IOP = (P, V) for a relation R has completeness 1 and
     For every pair $(\mathbb{X}, \mathbb{W}) \in R$, the probability that $P(\mathbb{X}, \mathbb{W})$ convinces $V(\mathbb{X})$ to accept is 1.
     
     \item \textbf{Soundness.}
-    For every instance $\mathbb{X} \not\in L(R)$ and malicious prover $\tilde{P}$, the probability that $\tilde{P}$ convince $V(\mathbb{X})$ to accept is at most $\epsilon$.
+    For every instance $\mathbb{X} \not\in L(R)$ and malicious prover $\tilde{P}$, the probability that $\tilde{P}$ convinces $V(\mathbb{X})$ to accept is at most $\epsilon$.
 \end{enumerate}
 \end{definition}
 
@@ -47,11 +66,11 @@ An \textbf{Interactive Oracle Proof of Proximity (IOPP)} is defined by a pair of
 algorithms \textbf{IOPP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
 During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover. 
+The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[I]$ through this query.
 The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 The protocol's goal is to show that a particular string is close to a valid witness.
-An interactive oracle proof of proximity IOPP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ with distance function $\Delta$ if the following holds.
+An interactive oracle proof of proximity IOPP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ with distance function $\Delta(w_1, w_2) \in \mathbb{F}$ ($w_1, w_2 \in \mathbb{F}^N$) if the following holds.
 
 \begin{enumerate}
     \item \textbf{Completeness.}
@@ -62,7 +81,34 @@ An interactive oracle proof of proximity IOPP = (P, V) for a relation R has comp
 \end{enumerate}
 \end{definition}
 
-\section{Polynomial}
+In practice, we use Merkle tree commitment to compile the IOP or IOPP to an real argument system. Each element in the large array message $\pi$ sent by the prover will be considered to be a leaf node of a Merkle tree. And the corresponding Merkle tree root will be sent to the verifier instead. For each query at position $I$, the prover will responds with $\pi[I]$ and the corresponding Merkle tree path, which will be authenticated later by the verifier.
+
+\begin{definition}
+
+A interactive oracle proof IOP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{semi-honest verifier zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
+ 
+\end{definition}
+
+\begin{definition}
+
+A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{semi-honest verifier zero-knowledge} if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$ and choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are identically distributed.
+ 
+\end{definition}
+
+\begin{definition}
+
+Let $A$ be an algorithm with adaptive query access to oracles $O_1, \cdots, O_n$. Let $Q$ be a stateful query-checker algorithm which receives the adaptive queries of $A$ and may output $\perp$ at any point. We say that $A$ is a $Q$-query algorithm if $Q$ never outputs $\perp$.
+ 
+\end{definition}
+
+\begin{definition}
+
+A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{perfect zero-knowledge} with query-checker $Q$ if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$, 
+$Q$-query algorithm $\widetilde{V}$ and the choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\widetilde{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \widetilde{V}(\mathbb{X};\rho))$ are identically distributed.
+ 
+\end{definition}
+
+\section{Polynomials}
 
 \begin{definition}[Monomials of Polynomial]
 A polynomial g over $\mathbb{F}$ is an expression consisting of a sum of \textbf{monomials} where each monomial is the product of a constant (from $\mathbb{F}$) and powers of one or more variables (which take values from $\mathbb{F}$); all arithmetic is performed over $\mathbb{F}$.
@@ -81,42 +127,96 @@ A \textbf{multivariate} polynomial is called a \textbf{multilinear} polynomial i
 \end{definition}
 
 \begin{definition}[Polynomial Commitment]
-A \textbf{Polynomial Commitment} consists of three algorithms:
+A \textbf{Polynomial Commitment} is an interactive proof (IP), which defines a relation $R = ((C, x, y), (\phi(\cdot))$. 
+And it consists of three algorithms (\textsc{PC.Setup}, \textsc{PC.Commit}, \textsc{PC.Verify}) and an evaluation protocol \textsc{PC.Eval}, where:
 
 \begin{itemize}
-    \item \textsc{PC.Commit}$(\phi(\cdot))$:the algorithm outputs a commitment $\mathcal{R}$ of the polynomial $\phi(\cdot)$.
-    \item \textsc{PC.Prove}$(\phi, x, \mathcal{R})$: given an evaluation point $x$, the algorithm outputs a tuple $(x, \phi(x),\pi_x)$, where $\pi_x$ is the proof.
-    \item \textsc{PC.Verify}$(\pi_x, x, \phi(x), \mathcal{R})$:given $\pi_x, x, \phi(x), \mathcal{R}$, the algorithm checks if $\phi(x)$ is the correct evaluation. The algorithm outputs \textsc{accept} or \textsc{reject}.
+    \item \textsc{PC.Setup}$(\lambda, d)$: the algorithm outputs public parameters $pp$ for committing to polynomials of degree $d$. The parameters $pp$ include a specification of an field $\mathbb{F}$.
+    
+    \item \textsc{PC.Commit}$(pp, \phi(\cdot))$: the algorithm outputs a commitment $\mathcal{C}$ of the polynomial $\phi(\cdot)$ with degree at most $d$.
+    
+    \item \textsc{PC.Verify}$(pp, \phi(\cdot), \mathcal{C})$: given $\phi(\cdot), \mathcal{C}$, the algorithm checks if $\mathcal{C}$ is a valid commitment for polynomial $\phi(\cdot)$  with degree at most $d$. The algorithm outputs \textsc{accept} or \textsc{reject}.
+    
+    \item \textsc{PC.Eval}$(\mathcal{P}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))$ : this is an  interactive protocol between a prover $\mathcal{P}$ who has the polynomial $\phi(\cdot)$ as private input and a verifier $\mathcal{V}$ who has $(\mathcal{R}, x, y)$ as common public input. The purpose of the protocol is to convince the verifier that $\phi(x) = y$ and the degree of $\phi(\cdot)$ is at most $d$.
 \end{itemize}
 
 \end{definition}
 
-\textbf{Completeness.} Let $\mathcal{R} \leftarrow \textsc{PC.Commit}(\phi(\cdot))$ be the commitment of a polynomial. Any output $(x, \phi(x),\pi_x)$ generated by an honest prover using algorithm \textsc{PC.Prove}$(\phi, x, \mathcal{R})$, will be successfully verified by algorithm \textsc{PC.Verify}$(\pi_x, x, \phi(x), \mathcal{R})$.
+\textbf{Completeness.} Let $\mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot))$ be the commitment of a polynomial. 
+For all polynomials $\phi(\cdot)$ and all points $x$, with probability 1 the verification \textsc{PC.Verify}$(pp, \phi(\cdot), \mathcal{C})$ outputs \textsc{accept}. And likewise, $\mathcal{V}$ output \textsc{accept} in interaction with $\mathcal{P}$ in the \textsc{PC.Eval} protocol on valid inputs. The formal completeness requirement is:
 $$
 Pr
 \begin{pmatrix}
- \mathcal{R} \leftarrow \textsc{PC.Commit}(\phi(\cdot)): \\
- (x, \phi(x),\pi_x) = \textsc{PC.Prove}(\phi, x, \mathcal{R}) \wedge \\
- \textsc{PC.Verify}(\pi_x, x, \phi(x), \mathcal{R}) = \textsc{accept }
+ b_1 = \textsc{accept} \wedge b_2 = \textsc{accept}: \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot)) \\
+ b_1 \leftarrow \textsc{PC.Verify}(pp, \phi(\cdot), \mathcal{C}) \\
+ (\perp, b_2)\leftarrow \textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))
 \end{pmatrix}
 = 1
 $$
 
 
-\textbf{Soundness.} For all adversaries $\mathcal{A}$, the soundness error $\epsilon$ is defined to be the following probability:
+\textbf{Binding.} For all adversaries $\mathcal{A}$, the binding error $\epsilon_{bind}$ is defined to be the following probability:
 $$
-\epsilon = Pr
+\epsilon_{bind} = Pr
 \begin{pmatrix}
- (\mathcal{R}, (\phi(\cdot), \pi_x), (\phi^\prime(\cdot)), \pi_x^\prime) \leftarrow \mathcal{A}(x): \\
- \textsc{PC.Verify}(\pi_x, x, \phi(x), \mathcal{R}) = \textsc{accept } \wedge \\
- \textsc{PC.Verify}(\pi_x^\prime, x, \phi^\prime(x), \mathcal{R}) = \textsc{accept } \wedge \\
- \phi(x) \neq \phi^\prime(x)
+ b_1 = \textsc{accept } \wedge \\
+ b_2 = \textsc{accept } \wedge \\
+ \phi(\cdot) \neq \phi^\prime(\cdot): \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
+ (\mathcal{C}, \phi(\cdot), \phi^\prime(\cdot)) \leftarrow \mathcal{A}(x) \\
+ b_1 \leftarrow \textsc{PC.Verify}(pp, \phi(\cdot), \mathcal{C}) \\
+ b_2 \leftarrow \textsc{PC.Verify}(pp, \phi^\prime(\cdot), \mathcal{C})
 \end{pmatrix}
 $$
 
-\textbf{Zero-knowledge.} At the end of the protocol, the verifier will know the evaluation result of the polynomial at some evaluation points, but nothing more than that.
 
-\section{Linear Code}
+
+\textbf{Hiding.} The polynomial commitment scheme is hiding if the commitments to distinct polynomials are statistically indistinguishable. Formally speaking, for all adversaries $\mathcal{A} = (\mathcal{A}_0, \mathcal{A}_1)$, the hiding error $\epsilon_{hide}$ is defined to be the following probability:
+
+$$
+\epsilon_{hide} = Pr
+\begin{pmatrix}
+ b = b^\prime : \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
+ (\phi_0(\cdot), \phi_1(\cdot)) \leftarrow \mathcal{A}_0 \\
+ b \overset{{\scriptscriptstyle\$}}{\leftarrow} \{0, 1\} \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi_b(\cdot)) \\
+ b^\prime \leftarrow \mathcal{A}_1(\mathcal{C})
+\end{pmatrix}
+$$
+
+
+\textbf{Soundness.} For all malicious prover $\tilde{P}$, the soundness error $\epsilon_{sound}$ is defined to be the following probability:
+$$
+\epsilon_{sound} = Pr
+\begin{pmatrix}
+ b = \textsc{accept } \wedge \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
+ \forall \tilde{\mathcal{P}} \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot)) \\
+ (\perp, b)\leftarrow \textsc{PC.Eval}(\tilde{\mathcal{P}}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))
+\end{pmatrix}
+$$
+
+
+
+\textbf{Zero-knowledge.} At the end of the protocol, the verifier will know the evaluation result of the polynomial at some evaluation points, but nothing more than that. The polynomial commitment scheme is zero-knowledge if the view of the verifier $\mathcal{V}$ generated by the interactive protocol \textsc{PC.Eval} is statistically indistinguishable to the view of the verifier generated by a simulator $\mathcal{S}$. Formally speaking, for all adversaries, the zero-knowledge error $\epsilon_{zk}$ is defined to be the following probability:
+$$
+\epsilon_{zk} = Pr
+\begin{pmatrix}
+ b = b^\prime : \\
+ pp \leftarrow \textsc{PC.Setup}(\lambda, d) \\
+ b \overset{{\scriptscriptstyle\$}}{\leftarrow} \{0, 1\} \\
+ \mathcal{C} \leftarrow \textsc{PC.Commit}(pp, \phi(\cdot)) \\
+ t_0 \leftarrow \mathcal{S} \\
+ t_1 \leftarrow \textsc{View}(\textsc{PC.Eval}(\mathcal{P}(\phi(\cdot)), \mathcal{V}(pp, \mathcal{C}, x, y))) \\
+ b^\prime \leftarrow \mathcal{A}(t_b, C)
+\end{pmatrix}
+$$
+
+\section{Linear Codes}
 
 \begin{definition}[Linear Code]
 If $\mathbb{F}$ is a field and $C \subset \mathbb{F}^n$ is a subspace of $\mathbb{F}^n$ then C is said to be a linear code.
@@ -133,11 +233,24 @@ The tensor product code $C^{\otimes t}$ is the linear code in $\mathbb{F}^{n^t}$
 \end{definition}
 
 \begin{definition}[Relation $R_\otimes$]
-The relation $R_\otimes$ is the sef of tuples
+\label{def:relation-prox}
+The relation $R_\otimes$ is the sets of tuples
 $$
     (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t), (c_0^{0}, \{c_1^{(s)}\}_s, \cdots, \{c_{t-1}^{(s)}\}_s))
 $$ 
 such that $c_0^{0} \in (C^{\otimes t})^l$ and for all $r \in [t-1]$ and $s \in [q]$, we have $c_r^{(s)} \in (C^{\otimes t-r})^k$.
+\end{definition}
+
+\begin{definition}[Relation $R_{cons}$]
+\label{def:relation-cons}
+The relation $R_{cons}$ is the sets of tuples
+$$
+    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t, \{\texttt{q}^{(s)}\}), c)
+$$ 
+such that $c = \textsc{Enc}_{C^{\otimes t}}(f) \in \mathbb{F}^{l\cdot n^t}$ for some $f \in \mathbb{F}^{l\cdot k^t}$, 
+for each $s \in [q]$, $\texttt{q}^{(s)} = (\texttt{q}_0^{(s)}, \cdots, \texttt{q}_t^{(s)}) \in \mathbb{F}^{l} \times (\mathbb{F}^k)^t$, 
+and for all $s \in [q]$, $\langle \otimes_{i}\texttt{q}_i^{(s)} , f \rangle = v^{(s)}$.
+
 \end{definition}
 
 \begin{definition}[Distance $\Delta_\otimes$]
