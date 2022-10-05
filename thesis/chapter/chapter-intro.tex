@@ -13,20 +13,96 @@ Efficiency is crucial for large and complex statements especially when we want t
 % interactive oracle proofs
 % https://www.iacr.org/archive/tcc2016b/99850156/99850156.pdf
 After years of researching, lots of new proof system models have been introduced. 
-One of the most well-known models is \textbf{Interactive proofs (IPs)}. Interactive proofs were introduced by Goldwasser, Micali, and Rackoff in \cite{DBLP:books/acm/19/GoldwasserMR19}, in which a probabilistic polynomial-time verifier exchanges $k$-rounds of messages with an all-powerful prover, and then accepts or rejects the statements.  
-Another famous model is \textbf{Probabilistically checkable proofs (PCPs)}. Probabilistically checkable proofs were introduced by \cite{DBLP:journals/tcs/FortnowRS94} \cite{DBLP:conf/stoc/BabaiFLS91}. In a probabilistically-checkable proof, a probabilistic polynomial-time verifier has oracle access to a proof string.
-Later, \textbf{Interactive oracle proofs (IOPs)} was introduced by \cite{DBLP:conf/tcc/Ben-SassonCS16}, which naturally combines aspects of IPs and PCPs and also generalizes interactive PCPs. Namely, an IOP is a ``multi-round PCP'' that generalizes an interactive proof as follows:
-the verifier $\mathcal{V}$ has oracle access to the prover $\mathcal{P}$’s messages, and may probabilistically query them (rather than having to read them in full). In more detail, a $k$-round IOP comprises $k$ rounds of interaction. In the $i$-th round of interaction: the verifier $\mathcal{V}$ sends a message $m_i$ to the prover $\mathcal{P}$, which he reads in full; then the prover $\mathcal{P}$ replies with a message $f_i$ to the verifier $\mathcal{V}$, which he can query, as an oracle proof string, in this and all later rounds. After the $k$ rounds of interaction, the verifier $\mathcal{V}$ either accepts or rejects the statement.
+One of the most well-known models is \textbf{Interactive proofs (IPs)}. Interactive proofs were introduced by Goldwasser, Micali, and Rackoff in \cite{DBLP:books/acm/19/GoldwasserMR19} decades ago, in which a probabilistic polynomial-time verifier exchanges $k$-rounds of messages with an all-powerful prover, and then accepts or rejects the statements. 
+
+One of the most famous and the most earliest interactive proof is the quadratic residuosity problem, in which we want to decide whether $a$ is a quadratic residue mod $N$, given $N$ and $a$. For an integer $N$, we say that $a$ ($0 \le a \le N - 1$) is a quadratic residue mod $N$ if there is an $r$ (a square root) such that $ a \equiv r^2 ( \texttt{mod } N)$. 
+
+The interactive proofs turn out to be very powerful, more and more protocols for problems in different areas have been proposed later. There even exists an interactive proof for language that may not rest in NP, for example, graph non-isomorphism (GNI) problem.
+
+% https://en.wikipedia.org/wiki/Probabilistically_checkable_proof
+% https://en.wikipedia.org/wiki/PCP_theorem#Origin_of_the_initials
+Another famous model is \textbf{Probabilistically checkable proofs (PCPs)}. Probabilistically checkable proofs were introduced by \cite{DBLP:journals/tcs/FortnowRS94} \cite{DBLP:conf/stoc/BabaiFLS91}. In a probabilistically-checkable proof, a probabilistic polynomial-time verifier has oracle access to a proof string and has access to a bounded amount of randomness. The verifier is then required to accept correct proofs and reject incorrect proofs with very high probability. 
+
+Comparing to a standard non-interactive proof where the verifier  deterministically reads the whole proof, always accepts correct proofs and rejects incorrect proofs, 
+PCPs are interesting because the existence of probabilistically checkable proofs that can be checked by reading only a few bits of the proof using randomness in an essential way.
+
+The number of queries required and the amount of randomness used are important measurements for PCPs. $\texttt{PCP}[r, q]$ is the class of languages for which the verifier uses at most $r$ bits of randomness, and queries at most $q$ locations of the proof.
+In 1990 Babai, Fortnow, and Lund \cite{DBLP:conf/focs/BabaiFL90} proved that PCP[poly(n), poly(n)] = NEXP. 
+Later, the PCP theorem (also known as the PCP characterization theorem), 
+a major result in computational complexity theory, 
+states that every decision problem in the NP complexity class has probabilistically checkable proofs of constant query complexity 
+and logarithmic randomness complexity (uses a logarithmic number of random bits).
+Namely, $\texttt{PCP}[O(\log n), O(1)] = \texttt{NP}$.
+
+Also, though PCPs are protocols purely in theory due to the oracle used in the proofs, researches later have proposed methods \cite{DBLP:conf/stoc/Kilian92} to compile PCPs into argument systems that can be implemented in reality, making PCPs impactful not only in theory but also in practice. 
+
+Later, \textbf{Interactive oracle proofs (IOPs)} was introduced by \cite{DBLP:conf/tcc/Ben-SassonCS16} and \cite{DBLP:journals/jacm/KalaiRR22}, which naturally combines aspects of IPs and PCPs and also generalizes interactive PCPs 
+(which consist of a PCP followed by an IP). 
+Namely, an IOP is a ``multi-round PCP'' that generalizes an interactive proof as follows:
+the verifier $\mathcal{V}$ has oracle access to the prover $\mathcal{P}$’s messages, and may probabilistically query them (rather than having to read them in full). 
+
+In more detail, a $k$-round IOP comprises $k$ rounds of interaction. In the $i$-th round of interaction: the verifier $\mathcal{V}$ sends a message $m_i$ to the prover $\mathcal{P}$, which he reads in full; then the prover $\mathcal{P}$ replies with a message $f_i$ to the verifier $\mathcal{V}$, which he can query, as an oracle proof string, in this and all later rounds. After the $k$ rounds of interaction, the verifier $\mathcal{V}$ either accepts or rejects the statement.
+
+IOPs is more powerful because 
+it retain the expressiveness of PCPs, 
+capturing NEXP rather than only PSPACE,
+allowing reading only a few bits of the proof,
+and also the flexibility of IPs, 
+allowing multiple rounds of communication with the prover. 
+IOPs have already found several applications, including unconditional
+zero knowledge, 
+constant-rate constant-query probabilistic checking, 
+and doubly-efficient constant-round IPs for polynomial-time bounded-space computations.
 
 
 % polynomial commitment schemes
 % https://eprint.iacr.org/2020/1536.pdf
-In this thesis, we focus on \textbf{polynomial commitment schemes}, which is the core component of many famous interactive protocols. A polynomial commitment schemes provides the ability to commit to a polynomial over a finite field and prove its evaluation at points.
+% https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf
+% https://www.mdpi.com/2079-9292/11/1/131/pdf#:~:text=Polynomial%20commitment%20schemes%20are%20important,at%20a%20public%20point%20later.
+In this thesis, we focus on \textbf{polynomial commitment schemes}, 
+initially introduced by \cite{DBLP:conf/asiacrypt/KateZG10}.
+Later, many constructions 
+\cite{DBLP:conf/sp/TomescuCZAPGD20} 
+\cite{DBLP:journals/iacr/YurekLFKM21} 
+\cite{277222}
+have been proposed.
+Polynomial commitment schemes are important building blocks for the construction of Succinct Non-interactive Arguments of Knowledge (SNARks), 
+which is receiving a lot of attention as a core privacy-enhancing technology for blockchain applications recently.
+
+Polynomial commitment schemes enable the prover to commit to a secret polynomial and convince the verifier that the evaluation of the committed polynomial is correct at a public point later.
+Comparing to the homomorphic commitment schemes in the literature, 
+whose sizes of the commitments are linear in the degree of the committed polynomial, 
+that can be used to achieve the same goal,
+polynomial commitment schemes are of constant size (single elements)
+and the overhead of opening a commitment is also constant; even opening multiple evaluations requires only a constant amount of communication overhead. Therefore, polynomial commitment schemes are useful tools to reduce the communication cost in many cryptographic protocols.
+
 
 % linear time encodable codes
+% https://www.cs.technion.ac.il/users/wwwb/cgi-bin/tr-get.cgi/2013/MSC/MSC-2013-22.pdf
+% https://people.csail.mit.edu/henrycg/pers/gelfand/gelfand1973complexity.pdf
 In coding theory, a linear code is an error-correcting code for which any linear combination of codewords is also a codeword. The encoding function maps vectors in space $\mathbb{F}^k$ to vectors in space $\mathbb{F}^n$, where $\mathbb{F}$ is a finite field with $q$ elements. The relative distance is defined to be the minimum distance between any valid codewords divided by $n$, the length of the codeword. 
-In particular, we are interested in \textbf{linear-time encodable codes}, whose encoding function runs in linear with the size of $k$, the length of input vectors.
-Many protocols rely on special families of linear-time encodable codes, whose properties influence the final performance of the proof systems. For example, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The lower the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs.
+
+Reed-Solomon code is one of the examples which can encode efficiently using FFT algorithm running in $O(n \log n)$ time.
+Random linear code is another example.
+And it is well known that a random linear code, 
+has a good minimal distance with high probability.
+However, one major disadvantage of random linear codes is that their encoding
+complexity grows quadratically with the message length.
+
+Those linear codes are important because many protocols rely on special families of error-correcting codes, whose properties influence the final performance of the proof systems. For example, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The lower the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs.
+
+One of the main research directions is minimizing the encoding complexity
+of codes. Since the best asymptotic encoding complexity one could hope for is linear in $k$, the length of input vectors, it is natural to ask whether there are asymptotically good families of \textbf{linear-time encodable codes}.
+The first proof that such codes exist is due to Gelfand, Dobrushin and Pinsker \cite{gelfand1973complexity}, who presented a randomized construction of linear-time encodable linear codes over the binary field which
+have positive rate and relative minimal distance.
+An explicit construction of such codes, which also admits a linear-time decoding algorithm, was given in a celebrated work of Spielman \cite{DBLP:conf/stoc/Spielman95}.
+
+The concrete rate/distance tradeoff achieved by Spielman’s codes is far
+from the GV bound. Guruswami and Indyk \cite{DBLP:journals/tit/GuruswamiI05} construct linear-time encodable codes whose rate and distance parameters can get arbitrarily close to the GV bound. 
+Unfortunately, the closer one wishes to get to the bound, 
+the larger the size of the underlying field becomes. 
+These results leave open the existence of linear-time encodable codes which meet the GV bound, or even get close to this bound in the binary case.
+
 
 % Start by gathering references
 % Then fill in the new section with as much text as you can so that we can discuss it together.

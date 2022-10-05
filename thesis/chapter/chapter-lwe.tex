@@ -2,7 +2,7 @@
 
 \section{Introduction}
 
-LWE (Learning with error) problem is the fundamental lattice problem upon which most of the lattice-based cryptography rests. LWE states that for a tuple $(A, u)$ it is hard to find a small $s$ and a small $e$ such that $u = As+e$. In this chapter, we explore a protocol in \cite{lwe} that makes use of polynomials to prove knowledge of $s$ and $e$ with small elements that satisfy:
+LWE (Learning with error) problem is one of the fundamental lattice problem upon which lots of the lattice-based cryptography rests. LWE states that for a tuple $(A, u)$ it is hard to find a small $s$ and a small $e$ such that $u = As+e$. In this chapter, we explore a protocol in \cite{lwe} that makes use of polynomials to prove knowledge of $s$ and $e$ with small elements that satisfy:
 $$
     As + e = u
 $$
@@ -895,7 +895,6 @@ $$
     \max
     \biggl\{
     \frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda, 
-    (1 - \delta)^\lambda, 
     \frac{2}{q-1} + \frac{q-3}{q-1}(1 - \frac{29\delta}{30})^\lambda,
     (1 - \frac{7\delta}{10})^\lambda
     \biggr\}
@@ -909,7 +908,22 @@ Suppose $H_2^\prime$, $H_1^\prime$ or $H_0^\prime$ is at least $\frac{\delta}{10
 
 Otherwise, $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ are $\frac{\delta}{10}$ close to a valid codeword, and it is possible to decode them to a instance/witness $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$. 
 
-Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$ is not in relation $R_{LWE}$. Then at least one of the following conditions is satisfied:
+Suppose the malicious prover $\mathcal{P}$ does not follow the protocol honestly and sends incorrect messages. 
+\begin{itemize}
+
+    \item If $\overline{f}, \overline{g}$, or $\overline{h}$ is incorrect, 
+    then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, 
+    at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and
+    $x^2\widetilde{\textsc{Enc}}(H_2, r_2) + x\widetilde{\textsc{Enc}}(H_1, r_1) + \widetilde{\textsc{Enc}}(H_0, r_0)$.
+    And since $\widetilde{\textsc{Enc}}(H_i, r_i)$ and $H_i^\prime$ are $\frac{\delta}{10}$ close to each other, at least $\frac{7\delta}{10}$ portion of $\widetilde{\textsc{Enc}}$ and 
+    $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \frac{7\delta}{10})^\lambda$.
+    
+    \item If $f_2, f_1, f_0, v_2, v_1, v_0, w_2, w_1$ or $w_0$ is incorrect, denote the incorrect polynomial as $f^\prime$, $g^\prime$ or $h^\prime$. Since $f$ and $f^\prime$, $g$ and $g^\prime$ or $h$ and $h^\prime$ are polynomials with degree at most 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{2}{q}$. If this event does not happen, then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda$.
+
+
+\end{itemize}
+
+Otherwise, the prover $\mathcal{P}$ follows the protocol honestly. Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$ is not in relation $R_{LWE}$. Then at least one of the following conditions is satisfied:
 \begin{itemize}
     \item $s \notin \{-1, 0, 1\}^{m}$: Then there is an $v_{-1} X^{-1}$ term in $\frac{1}{X} f(X) \circ [f(X) - 1^m] \circ [f(X) + 1^m]$. Therefore, polynomial $g$ is incorrect, denote the incorrect polynomial as $g^\prime$. $g$ and $g^\prime$ are polynomials with degree 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens so that equation \ref{eq:lwe6} is satisfied is at most $\frac{2}{q}$. 
     
@@ -919,20 +933,7 @@ Suppose $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$ is not i
     
 \end{itemize}
 
-Suppose the malicious prover $\mathcal{P}$ sends incorrect messages. 
-\begin{itemize}
-    
-    \item If $f_2, f_1, f_0, v_2, v_1, v_0, w_2, w_1$ or $w_0$ is incorrect, denote the incorrect polynomial as $f^\prime$, $g^\prime$ or $h^\prime$. Since $f$ and $f^\prime$, $g$ and $g^\prime$ or $h$ and $h^\prime$ are polynomials with degree at most 2. According to Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{2}{q}$. If this event does not happen, then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda$.
 
-    \item If $\overline{f}, \overline{g}$, or $\overline{h}$ is incorrect, 
-    then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, 
-    at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and
-    $x^2\widetilde{\textsc{Enc}}(\overline{H_2}, \overline{r_2}) + x\widetilde{\textsc{Enc}}(\overline{H_1}, \overline{r_1}) + \widetilde{\textsc{Enc}}(\overline{H_0}, \overline{r_0})$.
-    And since $\widetilde{\textsc{Enc}}(\overline{H_i}, \overline{r_i})$ and $H_i^\prime$ are $\frac{\delta}{10}$ close to each other, at least $\frac{7\delta}{10}$ portion of $\widetilde{\textsc{Enc}}$ and 
-    $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \frac{7\delta}{10})^\lambda$.
-    
-
-\end{itemize}
 \end{proof}
 
 \begin{lemma}
@@ -1004,40 +1005,55 @@ Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kab
 
 
 As $n$ and $m$ increases, it is generally require more time to complete
-the committing phase for the prover and the checking phase for the verifier. Also, larger $n$ and $m$ will result in larger communication complexity.
+the committing phase for the prover and the checking phase for the verifier. Also, larger $n$ and $m$ will result in larger proof size.
+
+
+
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{|c|m{4em}|m{4em}|m{4em}|m{7em}|}
+\begin{tabular}{|c|m{4em}|m{4em}|m{4em}|m{4em}|m{5em}|}
 \hline
 
-\multicolumn{1}{|l|}{n}                     & m    & Prover Time {[}ms{]} & Verifier Time {[}ms{]} & Communication Complexity {[}Field Element{]} \\ \hline\hline
-\multirow{5}{*}{128}                        & 128  & 56                   & 42                     & 1328                                         \\ \cline{2-5} 
-                                            & 256  & 116                  & 66                     & 1556                                         \\ \cline{2-5} 
-                                            & 512  & 168                  & 130                    & 1812                                         \\ \cline{2-5} 
-                                            & 1024 & 453                  & 178                    & 2424                                         \\ \cline{2-5} 
-                                            & 2048 & 564                  & 329                    & 3548                                         \\ \hline
-\multirow{5}{*}{256}                        & 128  & 80                   & 60                     & 1348                                         \\ \cline{2-5} 
-                                            & 256  & 131                  & 102                    & 1556                                         \\ \cline{2-5} 
-                                            & 512  & 231                  & 165                    & 1912                                         \\ \cline{2-5} 
-                                            & 1024 & 545                  & 344                    & 2424                                         \\ \cline{2-5} 
-                                            & 2048 & 824                  & 653                    & 3548                                         \\ \hline
-\multirow{5}{*}{512}                        & 128  & 155                  & 103                    & 1428                                         \\ \cline{2-5} 
-                                            & 256  & 220                  & 162                    & 1556                                         \\ \cline{2-5} 
-                                            & 512  & 385                  & 295                    & 1912                                         \\ \cline{2-5} 
-                                            & 1024 & 904                  & 654                    & 2524                                         \\ \cline{2-5} 
-                                            & 2048 & 1450                 & 1229                   & 3548                                         \\ \hline
-\multicolumn{1}{|l|}{\multirow{5}{*}{1024}} & 128  & 292                  & 192                    & 1528                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 256  & 533                  & 276                    & 1656                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 512  & 743                  & 647                    & 1912                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 1024 & 1403                 & 1166                   & 2524                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 2048 & 2679                 & 2166                   & 3648                                         \\ \hline
-\multicolumn{1}{|l|}{\multirow{5}{*}{2048}} & 128  & 526                  & 399                    & 1528                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 256  & 916                  & 603                    & 1756                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 512  & 1334                 & 922                    & 2012                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 1024 & 2178                 & 2097                   & 2524                                         \\ \cline{2-5} 
-\multicolumn{1}{|l|}{}                      & 2048 & 4078                 & 3746                   & 3648                                         \\ \hline
+\multicolumn{1}{|l|}{n}                     & m   & Code Length  & Prover Time {[}ms{]} & Verifier Time {[}ms{]} & Proof Size {[}bytes{]} \\ \hline\hline
+\multirow{5}{*}{128}                        & 128 & 661 & 56                   & 42                     & 10624                                         \\ \cline{2-6} 
+                                            & 256 & 1101 & 116                  & 66                     & 12448                                         \\ \cline{2-6} 
+                                            & 512 & 1982 & 168                  & 130                    & 14496                                         \\ \cline{2-6} 
+                                            & 1024 & 3743 & 453                  & 178                    & 19392                                         \\ \cline{2-6} 
+                                            & 2048 & 7266 & 564                  & 329                    & 28384                                         \\ \hline
+\multirow{5}{*}{256}                        & 128  & 881 & 80                   & 60                     & 10624                                         \\ \cline{2-5} 
+                                            & 256  & 1321 & 131                  & 102                    & 12448                                         \\ \cline{2-6} 
+                                            & 512  & 2202 & 231                  & 165                    & 15296                                         \\ \cline{2-6} 
+                                            & 1024 & 3963 & 545                  & 344                    & 19392                                         \\ \cline{2-6} 
+                                            & 2048 & 7486 & 824                  & 653                    & 28384                                         \\ \hline
+\multirow{5}{*}{512}                        & 128  & 1321 & 155                  & 103                    & 11424                                         \\ \cline{2-6} 
+                                            & 256  & 1762 & 220                  & 162                    & 12448                                         \\ \cline{2-6} 
+                                            & 512  & 2642 & 385                  & 295                    & 15296                                         \\ \cline{2-6} 
+                                            & 1024 & 4404 & 904                  & 654                    & 20192                                         \\ \cline{2-6} 
+                                            & 2048 & 7926 & 1450                 & 1229                   & 28384                                         \\ \hline
+\multicolumn{1}{|l|}{\multirow{5}{*}{1024}} & 128  & 2202 & 292                  & 192                    & 12224                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 256  & 2642 & 533                  & 276                    & 13248                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 512  & 3523 & 743                  & 647                    & 15296                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 1024 & 5284 & 1403                 & 1166                   & 20192                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 2048 & 8807 & 2679                 & 2166                   & 29184                                         \\ \hline
+\multicolumn{1}{|l|}{\multirow{5}{*}{2048}} & 128  & 3963 & 526                  & 399                    & 12224                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 256  & 4404 & 916                  & 603                    & 14048                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 512  & 5284 & 1334                 & 922                    & 16096                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 1024 & 7046 & 2178                 & 2097                   & 20192                                         \\ \cline{2-6} 
+\multicolumn{1}{|l|}{}                      & 2048 & 10568 & 4078                 & 3746                   & 29184                                         \\ \hline
 \end{tabular}
-\caption{Runtime of LWE protocol with 1 thread and 100 test tuples. The soundness error is around 0.007.}
+\caption{Runtime of LWE protocol with 1 thread and 200 test tuples. The soundness error is around 0.007.}
 \label{table:benchmark-lwe}
 \end{table}
+
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{graph/se.pdf}
+    \caption{Soundness Error of LWE Protocol}
+    \label{fig:se}
+\end{figure}
+
+Also figure \ref{fig:se} shows the relation between soundness error and the number of testing tuples ($\lambda$). As mentioned in lemma \ref{lemma:lwese}, the soundness error is the maximum value of three individual terms. Figure \ref{fig:se} labels these terms using lines with different colors. When $\lambda$ is small, the soundness error is dominated by $(1 - \frac{7\delta}{10})^\lambda$.
+As $\lambda$ increasing, the soundness is decreasing and gradually dominated by $\frac{2}{q-1}$. Hence, the minimum possible soundness is actual independent to the number of testing tuples ($\lambda$), and is determined solely by the field size. In our benchmark, we use a field with size roughly equals to $2^{256}$, therefore, the minimum possible soundness error is around $2^{-256}$.
