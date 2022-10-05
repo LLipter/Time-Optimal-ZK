@@ -420,12 +420,12 @@ where
 
     let verified_time = Instant::now();
 
-    println!("RD_code:{:?} n:{:?} m:{:?} lambda:{:?}", RS_code, n, m, lambda);
+    println!("RD_code:{:?} n:{:?} m:{:?} lambda:{:?} code_len:{:?}", RS_code, n, m, lambda, code_len);
     println!("commit_time: {} ms", committed_time.duration_since(start_time).as_millis());
     println!("mid_time: {} ms", mid_time.duration_since(committed_time).as_millis());
     println!("verify_time: {} ms", verified_time.duration_since(committed_time).as_millis());
     println!("total_time: {} ms", verified_time.duration_since(start_time).as_millis());
-    println!("CC: {} \n", m + (100 as usize) * (3 + ((code_len as f64).log2()) as usize));
+    println!("Proof Size: {} bytes\n", (m + (100 as usize) * (3 + ((code_len as f64).log2()) as usize)) * 8);
 
 
 }
