@@ -4,6 +4,8 @@
 
 import math
 import random
+import numpy as np
+from datetime import datetime
 
 # Auxiliary class to store sparse matrices as lists of non-zero elements
 # (I couldn't figure out a simple way to use scipy's sparse matrices for our goals.)
@@ -76,8 +78,9 @@ def field_list_add(A, B):
 
 # field size, prime p ~ 2^{256}
 # p = 90589243044481683682024195529420329427646084220979961316176257384569345097147
-p = 69345097147
-n = 2**10
+# p = 69345097147
+p = 97
+n = 2**7
 
 # the following parameters are taken from Table 1 of the write-up.
 alpha = 0.238
@@ -330,8 +333,6 @@ class RBRGraph:
         return graph
 
 
-d = 10
-
 def step1():
     n_prime = math.ceil(n * r)
     graph = RBRGraph.generate_random(n_prime, d)
@@ -379,6 +380,100 @@ def step3(randomlized):
     print(len(result))
     return result
 
+def mul_inverse(x):
+    return pow(int(x), -1, p)
+
+
+# write rows in row echelon form
+def upper_triangular(M):
+    # move all zeros to buttom of matrix
+    M = np.concatenate((M[np.any(M != 0, axis=1)], M[np.all(M == 0, axis=1)]), axis=0)
+
+    # iterate over matrix rows
+    for i in range(0, M.shape[0]):
+
+        # initialize row-swap iterator
+        j = 1
+
+        # select pivot value
+        pivot = M[i][i]
+
+        # find next non-zero leading coefficient
+        while pivot == 0 and i + j < M.shape[0]:
+            # perform row swap operation
+            M[[i, i + j]] = M[[i + j, i]]
+
+            # incrememnt row-swap iterator
+            j += 1
+
+            # get new pivot
+            pivot = M[i][i]
+
+        # if pivot is zero, remaining rows are all zeros
+        if pivot == 0:
+            break
+
+        # extract row
+        row = M[i]
+
+        # get 1 along the diagonal
+        M[i] = (row * mul_inverse(pivot)) % p
+
+        # iterate over remaining rows
+        for j in range(i + 1, M.shape[0]):
+            # subtract current row from remaining rows
+            M[j] = M[j] - M[i] * M[j][i]
+            M[j] %= p
+
+    for i in range(1, M.shape[0]):
+        if M[i, i] == 0:
+            continue
+
+        for j in range(0, i):
+            ratio = mul_inverse(M[i, i]) * (M[j, i] % p) % p
+            M[j] -= ratio * M[i]
+            M[j] %= p
+
+    # return upper triangular matrix
+    return M
+
+def rank(M):
+    A = upper_triangular(M)
+    print(A)
+    cnt = 0
+    for i in range(M.shape[0]):
+        for j in range(M.shape[1]):
+            if A[i, j] != 0:
+                cnt += 1
+                break
+    print(cnt)
+    return cnt
+
+def ns_basis(M):
+    # r_m = rank(M)
+    # r_m = rank(M[:, :-1])
+
+    msg_len = M.shape[0]
+    code_len = M.shape[1]
+    A = M.transpose()
+    # print(A)
+    E = np.identity(code_len, dtype=np.longlong)
+    # print(E)
+    X = np.concatenate((A, E), axis=1, dtype=np.longlong)
+    # print(X)
+
+    XX = upper_triangular(X)
+    # print(XX)
+    XX = XX[:, msg_len:]
+    # print(XX)
+
+    # for i in range(code_len):
+    #     print(M.dot(XX[i,:]) % p)
+
+    XXX = XX[msg_len:, :]
+    # print(XXX)
+
+    return XXX
 
 if __name__ == '__main__':
     # redistributed = step1()
@@ -386,55 +481,67 @@ if __name__ == '__main__':
     # result = step3(randomlized)
 
 
+
+    
+    random.seed(datetime.now())
+    # random.seed(0)
+
     code = generate(n)
     x = [i for i in range(n)]
     encoded_t = encode(x, code)
     code_len = len(encoded_t)
 
-    for _ in range(10):
-        x = []
-        # generate a random vector x of length n without using range(p):
-        for _ in range(n):
-            x.append(random.randint(0, p-1))
-        encoded = encode(x, code)
-        hammingWeight = sum(1 for x, y in zip(encoded, encoded_t) if x !=y)
-        # print(hammingWeight)
-        print(hammingWeight/len(encoded) >= delta)
+    # for _ in range(10):
+    #     x = []
+    #     # generate a random vector x of length n without using range(p):
+    #     for _ in range(n):
+    #         x.append(random.randint(0, p-1))
+    #     encoded = encode(x, code)
+    #     hammingWeight = sum(1 for x, y in zip(encoded, encoded_t) if x !=y)
+    #     # print(hammingWeight)
+    #     print(hammingWeight/len(encoded) >= delta)
 
     print(code_len)
 
-    from scipy.linalg import null_space
-    import numpy as np
 
-    data = np.empty([n, code_len], dtype=np.ulonglong)
+    data = np.zeros([n, code_len], dtype=np.longlong)
     for i in range(n):
         x = [0 for _ in range(n)]
         x[i] = 1
         encoded = encode(x, code)
         for j, val in enumerate(encoded):
             data[i, j] = val % p
+            # data[i, j+code_len] = val % p
+    # data[0, -1] = 1
 
+    print(data.shape)
     print(data)
 
-    ns = null_space(data)
+    nb = ns_basis(data)
+    print(nb.shape)
+    print(nb)
 
-    print(ns.shape)
-
-    print(ns)
-
-    for i in range(n):
+    min_t = 99999999999
+    for i in range(code_len - n):
+        # print(nb[i])
         cnt = 0
         for j in range(code_len):
-            if abs(ns[j, i]) > 1e-6:
+            if nb[i, j] != 0:
                 cnt += 1
-        print(i, cnt)
-        if cnt >= n:
-            continue
-        if cnt == 1 and abs(ns[i, i]) > 1e-6:
-            continue
-        print(i, j, "wrong", cnt)
+        # print(i, cnt)
+        min_t = min(min_t, cnt)
+    
+    print(min_t)
 
+    # size = (10, 15)
+    # data = np.zeros(size, dtype=np.longlong)
+    # for i in range(size[0]):
+    #     data[i, i] = 1
+    # for i in range(size[0]):
+    #     for j in range(size[0], size[1]-1):
+    #         data[i, j] = random.randint(0, p-1)
+    # data[0, size[1]-1] = 1
+    # print(data)
 
-
-        
-
+    # nb = ns_basis(data)
+    # print(nb)
