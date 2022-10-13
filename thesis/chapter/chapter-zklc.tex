@@ -1,11 +1,11 @@
 \chapter{Zero-Knowledge Linear Code}
 
-In this chapter, we use the construction presented in paper \cite{10.1145/2554797.2554815} to add zero-knowledge property to a normal linear code through code transformation. 
+In this chapter, we use the construction presented in paper \cite{10.1145/2554797.2554815} to add a zero-knowledge property to a normal linear code through code transformation. 
 
 % http://www.cs.cmu.edu/~odonnell/toolkit13/lecture12.pdf
 \section{Random d-regular Bipartite Graph}
 \label{sec:randomgraph}
-First, we present a algorithm to generate a random d-regular bipartite graph. To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it is possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
+First, we present an algorithm to generate a random d-regular bipartite graph. To make sure each vertex has degree $d$, we can first sample $d$ random perfect matching for 2 sets of $n$ vertices. Then take the union of them. Note that it is possible to generate parallel edges. But this should not be a concern for our purpose here. And it can be shown that this happens with low probability.
 
 \RestyleAlgo{ruled}
 %% This is needed if you want to add comments in
@@ -52,11 +52,11 @@ For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ 
 
 $$P_1 = (\frac{n-1}{n})^{d}$$
 
-For a set of vertices $S \subset L$ with $|S| = s \ge \epsilon n$, the probability that non of vertices in $S$ is connected to $b$ is:
+For a set of vertices, $S \subset L$ with $|S| = s \ge \epsilon n$, the probability that non of the vertices in $S$ is connected to $b$ is:
 
 $$P_2 = (P_1)^s = (\frac{n-1}{n})^{d s}$$
 
-The probability that there exists at least $\epsilon n$ vertices in $R$ are not connected to any vertex in $S$ is:
+The probability that there exists at least $\epsilon n$ vertices in $R$ that are not connected to any vertex in $S$ is:
 
 $$P_3 = \binom{n}{\epsilon n} (P_2)^{\epsilon n} = \binom{n}{\epsilon n} (\frac{n-1}{n})^{d s \epsilon n}$$
 
@@ -115,11 +115,11 @@ For every vertex $a \in L$ and every vertex $b \in R$, the probability that $a$ 
 
 $$P_1 = (\frac{n-1}{n})^{d}$$
 
-For a set of vertices $S \subset L$ with $|S| = \epsilon n$, the probability that non of vertices in $S$ is connected to $b$ is:
+For a set of vertices, $S \subset L$ with $|S| = \epsilon n$, the probability that non of the vertices in $S$ is connected to $b$ is:
 
 $$P_2 = (P_1)^{\epsilon n} = (\frac{n-1}{n})^{d\epsilon n}$$
 
-The probability that there exists at least $\epsilon n$ vertices in $R$ are not connected to any vertex in $S$ is:
+The probability that there exists at least $\epsilon n$ vertices in $R$ that are not connected to any vertex in $S$ is:
 
 \begin{align}
 P_3 &= \binom{n}{\epsilon n} (P_2)^{\epsilon n} \nonumber \\
@@ -137,7 +137,7 @@ By rearranging the above equation, we have $ d > \frac{H(\epsilon) \ln 2 - \frac
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $93.60$.
 
-Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfy the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such set is hard to found. Similar with hash functions, hash collision must exist somewhere, but this collision is hard to be found.
+Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfy the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in the graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such set is hard to found. Similar to hash functions, hash collision must exist somewhere, but this collision is hard to be found.
 
 \end{proof}
 
@@ -145,8 +145,8 @@ Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} prod
 
 The transposition principle, sometimes referred to as Tellegen’s principle \cite{Tellegen}, asserts that a linear algorithm that performs a matrix-vector product can be transposed, producing an algorithm that computes the transposed matrix-vector product. Further, the transposed algorithm has almost the same complexity as the original one.
 
-The following example illustrates this principle, using the
-computation graph representation, where $\bullet$ represents a fan-out gate and $+$ represents a addition gate. Taking $x_1, x_2$ as input, it computes $y_1 = ax_1 + bx_2$, $y_2 = cx_1 + dx_2$; edges perform multiplications by the constant values $a, b, c, d$.
+The following example from \cite{Tellegen} illustrates this principle, using the
+computation graph representation, where $\bullet$ represents a fan-out gate and $+$ represents an addition gate. Taking $x_1, x_2$ as input, it computes $y_1 = ax_1 + bx_2$, $y_2 = cx_1 + dx_2$; edges perform multiplications by the constant values $a, b, c, d$.
 
 \begin{figure}[h]
     \centering
@@ -183,11 +183,11 @@ In this section, we transpose the Brakedown linear code to get a reverse encodin
 
 \section{Construction}
 
-This construction transform an existing linear to another linear code. The linear code constructed will have better relative distance and is equipped with zero-knowledge property.
+This construction transforms an existing linear code into another linear code. The linear code constructed will have better relative distance and is equipped with the zero-knowledge property.
 
 \subsection{Redistribution}
 
-Given the normal encoding function \textbf{Enc()} and message $x$, we first compute the codeword $y = \textbf{Enc}(x) \in \mathbb{F}^n$. Then a random expander graph $G = (L, R, E)$ with degree $\Delta$ satisfying lemma \ref{lemma:randomgraph} will be generated. We will redistribute the symbols in $y$ according to $G$. More concretely, for everty $i \in [n]$ and $j \in [\Delta]$, let $\gamma(i, j)$ be the index of the $j$-th vertex in $R$. The $(i - 1) \cdot \Delta + j$-th entry of $z$ is defined to be the $y_{\gamma(i, j)}$.
+Given the normal encoding function \textbf{Enc()} and message $x$, we first compute the codeword $y = \textbf{Enc}(x) \in \mathbb{F}^n$. Then a random expander graph $G = (L, R, E)$ with degree $\Delta$ satisfying lemma \ref{lemma:randomgraph} will be generated. We will redistribute the symbols in $y$ according to $G$. More concretely, for every $i \in [n]$ and $j \in [\Delta]$, let $\gamma(i, j)$ be the index of the $j$-th vertex in $R$. The $(i - 1) \cdot \Delta + j$-th entry of $z$ is defined to be the $y_{\gamma(i, j)}$.
 
 \subsection{Randomization}
 
@@ -207,28 +207,28 @@ Given the reverse encoding function $\textbf{Enc}^{\top}$, the final output is $
 \end{figure}
 
 
-We have implement the above construction. We measure the runtime required for the redistribution step and the randomization step, whose execution is irrelevant to the actual underlying linear code.
+We have implemented the above construction. We measure the runtime required for the redistribution step and the randomization step, whose execution is irrelevant to the actual underlying linear code.
 
 
-According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is every sensitive to the relative distance of underlying linear code. The larger the relative distance, the smaller the degree. And larger degree will cause the algorithm more time consuming.
+According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is very sensitive to the relative distance of underlying linear code. The larger the relative distance, the smaller the degree. And larger degree will cause the algorithm more time-consuming.
 
-Figure \ref{fig:degree} presents the relation between relative distance and runtime. As relative distance approaches 0.1, the runtime increases dramatically. And even for larger relative distance, the construction is still significant slower than the original linear code, making this construction unacceptable in practice.
+Figure \ref{fig:degree} presents the relation between relative distance and runtime. As the relative distance approaches 0.1, the runtime increases dramatically. And even for a larger relative distance, the construction is still significantly slower than the original linear code, making this construction unacceptable in practice.
 
 \section{Improvement}
 
-The performance of our zero-knowledge linear code construction suffers from the degree of underlying random expander graph. Recently, we notice a idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
+The performance of our zero-knowledge linear code construction suffers from the degree of underlying random expander graph. Recently, we notice an idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
 
-We can prove a graph is not a expander graph by providing one counter example. The densest-subgraph algorihtm used by this detection algorithm can help us to find the counter example efficiently.
+We can prove a graph is not an expander graph by providing one counter-example. The densest-subgraph algorithm used by this detection algorithm can help us to find the counter-example efficiently.
 Basically, if the graph is not a good expander graph, the detection algorithm in \cite{orion} can identify this situation with some probability $p$ using a random input $r$. And if the graph is a good expander graph, the detection algorithm will not falsely identify it (no false positive). Then we can run this detection algorithm $\lambda$ times with different random inputs and amplify the detection probability to $1 - (1 - p)^\lambda$. Additionally, if we find the graph is not a good expander graph, then we can simply discard it and generate a new random graph.
 
 
-And if we have a efficient detection algorithm like this, we can randomly generate the expander graph with a much smaller degree $d$ and run detection algorithm on it. Depending on the output of detection algorithm, we can either be convinced that it is a good expander graph or we can re-run the generation algorithm one more time. The redistribution step in our construction will be much more efficient with such a small degree expander graph.
+And if we have an efficient detection algorithm like this, we can randomly generate the expander graph with a much smaller degree $d$ and run the detection algorithm on it. Depending on the output of the detection algorithm, we can either be convinced that it is a good expander graph or we can re-run the generation algorithm one more time. The redistribution step in our construction will be much more efficient with such a small degree expander graph.
 
 
 \begin{definition}
 \label{definition:randomgraph2}
 
-Let $\delta > 0$ and $0 < \epsilon < 1$ be a constant. Let $G=(L, R, E)$ be a $d$-regular bipartite graph with $|L| = n$. Graph $G$ is a expander graph if the following expansion property is satisfied:
+Let $\delta > 0$ and $0 < \epsilon < 1$ be a constant. Let $G=(L, R, E)$ be a $d$-regular bipartite graph with $|L| = n$. Graph $G$ is an expander graph if the following expansion property is satisfied:
 
     \begin{itemize}
         \item Expansion: For every set $X \subset L$ with $|X| \le \frac{\delta n}{d}$, if $Y$ is the set of neighbors of $X$ in $G$, then $|Y| \ge (1 - \epsilon) d |X|$.
@@ -236,6 +236,6 @@ Let $\delta > 0$ and $0 < \epsilon < 1$ be a constant. Let $G=(L, R, E)$ be a $d
 
 \end{definition}
 
-However, due to the difference in expander graph definition, it is fundamentally not possible to reuse this densest-subgraph based detection algorithm in our project to imporve efficiency. Definition \ref{definition:randomgraph2} is the expander graph used in \cite{orion} and lemma \ref{lemma:randomgraph} is the expander graph used in our project. The key difference is their expansion property. Informally speaking, definition \ref{definition:randomgraph2} needs the graph has good expansion property when we choose a small subset of vertices. And lemma \ref{lemma:randomgraph} needs the graph has good expansion property when we choose a large subset of vertices. The counter example found by the densest-subgraph algorithm may have a small subset of vertices. And this is enough to be a good counter example according to definition \ref{definition:randomgraph2}, but not enough according to lemma \ref{lemma:randomgraph}.
+However, due to the difference in expander graph definition, it is fundamentally not possible to reuse this densest-subgraph based detection algorithm in our project to improve efficiency. Definition \ref{definition:randomgraph2} is the expander graph used in \cite{orion} and lemma \ref{lemma:randomgraph} is the expander graph used in our project. The key difference is their expansion property. Informally speaking, definition \ref{definition:randomgraph2} needs the graph to have good expansion properties when we choose a small subset of vertices. And lemma \ref{lemma:randomgraph} needs the graph to have good expansion properties when we choose a large subset of vertices. The counter-example found by the densest-subgraph algorithm may have a small subset of vertices. And this is enough to be a good counter-example according to definition \ref{definition:randomgraph2}, but not enough according to lemma \ref{lemma:randomgraph}.
 
-Therefore, it is remain unclear how to improve efficiency on this construction. And using the method similar to one-time-pad encryption, we can add zero-knowledge property into the polynomial commitment scheme. And it is practical and efficient compared with the alternative approach.
+Therefore, it remains unclear how to improve the efficiency of this construction. And using a method similar to one-time-pad encryption, we can add zero-knowledge property into the polynomial commitment scheme. And it is practical and efficient compared with the alternative approach.

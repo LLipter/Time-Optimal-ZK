@@ -1,5 +1,7 @@
 \chapter{Preliminaries}
 
+In this chapter, we present the definitions used in this paper. We borrow the definitions from \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} \cite{10.1145/2554797.2554815} \cite{orion} \cite{lwe} \cite{DBLP:conf/tcc/Ben-SassonCS16} \cite{DBLP:journals/iacr/BonehDFG20a} to make it standard.
+
 \section{Combinatorics}
 
 \begin{definition}[$d$-regular Graph]
@@ -26,8 +28,8 @@ A \textbf{relation} $R$ is a set of pairs $(\mathbb{X}, \mathbb{W})$ where $\mat
 An \textbf{Interactive Proof (IP)} is defined by a pair of interactive randomized
 algorithms \textbf{IP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
-During a single round, the prover sends a message to the verifier, and the verifier reply a message back to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover.
+During a single round, the prover sends a message to the verifier, and the verifier replies with a message back to the prover. 
+The \textbf{proof length} is the sum of the lengths of all messages sent by the prover.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 
 An interactive proof IP = (P, V) for a relation R has completeness 1 and soundness error $\epsilon$ if the following holds.
@@ -45,8 +47,8 @@ An interactive proof IP = (P, V) for a relation R has completeness 1 and soundne
 An \textbf{Interactive Oracle Proof (IOP)} is defined by a pair of interactive randomized
 algorithms \textbf{IOP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
-During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $i \in [N]^t$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[i]$ through this query.
+During a single round, the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
+The \textbf{proof length} is the sum of the lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $i \in [N]^t$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[i]$ through this query.
 The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover messages.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 
@@ -65,8 +67,8 @@ An interactive oracle proof IOP = (P, V) for a relation R has completeness 1 and
 An \textbf{Interactive Oracle Proof of Proximity (IOPP)} is defined by a pair of interactive randomized
 algorithms \textbf{IOPP = (P, V)}, where \textbf{P} denotes the prover and \textbf{V} the verifier. 
 The number of rounds of interaction is called the \textbf{round complexity} of the system. 
-During a single round the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
-The \textbf{proof length} is the sum of lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[I]$ through this query.
+During a single round, the prover sends a message to which the verifier is given oracle access, and the verifier responds with a message to the prover. 
+The \textbf{proof length} is the sum of the lengths of all messages sent by the prover. Specifically, the prover is allowed to send a large array message $\pi$ to the verifier, and the verifier is allowed to query this message $\pi$ at position $I$. The message $\pi$ will work as an oracle and the verifier will learn $\pi[I]$ through this query.
 The \textbf{query complexity} of the protocol is the number of entries read by \textbf{V} from the various prover message.
 We denote by $\langle P \leftrightarrow V \rangle (\mathbb{X}, \mathbb{W})$ the output of \textbf{V} after interacting with \textbf{P} on instance $\mathbb{X}$ and witness $\mathbb{W}$; this output is either \textsc{accept} or \textsc{reject}.
 The protocol's goal is to show that a particular string is close to a valid witness.
@@ -81,7 +83,7 @@ An interactive oracle proof of proximity IOPP = (P, V) for a relation R has comp
 \end{enumerate}
 \end{definition}
 
-In practice, we use Merkle tree commitment to compile the IOP or IOPP to an real argument system. Each element in the large array message $\pi$ sent by the prover will be considered to be a leaf node of a Merkle tree. And the corresponding Merkle tree root will be sent to the verifier instead. For each query at position $I$, the prover will responds with $\pi[I]$ and the corresponding Merkle tree path, which will be authenticated later by the verifier.
+In practice, we use Merkle tree commitment to compile the IOP or IOPP to a real argument system. Each element in the large array message $\pi$ sent by the prover will be considered to be a leaf node of a Merkle tree. And the corresponding Merkle tree root will be sent to the verifier instead. For each query at position $I$, the prover will respond with $\pi[I]$ and the corresponding Merkle tree path, which will be authenticated later by the verifier.
 
 \begin{definition}
 
@@ -97,7 +99,7 @@ A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for 
 
 \begin{definition}
 
-Let $A$ be an algorithm with adaptive query access to oracles $O_1, \cdots, O_n$. Let $Q$ be a stateful query-checker algorithm which receives the adaptive queries of $A$ and may output $\perp$ at any point. We say that $A$ is a $Q$-query algorithm if $Q$ never outputs $\perp$.
+Let $A$ be an algorithm with adaptive query access to oracles $O_1, \cdots, O_n$. Let $Q$ be a stateful query-checker algorithm that receives the adaptive queries of $A$ and may output $\perp$ at any point. We say that $A$ is a $Q$-query algorithm if $Q$ never outputs $\perp$.
  
 \end{definition}
 
@@ -131,7 +133,7 @@ A \textbf{Polynomial Commitment} is an interactive proof (IP), which defines a r
 And it consists of three algorithms (\textsc{PC.Setup}, \textsc{PC.Commit}, \textsc{PC.Verify}) and an evaluation protocol \textsc{PC.Eval}, where:
 
 \begin{itemize}
-    \item \textsc{PC.Setup}$(\lambda, d)$: the algorithm outputs public parameters $pp$ for committing to polynomials of degree $d$. The parameters $pp$ include a specification of an field $\mathbb{F}$.
+    \item \textsc{PC.Setup}$(\lambda, d)$: the algorithm outputs public parameters $pp$ for committing to polynomials of degree $d$. The parameters $pp$ include a specification of a field $\mathbb{F}$.
     
     \item \textsc{PC.Commit}$(pp, \phi(\cdot))$: the algorithm outputs a commitment $\mathcal{C}$ of the polynomial $\phi(\cdot)$ with degree at most $d$.
     
@@ -202,7 +204,7 @@ $$
 
 
 
-\textbf{Zero-knowledge.} At the end of the protocol, the verifier will know the evaluation result of the polynomial at some evaluation points, but nothing more than that. The polynomial commitment scheme is zero-knowledge if the view of the verifier $\mathcal{V}$ generated by the interactive protocol \textsc{PC.Eval} is statistically indistinguishable to the view of the verifier generated by a simulator $\mathcal{S}$. Formally speaking, for all adversaries, the zero-knowledge error $\epsilon_{zk}$ is defined to be the following probability:
+\textbf{Zero-knowledge.} At the end of the protocol, the verifier will know the evaluation result of the polynomial at some evaluation points, but nothing more than that. The polynomial commitment scheme is zero-knowledge if the view of the verifier $\mathcal{V}$ generated by the interactive protocol \textsc{PC.Eval} is statistically indistinguishable from the view of the verifier generated by a simulator $\mathcal{S}$. Formally speaking, for all adversaries, the zero-knowledge error $\epsilon_{zk}$ is defined to be the following probability:
 $$
 \epsilon_{zk} = Pr
 \begin{pmatrix}
@@ -226,7 +228,7 @@ The weight of a codeword is the number of its elements that are nonzero and the 
 
 As $C$ is a subspace, there exists a basis $c_1, c_2, \cdots, c_k$ where $k$ is the dimension of the subspace. Any codeword can be expressed as the linear combination of these basis vectors. We can write these vectors in matrix form as the rows of a $k \times n$ matrix. Such a matrix is called a \textbf{generator matrix}.
 
-Additionally, any linear combination of valid codeword is also a valid codeword, which is the \textbf{linearity property}. Formally speaking, given $x_1, x_2, \cdots, x_n$ are valid codeword, and given $r_1, r_2, \cdots, r_n$ are some constants, $x^\prime = r_1 x_1 + r_2 x_2 + \cdots + r_n x_n$ is also a valid codeword.
+Additionally, any linear combination of valid codewords is also a valid codeword, which is the \textbf{linearity property}. Formally speaking, given $x_1, x_2, \cdots, x_n$ are valid codeword, and given $r_1, r_2, \cdots, r_n$ are some constants, $x^\prime = r_1 x_1 + r_2 x_2 + \cdots + r_n x_n$ is also a valid codeword.
 
 \begin{definition}[Tensor Product Code]
 The tensor product code $C^{\otimes t}$ is the linear code in $\mathbb{F}^{n^t}$ with message length $k^t$, block length $n^t$ and distance $d^t$ where any axis-parallel line of elements is in C.
@@ -243,7 +245,7 @@ such that $c_0^{0} \in (C^{\otimes t})^l$ and for all $r \in [t-1]$ and $s \in [
 
 \begin{definition}[Relation $R_{cons}$]
 \label{def:relation-cons}
-The relation $R_{cons}$ is the sets of tuples
+The relation $R_{cons}$ is the set of tuples
 $$
     (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t, \{\texttt{q}^{(s)}\}), c)
 $$ 

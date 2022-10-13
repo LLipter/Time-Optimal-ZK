@@ -14,7 +14,7 @@ $$
 
 Verifier $\mathcal{V}$'s input: nothing.
 
-In high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
+At a high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
 
 \begin{itemize}
     \item Let $M_0 = u$ and $PAD_0$ be a tensor with dimensions identical to $M_0$ filled with random elements from $\mathbb{F}$.
@@ -102,7 +102,7 @@ Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{E
 
 \subsection{Proximity Test}
 
-In this section, we describe the testing phase in the above protocol formally in terms of a IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
+In this section, we describe the testing phase in the above protocol formally in terms of an IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
 
 The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C, m, N, t)$ and witness $\mathbb{W} = (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\prime}, PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime})$. The verifier $\textbf{V}$ takes as input the instance $\mathbb{X}$.
 
@@ -119,7 +119,7 @@ $$
 $$
     PAD_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(PAD_0) \in \mathbb{F}^{N^{t-1} \cdot m}
 $$
-    Note that $PAD_0$ is a matrix with dimension identical to $M_0$ filled with random elements from $\mathbb{F}$. And $\oplus$ denotes elements-wise matrix addition.
+    Note that $PAD_0$ is a matrix with a dimension identical to $M_0$ filled with random elements from $\mathbb{F}$. And $\oplus$ denotes elements-wise matrix addition.
     
     For each round $i \in [t-1]$:
     \begin{itemize}
@@ -199,7 +199,7 @@ And the right side of this equation is equivalent to:
 &= \textbf{Fold}_{t-i+1}(\textbf{Enc}_{1, \cdots, t- i}(M_{i-1} \oplus PAD_{i-1}), r_i) \label{lb:exp2} \\
 \end{align}
 Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. And similar argument applied to the equation \ref{eq:szkpctc_eq2}.
-The equations checked by the verifier $\textbf{V}$ holds.
+The equations checked by the verifier $\textbf{V}$ hold.
 
 \end{proof}
 
@@ -235,9 +235,9 @@ If $((\mathbb{F}, C, m, N, t), (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\pr
 
 If $((\mathbb{F}, C, m, N, t), (PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime}))$ is not in relation $R_\otimes$, then, the soundness error introduced by this part is $\frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
-In a complete proximity test, we use $E_{last}$ denote the event that the last round of test is passed. And we use $E_{other}$ denote the event that all other tests are passed.
+In a complete proximity test, we use $E_{last}$ to denote the event that the last round of the test is passed. And we use $E_{other}$ to denote the event that all other tests are passed.
 The soundness error is the probability the verifier is convinced by a malicious input.
-The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_{last}$ and event $E_{other}$ occurs. Therefore, $P_t = P_{E_{last}} \cdot P_{E_{last}}$. Note that $P_{E_{last}}$ is actually the soundness error when $t=2$, namely, $P_{E_{last}} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_{other}}$ is the soundness error introduced by the second proximity test here, where the input is malicious and all tests except the last one are passed. Therefore, $P_{E_{other}} = \frac{P_{t}}{P_{E_{last}}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
+The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_{last}$ and event $E_{other}$ occur. Therefore, $P_t = P_{E_{last}} \cdot P_{E_{last}}$. Note that $P_{E_{last}}$ is actually the soundness error when $t=2$, namely, $P_{E_{last}} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_{other}}$ is the soundness error introduced by the second proximity test here, where the input is malicious and all tests except the last one are passed. Therefore, $P_{E_{other}} = \frac{P_{t}}{P_{E_{last}}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
 \end{proof}
 
@@ -247,7 +247,7 @@ The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otim
 \begin{lemma}
 \label{lemma:szkpc-zk}
 
-IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{perfect zero-knowledge}
+IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{semi-honest zero-knowledge}
 
 \end{lemma}
 \begin{proof}
@@ -287,7 +287,7 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (j_1, j_2, 
     
     In the real world, $PAD_0^\prime[I]$ is a uniformly random variable by definition. $M_0^\prime[I]$ is also a uniformly random variable because $M_0^\prime[I] = u[I] + PAD_0^\prime[I]$. Similarly, both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combination of a set of uniformly random variables, which are also uniformly random variables.
     
-    Therefore, the verifier will see a uniformly distributed random element from $\mathbb{F}$ both in simulation world and in real world.
+    Therefore, the verifier will see a uniformly distributed random element from $\mathbb{F}$ both in the simulation world and in the real world.
     
     \item Otherwise,
     
@@ -302,6 +302,6 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (j_1, j_2, 
 
 The random variables in $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and in $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are indistinguishable to each other. They are identically distributed.
 
-Note that although $PAD_i$ and $M_i$ are correlated (the subtraction of them is the underlying polynomial coefficients), the verifier $\mathcal{V}$ will not be able to observe this correlation because verifier is not allowed to query both $PAD_i$ and $M_i$ at the same index. The verifier is only allowed to query one of them.
+Note that although $PAD_i$ and $M_i$ are correlated (the subtraction of them is the underlying polynomial coefficients), the verifier $\mathcal{V}$ will not be able to observe this correlation because the verifier is not allowed to query both $PAD_i$ and $M_i$ at the same index. The verifier is only allowed to query one of them.
 
 \end{proof}

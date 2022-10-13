@@ -1,6 +1,6 @@
 \chapter{Polynomial Commitment}
 
-In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}. We first extend the scheme to the $t=3$ situation so that readers can have a good intuition on how it works. Then we generalize it to arbitrary $t$ with detailed analysis available.
+In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}. We first extend the scheme to the $t=3$ situation so that readers can have a good intuition of how it works. Then we generalize it to arbitrary $t$ with detailed analysis available.
 
 \section{Notation}
 
@@ -45,7 +45,7 @@ $$
 
 Verifier $\mathcal{V}$'s input: nothing.
 
-In high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
+At a high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
 
 \begin{itemize}
     \item $\mathcal{P}$ sends $M_0^{\prime}$ to $\mathcal{V}$.
@@ -92,7 +92,7 @@ $$
 
 Verifier $\mathcal{V}$'s input: $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle$.
 
-In high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
+At a high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
 
 \begin{itemize}
     \item $\mathcal{P}$ sends $M_0^{\prime}$ to $\mathcal{V}$.
@@ -148,7 +148,7 @@ If all tests passed, the verifier $\mathcal{V}$ will output the evaluation resul
 
 \section{Analysis}
 
-We refer to the result in \cite{cryptoeprint:2020/1426} and summarize to the following lemmas. 
+We refer to the result in \cite{cryptoeprint:2020/1426} and summarize the following lemmas. 
 
 \begin{lemma}
 \label{lemma:pc-completeness}
@@ -187,16 +187,16 @@ where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
  4 & 32     & 56 & 153558  & 204  & 1.98 & 114701   \\
  \hline
 \end{tabular}
-\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 1 threads, linear code with relative distance 0.07, and 1000 test tuples.}
+\caption{Runtime of polynomial commitment scheme with $2^{20}$ coefficients, 1 thread, linear code with relative distance 0.07, and 1000 test tuples.}
 \label{table:benchmark-pc-1}
 \end{table}
 
 
-We benckmark the above polynomial commitment scheme on a computer with
+We benchmark the above polynomial commitment scheme on a computer with
 Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-pc-1} and table \ref{table:benchmark-pc-2}.
 
 
-Running the polynomial commitment scheme with the same setting, using 8-threads-parallelism can provides approximately a 4x speedup.
+Running the polynomial commitment scheme with the same setting, using 8-threads-parallelism can provide approximately a 4x speedup.
 
 \begin{table}[h!]
 \centering
@@ -216,7 +216,7 @@ Running the polynomial commitment scheme with the same setting, using 8-threads-
 \end{table}
 
 
-As the dimension increases, it is generally require more time to complete the commit phase for the prover. And less time is required to complete the verify phase for the verifier. Also high dimensional polynomial commitment scheme will have less communication complexity. However, since the relative distance is decreasing as the tensor code's dimension is increasing, the soundness error will also increase. In fact, the soundness error for 3-dimensional and 4-dimensional polynomial commitment scheme is higher than 1, which is unusable in practice.
+As the dimension increases, it generally requires more time to complete the commit phase for the prover. And less time is required to complete the verification phase for the verifier. Also, a high dimensional polynomial commitment scheme will have less communication complexity. However, since the relative distance is decreasing as the tensor code's dimension is increasing, the soundness error will also increase. In fact, the soundness error for 3-dimensional and 4-dimensional polynomial commitment schemes is higher than 1, which is unusable in practice.
 
 \subsection{Soundness Error}
 
@@ -244,7 +244,7 @@ According to lemma \ref{lemma:pc-soundness}, we can compute the soundness error 
   & 100 & 56   & 0.55* & 0.10  \\ 
  \hline
 \end{tabular}
-\caption{Soundness error of polynomial commitment scheme. (* represents an imaginary linear code with relative distance 0.55)}
+\caption{Soundness error of polynomial commitment scheme. (* represents an imaginary linear code with a relative distance of 0.55)}
 \label{table:benchmark-pc-3}
 \end{table}
 
