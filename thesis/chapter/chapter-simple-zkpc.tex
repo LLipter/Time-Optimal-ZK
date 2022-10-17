@@ -2,6 +2,8 @@
 
 In this chapter, we describe a simple method to add the zero-knowledge property to a given polynomial commitment scheme. This method uses random numbers to hide the actual coefficients and it works similarly to one-time pad encryption.
 
+We first present the construction, then we prove the construction is complete and sound. For the zero-knowledge property, we first present an failed attempt of proof, then we fix it and present the complete proof.
+
 \section{Proximity Test}
 
 Prover $\mathcal{P}$'s input: 
@@ -247,7 +249,7 @@ The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otim
 \begin{lemma}
 \label{lemma:szkpc-zk}
 
-IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{semi-honest zero-knowledge}
+IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{``almost'' semi-honest zero-knowledge}
 
 \end{lemma}
 \begin{proof}
@@ -298,10 +300,114 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (j_1, j_2, 
     
 \end{itemize}
 
-
-
 The random variables in $\textbf{S}^{\textbf{V}(\mathbb{X};\rho)}(\mathbb{X})$ and in $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \textbf{V}(\mathbb{X};\rho))$ are indistinguishable to each other. They are identically distributed.
 
 Note that although $PAD_i$ and $M_i$ are correlated (the subtraction of them is the underlying polynomial coefficients), the verifier $\mathcal{V}$ will not be able to observe this correlation because the verifier is not allowed to query both $PAD_i$ and $M_i$ at the same index. The verifier is only allowed to query one of them.
 
 \end{proof}
+However, there is one missing problem in lemma \ref{lemma:szkpc-zk}. In the polynomial commitment protocol, the adversary can learn up to $\lambda$ entries of a codeword.
+The lemma does not mention whether it is possible for the adversary to infer another entry given these $\lambda$ entries, and then to distinguish the transcripts based on this inferred information. We can construct a counterexample to break it using the following codeword.
+
+\begin{definition}[times-2 linear code $\mathcal{C}_{\times 2}$]
+% \label{def:szkpc-times2-lc}
+ Given a linear code $\mathcal{C}$ and its encoding function \textsc{Enc}, the encoding function $\textsc{Enc}_{\times 2}$ of the times-2 linear code $\mathcal{C}_{\times 2}$ is defined as follows:
+ $$
+    \textsc{Enc}_{\times 2} (m) = (\textsc{Enc}(m), \textsc{Enc}(m))
+ $$
+\end{definition}
+
+
+
+\begin{lemma}
+\label{lemma:szkpc-zk-cexample}
+
+IOPP = ($\textbf{P}$, $\textbf{V}$) is NOT \textbf{semi-honest zero-knowledge}.
+
+\end{lemma}
+\begin{proof}
+
+Without loss of generality, we assume the dimension $t$ is 3. This counterexample can be extended to higher dimension situations naturally. Given a linear code $\mathcal{C}$ from $\mathbb{F}^m$ to $\mathbb{F}^N$. We construct the times-2 linear code $\mathcal{C}_{\times 2}$, whose encoding function \textsc{Enc} maps messages from $\mathbb{F}^m$ to $\mathbb{F}^{2N}$.
+
+In the query phase, the verifier $\mathcal{V}$ can query $M_0^\prime$ at position $(0, 0, 0)$. Then the verifier $\mathcal{V}$ can query $PAD_0^\prime$ at position $(0, N, 0)$. 
+Because the construction of $\mathcal{C}_{\times 2}$, elements at position $(0, N, 0)$ will be identical to elements at position $(0, 0, 0)$. 
+Therefore, the polynomial coefficient at position $(0, 0, 0)$ is $M_0^\prime[0, 0, 0] - PAD_0^\prime[0, 0, 0] = M_0^\prime[0, 0, 0] - PAD_0^\prime[0, N, 0]$.
+\end{proof}
+
+
+
+
+
+
+
+
+
+To fix this problem, we need to use the following definition.
+
+\begin{definition}[$l$-query zero-knowledge codeword]
+A linear code $\mathcal{C}$ is $l$-query zero-knowledge if all adversaries $\mathcal{A}$ cannot distinguish a random value from an entry in the codeword when the adversary $\mathcal{A}$ can make $l$ queries to the codeword. Formally speaking, the following probability should be negligible:
+
+
+$$
+\left \lvert
+Pr
+\begin{pmatrix}
+ b = b^\prime : \\
+ c \overset{{\scriptscriptstyle\$}}{\leftarrow} \mathcal{C} \\
+ b \overset{{\scriptscriptstyle\$}}{\leftarrow} \{0, 1\} \\
+ t_0 \overset{{\scriptscriptstyle\$}}{\leftarrow} \mathbb{F} \\
+ (I_1, \cdots, I_l) \leftarrow \mathcal{A} \\
+ \mathcal{A} \leftarrow c[I_1], \cdots, c[I_l] \\
+ I^\prime \leftarrow \mathcal{A} \\
+ t_1 \leftarrow c[I^\prime] \\
+ b^\prime \leftarrow \mathcal{A}(t_b, \mathcal{C})
+\end{pmatrix}
+- \frac{1}{2}
+\right \rvert
+$$
+\end{definition}
+
+\begin{lemma}
+\label{lemma:lquery-zk}
+
+A linear code $\mathcal{C}$ is $l$-query zero-knowledge if and only if any $l$ columns of the generator matrix $G$ are linearly independent of each other.
+
+\end{lemma}
+
+\begin{lemma}
+\label{lemma:szkpc-zk-final}
+
+IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{semi-honest zero-knowledge} if IOPP is ``almost'' semi-honest zero-knowledge according to lemma \ref{lemma:szkpc-zk}, the codeword used in IOPP is $l$-query zero-knowledge, and $\lambda \le l$.
+
+\end{lemma}
+\begin{proof}
+
+According to lemma \ref{lemma:szkpc-zk}, the transcript generated by the simulator is indistinguishable from a real-world transcript. And since the codeword used in IOPP is $l$-query zero-knowledge and $\lambda \le l$, the adversary is not able to infer more information from that. Hence, the protocol leaks no information.
+
+\end{proof}
+
+The only remaining problem is how to prove a linear code is $l$-query zero-knowledge. Depending on the structure of the specific linear code, one may construct a proof easily. For example, the following lemma shows Reed-Solomon code ($\mathbb{F}^k \rightarrow \mathbb{F}^n$) is $k$-query zero-knowledge.
+
+\begin{lemma}
+\label{lemma:rscode-kzk}
+
+A Reed-Solomon code that maps from $\mathbb{F}^k$ to $\mathbb{F}^n$ is $k$-query zero-knowledge.
+
+\end{lemma}
+\begin{proof}
+
+The codeword of the Reed-Solomon code is in the following format:
+$$
+\mathcal{C}(x) = 
+(
+p_x(a_1), p_x(a_2), \cdots, p_x(a_n)
+)
+$$
+$$
+p_x(a) = \sum_{i=1}^k x_i a^{i-1}
+$$
+where $x$ is the input message, $p$ is a polynomial of degree $k$, and $a_1, a_2, \cdots, a_n$ are some coefficients.
+It is clear that $k+1$ evaluation points are required to fix a polynomial with degree $k$. If only $k$ evaluation points are provided, then no information is leaking.
+
+\end{proof}
+
+For a general codeword, one may use the lemma \ref{lemma:lquery-zk} to test the code in a brute-force manner. Whether it is possible to find an efficient algorithm remains an open question.
