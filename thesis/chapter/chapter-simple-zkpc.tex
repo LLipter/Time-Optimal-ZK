@@ -1,108 +1,10 @@
-\chapter{Simple Zero-Knowledge Polynomial Commitment}
+\chapter{IOPs for Zero-Knowledge Polynomial Commitment}
 
 In this chapter, we describe a simple method to add the zero-knowledge property to a given polynomial commitment scheme. This method uses random numbers to hide the actual coefficients and it works similarly to one-time pad encryption.
 
 We first present the construction, then we prove the construction is complete and sound. For the zero-knowledge property, we first present an failed attempt of proof, then we fix it and present the complete proof.
 
 \section{Proximity Test}
-
-Prover $\mathcal{P}$'s input: 
-$$
-    M_0 \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}
-$$
-$$
-    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1}(M_0 \oplus PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
-$$
-
-Verifier $\mathcal{V}$'s input: nothing.
-
-At a high level, the protocol consists of $t-1$ rounds, with each round reducing the dimension by 1. The protocol proceeds as follows. 
-
-\begin{itemize}
-    \item Let $M_0 = u$ and $PAD_0$ be a tensor with dimensions identical to $M_0$ filled with random elements from $\mathbb{F}$.
-Let 
-$$
-    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (M_0 \oplus PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
-$$
-$$
-    PAD_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1} (PAD_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
-$$
-where $\oplus$ denotes elements-wise tensor addition.
-$\mathcal{P}$ sends $M_0^{\prime}$ and $PAD_0\prime$ to $\mathcal{V}$.
-
-    \item Round $i$ for $i \in [t-1]$
-    
-    \begin{itemize}
-        \item $\mathcal{V}$ sample a random variable $r_i \in \mathbb{F}^m$ and send $r_i$ to $\mathcal{P}$.
-        \item $\mathcal{P}$ computes a linear combination for $M_i, PAD_i \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t-i \text{ times}}}$ of their last dimension.
-        Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
-$$
-    M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
-$$
-$$
-    PAD_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot PAD_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
-$$
-        \item $\mathcal{P}$ computes
-$$
-M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i \oplus PAD_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
-$$
-$$
-PAD_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(PAD_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
-$$
-        \item $\mathcal{P}$ sends $M_i^{\prime}$ and $PAD_i^\prime$ to $\mathcal{V}$.
-    \end{itemize}
-    
-    \item $\mathcal{V}$ will perform a probabilistic check to make sure 
-$M_0^\prime$, $M_1^\prime$, $M_2^\prime, \cdots, M_{t}^\prime, PAD_0^\prime$, $PAD_1^\prime$, $PAD_2^\prime, \cdots, PAD_{t}^\prime$ are consistent with each other.
-
-Formally speaking, in step 1, the verifier will sample $l_1$ random tuple $(j_1, j_2, \cdots, j_t)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$. Denote this set of tuples as $L_1$.
-For each sampled tuple $(j_1, j_2, \cdots, j_t)$, the verifier will check the following equation holds for every $i \in [t-1]$.
-$$
-    \text{Enc}(M_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot M_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
-$$
-Then, in step 2, the verifier will sample another $l_2$ random tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ from space $\underbrace{[N] \times [N] \times \cdots \times [N]}_{t \text{ times}}$ with the restriction that $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$. Denote this set of tuples as $L_2$.
-For each sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$, the verifier will check the following equation holds for every $1 \le i \le t-2$.
-$$
-    \text{Enc}(PAD_i^\prime[j_1, j_2, \cdots, j_{t-i-1}, *])[j_{t-i}] \stackrel{?}{=} \sum_{k=1}^m r_i[k] \cdot PAD_{i-1}^{\prime}[j_1,j_2, \cdots, j_{t-i},k]
-$$
-    
-\end{itemize}
-
-
-% \textbf{Evaluation Phase.}
-
-% Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The evaluation phase is identical to the testing phase, except for the following difference.
-
-% \begin{itemize}
-%     \item One additional round is required. There are $t$ rounds in total. In round $t$, $M_t^\prime$ and $ PAD_t^\prime$ are degenerated to a single value.
-
-%     \item In round $i$, the random value $r_i$ is replaced by $q_i$.
-    
-%     \item For every sampled tuple $(j_1, j_2, \cdots, j_t)$ in step 1, the following restriction is required, $j_k \neq j_k^\prime$ for $\forall (j_1^\prime, j_2^\prime, \cdots, j_t^\prime) \in L_2$.
-
-%     \item For every sampled tuple $(j_1^\prime, j_2^\prime, \cdots, j_t^\prime)$ in step 2, the following restriction is required, $j_k^\prime \neq j_k$ for $\forall (j_1, j_2, \cdots, j_t) \in L_1$.
-% \end{itemize}
-
-% If all consistent checks passed, then the verifier outputs $M_{t}^{\prime} - PAD_t^\prime$ as $g(x)$.
-
-\section{Formal Description}
-
-\subsection{Notation}
-
-\subsubsection{Fold Operation}
-
-Define $\textbf{Fold}_i(X, r)$ to be the operation taking a linear combination of $X$ across the $i$-th dimension according to coefficient $r$. 
-
-Namely, for indexes $j_1, \cdots, j_{i-1}, j_{i+1}, \cdots , j_{k} \ge 1$:
-$$
-\textbf{Fold}_i(X, r)[j_1, \cdots, j_{i-1}, j_{i+1}, \cdots , j_{k}] = \sum_{k=1}^{m} r_{i}[k] \cdot X[j_1, \cdots, j_{i-1}, k, j_{i+1}, \cdots , j_{k}]
-$$
-
-\subsubsection{Encode Operation}
-
-Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{i}$.
-
-\subsection{Proximity Test}
 
 In this section, we describe the testing phase in the above protocol formally in terms of an IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
 
@@ -246,10 +148,12 @@ The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otim
 
 \subsection{Proximity Test Zero-Knowledge}
 
+\subsubsection{``almost'' semi-honest zero-knowledge}
+
 \begin{lemma}
 \label{lemma:szkpc-zk}
 
-IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{``almost'' semi-honest zero-knowledge}
+IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{``almost'' semi-honest zero-knowledge}.
 
 \end{lemma}
 \begin{proof}
@@ -328,7 +232,7 @@ IOPP = ($\textbf{P}$, $\textbf{V}$) is NOT \textbf{semi-honest zero-knowledge}.
 
 Without loss of generality, we assume the dimension $t$ is 3. This counterexample can be extended to higher dimension situations naturally. Given a linear code $\mathcal{C}$ from $\mathbb{F}^m$ to $\mathbb{F}^N$. We construct the times-2 linear code $\mathcal{C}_{\times 2}$, whose encoding function \textsc{Enc} maps messages from $\mathbb{F}^m$ to $\mathbb{F}^{2N}$.
 
-In the query phase, the verifier $\mathcal{V}$ can query $M_0^\prime$ at position $(0, 0, 0)$. Then the verifier $\mathcal{V}$ can query $PAD_0^\prime$ at position $(0, N, 0)$. 
+In the query phase, the verifier can manipulate the randomness appropriately such that the verifier $\mathcal{V}$ can query $M_0^\prime$ at position $(0, 0, 0)$ and $PAD_0^\prime$ at position $(0, N, 0)$.
 Because the construction of $\mathcal{C}_{\times 2}$, elements at position $(0, N, 0)$ will be identical to elements at position $(0, 0, 0)$. 
 Therefore, the polynomial coefficient at position $(0, 0, 0)$ is $M_0^\prime[0, 0, 0] - PAD_0^\prime[0, 0, 0] = M_0^\prime[0, 0, 0] - PAD_0^\prime[0, N, 0]$.
 \end{proof}
@@ -365,6 +269,8 @@ Pr
 \right \rvert
 $$
 \end{definition}
+
+We sample a random codeword in this definition, which is little bit different from \cite{BCL22}, because in the context we are using this definition the codewords are random. We include the randomness to reflect this situation.
 
 \begin{lemma}
 \label{lemma:lquery-zk}

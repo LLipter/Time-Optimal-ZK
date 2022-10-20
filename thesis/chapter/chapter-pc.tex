@@ -1,6 +1,6 @@
-\chapter{Polynomial Commitment}
+\chapter{IOPs for Polynomial Commitment}
 
-In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}. We first extend the scheme to the $t=3$ situation so that readers can have a good intuition of how it works. Then we generalize it to arbitrary $t$ with detailed analysis available.
+In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}. We first present the formal description of the protocol. Then we generalize it to arbitrary $t$ with detailed analysis available.
 
 \section{Notation}
 
@@ -9,7 +9,25 @@ We can rearrange $u$ to be a $\underbrace{n^{\frac{1}{t}} \times n^{\frac{1}{t}}
 
 Let $N = \rho^{-1} \cdot m$ and \text{Enc}: $\mathbb{F}^m \rightarrow \mathbb{F}^N$ represent the encoding function of a linear code with a constant rate $\rho > 0$ and a constant minimum relative distance $\gamma > 0$.
 
+\subsubsection{Encode Operation}
+
 Let $\text{Enc}_i(M)$ denote the function that encode every stripes in the $i$th dimension of matrix $M$ using encoding function Enc. For example, $\text{Enc}_1(M)$ will encode each column of a $n \times n $ matrix and produce a $N \times m$ matrix.
+
+
+Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{i}$.
+
+\subsubsection{Fold Operation}
+
+Define $\textbf{Fold}_i(X, r)$ to be the operation taking a linear combination of $X$ across the $i$-th dimension according to coefficient $r$. 
+
+Namely, for indexes $j_1, \cdots, j_{i-1}, j_{i+1}, \cdots , j_{k} \ge 1$:
+$$
+\textbf{Fold}_i(X, r)[j_1, \cdots, j_{i-1}, j_{i+1}, \cdots , j_{k}] = \sum_{k=1}^{m} r_{i}[k] \cdot X[j_1, \cdots, j_{i-1}, k, j_{i+1}, \cdots , j_{k}]
+$$
+
+
+
+Since the IOPs in this section work for general tensor products, we also need to express the polynomial evaluation as a tensor product.
 
 \begin{lemma}[Polynomial Evaluation \cite{brakedown}]
 \label{lemma:petq}
@@ -31,7 +49,7 @@ And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_
 
 \section{Proximity Test for Arbitrary t}
 
-Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tenser code $C^{\otimes t}$.
+Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tensor code $C^{\otimes t}$.
 
 \subsection{Formal Description}
 
@@ -40,7 +58,7 @@ $$
     M_0 \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}
 $$
 $$
-    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1}(M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
+    M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
 $$
 
 Verifier $\mathcal{V}$'s input: nothing.
@@ -56,14 +74,14 @@ At a high level, the protocol consists of $t-1$ rounds, with each round reducing
         \item $\mathcal{V}$ sample a random variable $r_i \in \mathbb{F}^m$ and send $r_i$ to $\mathcal{P}$.
         \item $\mathcal{P}$ computes a linear combination 
         $M_i \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$ of the last dimension of matrix $M_{i-1}$.
-        Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+        Namely,
 $$
-    M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} r_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
+    M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, r_i)
 $$
 
         \item $\mathcal{P}$ computes 
 $$
-    M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
+    M_i^\prime =  \textbf{Enc}_{1,\cdots,t-i-1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
 $$    
         and sends $M_i^\prime$ to $\mathcal{V}$.
     \end{itemize}
@@ -87,7 +105,7 @@ $$
     M_0 \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \text{ times}}}
 $$
 $$
-    M_0^{\prime} = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t-1}(M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
+    M_0^{\prime} = \textbf{Enc}_{1,\cdots,t-1}(M_0) \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}
 $$
 
 Verifier $\mathcal{V}$'s input: $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle$.
@@ -102,15 +120,14 @@ At a high level, the protocol consists of $t-1$ rounds, with each round reducing
     \begin{itemize}
         \item $\mathcal{V}$ send $q_i$ to $\mathcal{P}$.
         \item $\mathcal{P}$ computes a linear combination 
-        $M_i \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$ of the last dimension of matrix $M_{i-1}$.
-        Namely, for $1 \le j_1,j_2, \cdots, j_{t-i} \le m$:
+        $M_i \in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-1 \text{ times}} \times m}$ of the last dimension of matrix $M_{i-1}$. Namely,
 $$
-    M_i[j_1,j_2, \cdots, j_{t-i}] = \sum_{k=1}^{m} q_{i}[k] \cdot M_{i-1}[j_1,j_2, \cdots, j_{t-i}, k]
+    M_i = \textbf{Fold}_{t-i+1}(M_{i-1}, q_i)
 $$
 
         \item $\mathcal{P}$ computes 
 $$
-    M_i^\prime = \text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{t - i - 1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
+    M_i^\prime =  \textbf{Enc}_{1,\cdots,t-i-1}(M_i)\in \mathbb{F}^{\overbrace{N \times N \times \cdots \times N}^{t-i-1 \text{ times}} \times m}
 $$    
         and sends $M_i^\prime$ to $\mathcal{V}$.
     \end{itemize}
@@ -165,7 +182,31 @@ where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 \end{lemma}
 
 
+\section{Implementation Details}
 
+The protocol presented above is in IOP model, and is not concrete polynomial commitment algorithms. We can use the Merkle tree to compile such point-query IOPs into concrete arguments.
+
+\subsection{Merkle Tree Commitment}
+
+A Merkle Tree is a data structure that allows one to commit to $l = 2^{d}$ messages by a single hash value $h$, such that revealing any bit of the message requires $d+1$ hash values. A Merkle hash tree is presented by a binary tree of depth $d$ where $l$ messages elements $m_1, m_2, \cdots, m_l$ are assigned to the leaves of the tree. The values assigned to internal nodes are computed by hashing the value of its two child nodes. To reveal $m_i$, we need to reveal $m_i$ together with the values on the path from $m_i$ to the root. We denote the algorithm as follows:
+
+\begin{enumerate}
+    \item $h \leftarrow \textsc{Merkle.Commit}(m_1, m_2, \cdots, m_l)$
+    \item $(m_i, \phi_i) \leftarrow \textsc{Merkle.Open}(m, i)$
+    \item $\{\textsc{accept}, \textsc{reject}\} \leftarrow \textsc{Merkle.Verify}(\phi_i, m_i, h)$
+\end{enumerate}
+
+In practice, we use Merkle tree commitment to compile the IOP or IOPP to a real argument system. Each element in the large array message $\pi$ sent by the prover will be considered to be a leaf node of a Merkle tree. And the corresponding Merkle tree root will be sent to the verifier instead. For each query at position $I$, the prover will respond with $\pi[I]$ and the corresponding Merkle tree path, which will be authenticated later by the verifier.
+
+Coefficient matrices $M_0^\prime, M_1^\prime, \cdots, M_{t-1}^\prime$ sent by the prover may be replaced by a Merkle tree commitment to that matrix. And since each time the verifier will query a strip of elements in a matrix (i.e. $M_i^\prime[i_1, i_2, \cdots, i_{t-i-1}, *]$), it is possible to zip such a strip of elements into a single node in Merkle-tree's leaf level to decrease runtime complexity and communication complexity.
+
+\subsection{Zero-knowledge Merkle Tree Commitment}
+
+To implement a zero-knowledge polynomial commitment scheme, we also need a zero-knowledge Merkle tree commitment to preventing information-leaking from the Merkle tree path. If we use the random oracle model, we can argue that the Merkle hash is completely random, thus, leaking no information at all. On the other hand, we can prevent information leaking by adding randomness to the leaf nodes. The leaf node is $hash(data_i || r_i)$ where $r_i$ is some random elements. 
+
+\subsection{Parallelism}
+
+Most of the computations for the polynomial commitment scheme can be done in parallel in a natural fashion. There is little data dependence among them. Therefore, it is possible to run the commitment scheme using multiple threads to increase efficiency significantly for both the prover and the verifier.
 
 
 
@@ -193,7 +234,7 @@ where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 
 
 We benchmark the above polynomial commitment scheme on a computer with
-Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-pc-1} and table \ref{table:benchmark-pc-2}.
+Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. We use the Brakedown linear code presented in \cite{brakedown}. The runtimes are summarized in the table \ref{table:benchmark-pc-1} and table \ref{table:benchmark-pc-2}.
 
 
 Running the polynomial commitment scheme with the same setting, using 8-threads-parallelism can provide approximately a 4x speedup.
