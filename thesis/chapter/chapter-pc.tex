@@ -49,7 +49,7 @@ And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_
 
 \section{Proximity Test for Arbitrary t}
 
-Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tensor code $C^{\otimes t}$.
+Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes^1$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tensor code $C^{\otimes t}$.
 
 \subsection{Formal Description}
 
@@ -96,7 +96,7 @@ $$
 
 \section{Consistency Test}
 
-Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The consistency test is identical to the proximity test, except that in round $i$, the random linear combination $r_i$ is replaced by $q_i$. It will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_{cons}$ (definition \ref{def:relation-cons}). The full description of the consistency test is written below.
+Let $q_1, q_2, \cdots, q_t \in \mathbb{F}^{m}$ be vectors such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $. The consistency test is identical to the proximity test, except that in round $i$, the random linear combination $r_i$ is replaced by $q_i$. It will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_{cons}^1$ (definition \ref{def:relation-cons}). The full description of the consistency test is written below.
 
 \subsection{Formal Description}
 

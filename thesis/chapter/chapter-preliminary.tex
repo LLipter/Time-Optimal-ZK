@@ -235,7 +235,6 @@ The tensor product code $C^{\otimes t}$ is the linear code in $\mathbb{F}^{n^t}$
 \end{definition}
 
 \begin{definition}[Relation $R_\otimes$]
-\label{def:relation-prox}
 The relation $R_\otimes$ is the sets of tuples
 $$
     (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t), (c_0^{0}, \{c_1^{(s)}\}_s, \cdots, \{c_{t-1}^{(s)}\}_s))
@@ -243,8 +242,16 @@ $$
 such that $c_0^{0} \in (C^{\otimes t})^l$ and for all $r \in [t-1]$ and $s \in [q]$, we have $c_r^{(s)} \in (C^{\otimes t-r})^k$.
 \end{definition}
 
+\begin{definition}[Relation $R_\otimes^1$]
+\label{def:relation-prox}
+The relation $R_\otimes^1$ is the sets of tuples
+$$
+    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t), c_0^{0})
+$$ 
+such that $c_0^{0} \in (C^{\otimes t})^l$.
+\end{definition}
+
 \begin{definition}[Relation $R_{cons}$]
-\label{def:relation-cons}
 The relation $R_{cons}$ is the set of tuples
 $$
     (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t, \{\texttt{q}^{(s)}\}), c)
@@ -255,6 +262,18 @@ and for all $s \in [q]$, $\langle \otimes_{i}\texttt{q}_i^{(s)} , f \rangle = v^
 
 \end{definition}
 
+\begin{definition}[Relation $R_{cons}^1$]
+\label{def:relation-cons}
+The relation $R_{cons}^1$ is the set of tuples
+$$
+    (\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, C, l, q, t, \{\texttt{q}^{(s)}\}), c)
+$$ 
+such that $c = \textsc{Enc}_{C^{\otimes t}}(f) \in \mathbb{F}^{l\cdot n^t}$ for some $f \in \mathbb{F}^{l\cdot k^t}$, 
+$\texttt{q} = (\texttt{q}_0, \cdots, \texttt{q}_t) \in \mathbb{F}^{l} \times (\mathbb{F}^k)^t$, 
+and $\langle \otimes_{i}\texttt{q}_i , f \rangle = v$.
+
+\end{definition}
+
 \begin{definition}[Distance $\Delta_\otimes$]
 Let $\mathbb{W} = (c_0^{0}, \{c_1^{(s)}\}_s, \cdots, \{c_{t-1}^{(s)}\}_s)$ be such that $c_0^{(0)} \in \mathbb{F}^{l \cdot n^t}$ and, for all $r \in [t-1]$ and $s \in [q]$, we have $c_r^{(s)} \in \mathbb{F}^{k \cdot n^{t-r}}$. Given $\mathbb{X} = (\mathbb{F}, C, l, q, t)$, the $\Delta_\otimes$ distance of $\mathbb{W}$ to $R_\otimes|_{\mathbb{X}}$ is
 $$
@@ -262,3 +281,4 @@ $$
 $$
 where $\Delta_0 := \Delta(c_0^{(0)}, C^{\otimes t})$ and $\forall r \in [t-1], \Delta_r := \Delta(\{c_r^{(s)}\}_s, C^{\otimes t-r})$.
 \end{definition}
+

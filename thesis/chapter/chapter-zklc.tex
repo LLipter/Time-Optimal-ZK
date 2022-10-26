@@ -1,6 +1,6 @@
 \chapter{Zero-Knowledge Linear Code}
 
-In this chapter, we use the construction presented in paper \cite{10.1145/2554797.2554815} to add a zero-knowledge property to a normal linear code through code transformation. 
+In this chapter, we use the construction presented in paper \cite{10.1145/2554797.2554815} to add a zero-knowledge property to a normal linear code through code transformation. This construction was originally proposed to boost relative distance. Later researchers have shown that it can also provide zero-knowledge property \cite{BCL22}. We first present the ingredients of this construction, including random graph, expander graph, and reversed linear code. Then we present the construction and its analysis.
 
 % http://www.cs.cmu.edu/~odonnell/toolkit13/lecture12.pdf
 \section{Random d-regular Bipartite Graph}
@@ -89,7 +89,7 @@ $P_4$ is the probability that a randomly generated graph $G$ does not satisfy th
 By rearranging the above equation, we have $ d > \frac{\ln 2 + H(\epsilon) \ln 2 - \frac{\ln p}{n}}{\epsilon^2}$.
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $370.86$.
-
+\qedsymbol{}
 \end{proof}
 
 
@@ -214,9 +214,9 @@ According to lemma \ref{lemma:randomgraph2}, the degree of the expander graph is
 
 Figure \ref{fig:degree} presents the relation between relative distance and runtime. As the relative distance approaches 0.1, the runtime increases dramatically. And even for a larger relative distance, the construction is still significantly slower than the original linear code, making this construction unacceptable in practice.
 
-\section{Improvement}
+\section{Possible Improvement?}
 
-The performance of our zero-knowledge linear code construction suffers from the degree of underlying random expander graph. Recently, we notice an idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
+The performance of our zero-knowledge linear code construction suffers from the degree of underlying random expander graph. The larger the degree, the slower the encoding function. Recently, we notice an idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
 
 We can prove a graph is not an expander graph by providing one counter-example. The densest-subgraph algorithm used by this detection algorithm can help us to find the counter-example efficiently.
 Basically, if the graph is not a good expander graph, the detection algorithm in \cite{orion} can identify this situation with some probability $p$ using a random input $r$. And if the graph is a good expander graph, the detection algorithm will not falsely identify it (no false positive). Then we can run this detection algorithm $\lambda$ times with different random inputs and amplify the detection probability to $1 - (1 - p)^\lambda$. Additionally, if we find the graph is not a good expander graph, then we can simply discard it and generate a new random graph.
