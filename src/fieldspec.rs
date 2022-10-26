@@ -1,3 +1,14 @@
+pub mod ft32 {
+    use ff::PrimeField;
+    use ff_derive_num::Num;
+
+    #[derive(PrimeField, Num)]
+    #[PrimeFieldModulus = "2147483647"]
+    #[PrimeFieldGenerator = "3"]
+    #[PrimeFieldReprEndianness = "little"]
+    pub struct Ft32([u64; 1]);
+}
+
 pub mod ft127 {
     use ff::PrimeField;
     use ff_derive_num::Num;

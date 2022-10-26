@@ -1,0 +1,175 @@
+RD_code:false n:128 m:128 lambda:200 code_len:661
+commit_time: 37 ms
+mid_time: 36 ms
+verify_time: 44 ms
+total_time: 82 ms
+Proof Size: 10624 bytes
+
+RD_code:false n:128 m:256 lambda:200 code_len:1101
+commit_time: 78 ms
+mid_time: 40 ms
+verify_time: 53 ms
+total_time: 131 ms
+Proof Size: 12448 bytes
+
+RD_code:false n:128 m:512 lambda:200 code_len:1982
+commit_time: 100 ms
+mid_time: 55 ms
+verify_time: 75 ms
+total_time: 175 ms
+Proof Size: 14496 bytes
+
+RD_code:false n:128 m:1024 lambda:200 code_len:3743
+commit_time: 185 ms
+mid_time: 101 ms
+verify_time: 140 ms
+total_time: 326 ms
+Proof Size: 19392 bytes
+
+RD_code:false n:128 m:2048 lambda:200 code_len:7266
+commit_time: 405 ms
+mid_time: 167 ms
+verify_time: 248 ms
+total_time: 653 ms
+Proof Size: 28384 bytes
+
+RD_code:false n:256 m:128 lambda:200 code_len:881
+commit_time: 62 ms
+mid_time: 39 ms
+verify_time: 51 ms
+total_time: 113 ms
+Proof Size: 10624 bytes
+
+RD_code:false n:256 m:256 lambda:200 code_len:1321
+commit_time: 83 ms
+mid_time: 65 ms
+verify_time: 79 ms
+total_time: 162 ms
+Proof Size: 12448 bytes
+
+RD_code:false n:256 m:512 lambda:200 code_len:2202
+commit_time: 144 ms
+mid_time: 99 ms
+verify_time: 121 ms
+total_time: 265 ms
+Proof Size: 15296 bytes
+
+RD_code:false n:256 m:1024 lambda:200 code_len:3963
+commit_time: 256 ms
+mid_time: 162 ms
+verify_time: 204 ms
+total_time: 460 ms
+Proof Size: 19392 bytes
+
+RD_code:false n:256 m:2048 lambda:200 code_len:7486
+commit_time: 546 ms
+mid_time: 266 ms
+verify_time: 331 ms
+total_time: 877 ms
+Proof Size: 28384 bytes
+
+RD_code:false n:512 m:128 lambda:200 code_len:1321
+commit_time: 98 ms
+mid_time: 56 ms
+verify_time: 71 ms
+total_time: 169 ms
+Proof Size: 11424 bytes
+
+RD_code:false n:512 m:256 lambda:200 code_len:1762
+commit_time: 125 ms
+mid_time: 88 ms
+verify_time: 106 ms
+total_time: 232 ms
+Proof Size: 12448 bytes
+
+RD_code:false n:512 m:512 lambda:200 code_len:2642
+commit_time: 214 ms
+mid_time: 162 ms
+verify_time: 191 ms
+total_time: 406 ms
+Proof Size: 15296 bytes
+
+RD_code:false n:512 m:1024 lambda:200 code_len:4404
+commit_time: 520 ms
+mid_time: 289 ms
+verify_time: 348 ms
+total_time: 868 ms
+Proof Size: 20192 bytes
+
+RD_code:false n:512 m:2048 lambda:200 code_len:7926
+commit_time: 741 ms
+mid_time: 487 ms
+verify_time: 556 ms
+total_time: 1297 ms
+Proof Size: 28384 bytes
+
+RD_code:false n:1024 m:128 lambda:200 code_len:2202
+commit_time: 148 ms
+mid_time: 84 ms
+verify_time: 107 ms
+total_time: 256 ms
+Proof Size: 12224 bytes
+
+RD_code:false n:1024 m:256 lambda:200 code_len:2642
+commit_time: 211 ms
+mid_time: 169 ms
+verify_time: 199 ms
+total_time: 410 ms
+Proof Size: 13248 bytes
+
+RD_code:false n:1024 m:512 lambda:200 code_len:3523
+commit_time: 411 ms
+mid_time: 353 ms
+verify_time: 394 ms
+total_time: 805 ms
+Proof Size: 15296 bytes
+
+RD_code:false n:1024 m:1024 lambda:200 code_len:5284
+commit_time: 726 ms
+mid_time: 579 ms
+verify_time: 629 ms
+total_time: 1356 ms
+Proof Size: 20192 bytes
+
+RD_code:false n:1024 m:2048 lambda:200 code_len:8807
+commit_time: 1222 ms
+mid_time: 934 ms
+verify_time: 1008 ms
+total_time: 2230 ms
+Proof Size: 29184 bytes
+
+RD_code:false n:2048 m:128 lambda:200 code_len:3963
+commit_time: 250 ms
+mid_time: 151 ms
+verify_time: 189 ms
+total_time: 440 ms
+Proof Size: 12224 bytes
+
+RD_code:false n:2048 m:256 lambda:200 code_len:4404
+commit_time: 391 ms
+mid_time: 259 ms
+verify_time: 299 ms
+total_time: 691 ms
+Proof Size: 14048 bytes
+
+RD_code:false n:2048 m:512 lambda:200 code_len:5284
+commit_time: 637 ms
+mid_time: 484 ms
+verify_time: 532 ms
+total_time: 1170 ms
+Proof Size: 16096 bytes
+
+RD_code:false n:2048 m:1024 lambda:200 code_len:7046
+commit_time: 1131 ms
+mid_time: 945 ms
+verify_time: 1006 ms
+total_time: 2138 ms
+Proof Size: 20192 bytes
+
+RD_code:false n:2048 m:2048 lambda:200 code_len:10568
+commit_time: 2175 ms
+mid_time: 1952 ms
+verify_time: 2047 ms
+total_time: 4222 ms
+Proof Size: 29184 bytes
+

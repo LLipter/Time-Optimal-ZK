@@ -30,7 +30,7 @@ def lwe_se(field_size, distance, test_no):
     return part1, part2, part3, part4, max(part1, part2, part3, part4)
 
 if __name__ == '__main__':
-    fs = 46242760681095663677370860714659204618859642560429202607213929836750194081793
+    # fs = 46242760681095663677370860714659204618859642560429202607213929836750194081793
     # print(soundness_error(0.07, 100, 2, 1762, fs))
     # print(soundness_error(0.07, 1430, 3, 174, fs))
     # print(soundness_error(0.07, 20400, 4, 56, fs))
@@ -50,6 +50,7 @@ if __name__ == '__main__':
 
     # print(d_bound4(1/1.72, math.pow(2, -256), 1762))
 
+    fs = 2147483647
     for i in range(10):
         test_no = 2 ** (i + 7)
         se = lwe_se(fs, 0.035, test_no)
