@@ -15,7 +15,7 @@ The difference is that the prover in the argument system is computationally boun
 
 % interactive oracle proofs
 % https://www.iacr.org/archive/tcc2016b/99850156/99850156.pdf
-Obviously, the standard mathematical proof that needs to show the witness is not zero-knowledge.
+Obviously, the standard mathematical proof that needs to show the solution to the verifier is not zero-knowledge.
 To achieve zero-knowledge, lots of new proof system models have been introduced after years of research. One of the most well-known models is \textbf{Interactive proofs (IPs)}. Interactive proofs were proposed by Goldwasser, Micali, and Rackoff in \cite{DBLP:books/acm/19/GoldwasserMR19} decades ago, which also presents the idea of zero-knowledge for the first time. In Interactive proofs, a probabilistic polynomial-time (PPT) verifier $\mathcal{V}$ exchanges $k$-rounds of messages with an all-powerful prover $\mathcal{P}$, and then either accepts or rejects the statements.
 
 One of the most famous and the earliest interactive proof is the quadratic residuosity problem, in which we want to decide whether $a$ is a quadratic residue mod $N$, given $N$ and $a$. For an integer $N$, we say that $a$ ($0 \le a \le N - 1$) is a quadratic residue mod $N$ if there is an $r$ (a square root) such that $ a \equiv r^2 ( \texttt{mod } N)$. 
@@ -51,10 +51,11 @@ the verifier $\mathcal{V}$ has oracle access to the prover $\mathcal{P}$’s mes
 To be more precise, a $k$-round IOP consists of $k$ rounds of interaction. In the $i$-th round of interaction, the verifier $\mathcal{V}$ sends a message $m_i$ to the prover $\mathcal{P}$, which the prover $\mathcal{P}$ reads in full. 
 Then the prover $\mathcal{P}$ replies with a message $o_i$ to the verifier $\mathcal{V}$ as an oracle proof string.
 The verifier $\mathcal{V}$ can query $o_i$ either in this or in all later rounds. 
-After the $k$ rounds of interaction, the verifier $\mathcal{V}$ either accepts or rejects the statement. Depending on the types of queries (e.g. point, linear, tensor and polynomial), IOPs and PCPs can be classified into a few categories.
+After the $k$ rounds of interaction, the verifier $\mathcal{V}$ either accepts or rejects the statement.
+Apart from point queries, other query classes are also possible.
 
 IOPs are even more powerful because, on one hand, it preserves the expressiveness and richness of PCPs, containing the complexity class NEXP rather than only PSPACE, allowing checking only a few positions of the proof string. Also, on the other hand, it is as flexible as IPs, allowing multiple rounds of interaction with the prover $\mathcal{P}$. IOPs have already found several major applications, including linear-time zero-knowledge arguments, zero-knowledge proofs for NP relations with bounded space requirements, and verifiable computing.
-Additionally, lots of researchers have tried to build linear-time IOPs, while whether linear-time PCPs with non-trivial query complexity exists is still an open question.
+Additionally, lots of researchers have built linear-time IOPs, while whether linear-time PCPs with non-trivial query complexity exists is still an open question.
 
 
 \section{Polynomial Commitment Scheme}
@@ -80,7 +81,7 @@ In a polynomial commitment scheme, a prover $\mathcal{P}$ commits to a secret po
 % linear time encodable codes
 % https://www.cs.technion.ac.il/users/wwwb/cgi-bin/tr-get.cgi/2013/MSC/MSC-2013-22.pdf
 % https://people.csail.mit.edu/henrycg/pers/gelfand/gelfand1973complexity.pdf
-Linear codes are essential in many cryptographic protocols. Those protocols rely on special families of error-correcting linear codes, whose structures and properties influence the overall performance of the proof systems. For instance, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The higher the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs. Other proof systems that make use of linear code include \cite{DBLP:conf/coco/BordageLNR22}, \cite{DBLP:conf/icalp/Ben-SassonBHR18}, \cite{DBLP:conf/ccs/AmesHIV17} and \cite{DBLP:conf/crypto/Ben-SassonBHR19}.
+Linear codes are essential in many proof systems. Those protocols rely on special families of error-correcting linear codes, whose structures and properties influence the overall performance of the proof systems. For instance, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The higher the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs. Other proof systems that make use of linear code include \cite{DBLP:conf/coco/BordageLNR22}, \cite{DBLP:conf/icalp/Ben-SassonBHR18}, \cite{DBLP:conf/ccs/AmesHIV17} and \cite{DBLP:conf/crypto/Ben-SassonBHR19}.
 
 
 In coding theory, a linear code is a mapping between vectors in space $\mathbb{F}^k$ and vectors in space $\mathbb{F}^n$, where $\mathbb{F}$ is a finite field with $q$ elements. It is an error-correcting code and it is linear because any linear combination of codewords is also a codeword. A linear code is often defined by a generator matrix $G \in \mathbb{F}^{k \times n}$. The relative distance is defined to be the minimum distance between any valid distinct codewords divided by $n$, the length of the codeword. The rate of a linear code is the ratio between the length of the message and the length of the codeword. Since we are interested in linear-time protocols, the linear code used in the protocol must also be in linear time, which implies a constant code rate ($k = O(n)$).

@@ -246,7 +246,8 @@ Therefore, the polynomial coefficient at position $(0, 0, 0)$ is $M_0^\prime[0, 
 To fix this problem, we need to use the following definition.
 
 \begin{definition}[$l$-query independent codeword]
-A linear code $\mathcal{C}$ is $l$-query independent if all adversaries $\mathcal{A}$ cannot distinguish a random value from an entry in the codeword when the adversary $\mathcal{A}$ can make $l$ queries to the codeword. Formally speaking, the following probability should be negligible:
+\label{def:l-ind-codeword}
+A linear code $\mathcal{C}$ is $l$-query independent if all adversaries $\mathcal{A}$ cannot distinguish a random value from an entry in the codeword when the adversary $\mathcal{A}$ can make $l$ queries to the codeword. And the adversary $\mathcal{A}$ can choose the challenge position $I^\prime$ himself. Formally speaking, the following probability should be negligible:
 
 
 $$
@@ -273,9 +274,73 @@ We sample a random codeword in this definition, which is little bit different fr
 \begin{lemma}
 \label{lemma:lquery-zk}
 
-A linear code $\mathcal{C}$ is $l$-query independent if and only if any $l$ columns of the generator matrix $G$ are linearly independent of each other.
+A linear code $\mathcal{C}$ is $l$-query independent if and only if any $l+1$ columns of the generator matrix $G$ are linearly independent of each other.
 
 \end{lemma}
+
+\begin{proof}
+First, we prove the ``only if'' part, i.e. a linear code $\mathcal{C}$ is $l$-query independent $\Rightarrow$ any $l+1$ columns of the generator matrix $G$ are linearly independent of each other.
+
+We prove it by contrapositive. Suppose there exists $l+1$ columns of generator matrix $G$ are NOT linearly independent of each other. Without loss of generality, we use $G[I_1], \cdots, G[I_l]$ and $G[I_{l+1}]$ to denote these $l+1$ columns. Then it must be possible to write $G[I_{l+1}]$ as a linear combination of $G[I_1], \cdots, G[I_l]$. Namely, 
+$$
+    G[I_{l+1}] = a_{1}G[I_1] + \cdots + a_{l}G[I_l]
+$$
+Then, in the game defined in definition \ref{def:l-ind-codeword}, the adversary $\mathcal{A}$ will query indices $I_1, \cdots, I_l$ and learn $c[I_1], \cdots, c[I_l]$. Also, the adversary $\mathcal{A}$ will choose $I_{l+1}$ as the challenge and compute $c[I_{l+1}]$ using the following equation,
+\begin{align}
+c[I_{l+1}] 
+    &= G[I_{l+1}] \cdot m  
+    && \cdot \text{ represents dot product} \nonumber \\
+    &= (a_{1}G[I_1] + \cdots + a_{l}G[I_l]) \cdot m 
+    &&  m \text{ is the message} \nonumber \\
+    &= a_{1}(G[I_1]\cdot m) + \cdots + a_{l}(G[I_l]\cdot m) \nonumber \\
+    &= a_1 c[I_1] + \cdots + a_{l} c[I_l] \nonumber
+\end{align}
+At the end, the adversary $\mathcal{A}$ will output 1 if $t_b = c[I_{l+1}]$. Otherwise the adversary $\mathcal{A}$ will output 0. 
+
+If $b = 1$, then the adversary $\mathcal{A}$ always wins the game. 
+
+If $b=0$, then the adversary $\mathcal{A}$ wins when $t_0 \neq c[I_{l+1}]$. Since $t_0$ is sampled uniformly, the adversary $\mathcal{A}$ wins with probability $1 - \frac{1}{q}$, where $q$ is the size of the field $\mathbb{F}$. 
+
+Hence, the adversary $\mathcal{A}$'s advantage is $\frac{1}{2} + \frac{1}{2}(1 - \frac{1}{q})$ and this linear code $\mathcal{C}$ is NOT $l$-query independent.
+
+Second, we prove the ``if'' part, i.e. any $l+1$ columns of the generator matrix $G$ are linearly independent of each other $\Rightarrow$ a linear code $\mathcal{C}$ is $l$-query independent.
+
+Without loss of generality, the adversary $\mathcal{A}$ will query indices $I_1, \cdots, I_l$ and learn $c[I_1], \cdots, c[I_l]$ in the game defined in definition \ref{def:l-ind-codeword}. Also, the adversary $\mathcal{A}$ will choose $I_{l+1}$ as the challenge. we use $G[I_1], \cdots, G[I_l]$ and $G[I_{l+1}]$ to denote these $l+1$ columns in the generator matrix $G$. Then we create the following $(l+1)\times(k+1)$ matrix $H$,
+$$
+H = 
+\begin{bmatrix}
+    G[I_1]^T & c[I_1] \\
+    \vdots & \vdots \\
+    G[I_{l}]^T & c[I_{l}] \\
+    G[I_{l+1}]^T & c[I_{l+1}]
+\end{bmatrix}  
+$$
+In $H$, only $c[I_{l+1}]$ is unknown. And we refer the last row as the challenge row. Then we run the Gaussian elimination algorithm on it and get the $H^\prime$ matrix in reduced row echelon form. Because these $l+1$ columns are linearly independent of each other, each row in $H^\prime$ matrix will have a pivot element. We use $j$ to denote the pivot position of the challenge row. And the challenge row should have the following form,
+$$
+H^\prime_{\text{challenge}} = 
+\begin{bmatrix}
+    0 & \dots & 0 & 1 &  & \dots &  & c[I_{l+1}] + s
+\end{bmatrix}  
+$$
+which is equivalent to the following equation,
+\begin{equation}
+\label{eq:lind-gau}
+    m_j + \sum_{a=j+1}^{k} m_a H^\prime_{\text{challenge}}[a] = c[I_{l+1}] + s
+\end{equation}
+ 
+$m_a$ is the $a$-th element in the message $m$. $s$ is a known value and is introduced by those row operations in the Gaussian elimination algorithm.
+
+By rearranging the equation \ref{eq:lind-gau}, we have the following equation,
+\begin{equation}
+    c[I_{l+1}] = m_j + s^\prime
+\end{equation}
+where $s^\prime = \sum_{a=j+1}^{k} m_a H^\prime_{\text{challenge}}[a] - s$. 
+
+By definition of the reduced row echelon form, the $j$-th column of matrix $H^\prime$ are all zeros except the one in the challenge row. This implies that $m_j$ is not computable from $c[I_1], \cdots, c[I_l]$. Since the codeword is sampled uniformly random, $m_j$ looks randomly. And $c[I_{l+1}]$ is also uniformly random from the adversary $\mathcal{A}$'s perspective. Therefore, the adversary $\mathcal{A}$ cannot distinguish it from a random element $t_0$ and win the game. 
+
+\qedsymbol{}
+$ $
+\end{proof}
 
 \begin{lemma}
 \label{lemma:szkpc-zk-final}
@@ -287,7 +352,8 @@ IOPP = ($\textbf{P}$, $\textbf{V}$) is \textbf{semi-honest zero-knowledge} if IO
 
 According to lemma \ref{lemma:szkpc-zk}, the transcript generated by the simulator is indistinguishable from a real-world transcript. And since the codeword used in IOPP is $l$-query independent and $\lambda \le l$, the adversary is not able to infer more information from that. Hence, the protocol leaks no information.
 
-% \qedsymbol{}
+\qedsymbol{}
+$ $
 \end{proof}
 
 The only remaining problem is how to prove a linear code is $l$-query independent. Depending on the structure of the specific linear code, one may construct a proof easily. For example, the following lemma shows Reed-Solomon code ($\mathbb{F}^k \rightarrow \mathbb{F}^n$) is $k$-query independent.
@@ -312,7 +378,7 @@ p_x(a) = \sum_{i=1}^k x_i a^{i-1}
 $$
 where $x$ is the input message, $p$ is a polynomial of degree $k$, and $a_1, a_2, \cdots, a_n$ are some coefficients.
 It is clear that $k+1$ evaluation points are required to fix a polynomial with degree $k$. If only $k$ evaluation points are provided, then no information is leaking.
-
+\qedsymbol{}
 \end{proof}
 
 For a general codeword, one may use the lemma \ref{lemma:lquery-zk} to test the code naively in a brute-force manner. Faster algorithms are possible with the help of minimum distance decoding algorithm. However, whether it is possible to find an efficient algorithm remains an open question.

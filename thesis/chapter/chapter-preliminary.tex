@@ -97,18 +97,18 @@ A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for 
  
 \end{definition}
 
-\begin{definition}
+% \begin{definition}
 
-Let $A$ be an algorithm with adaptive query access to oracles $O_1, \cdots, O_n$. Let $Q$ be a stateful query-checker algorithm that receives the adaptive queries of $A$ and may output $\perp$ at any point. We say that $A$ is a $Q$-query algorithm if $Q$ never outputs $\perp$.
+% Let $A$ be an algorithm with adaptive query access to oracles $O_1, \cdots, O_n$. Let $Q$ be a stateful query-checker algorithm that receives the adaptive queries of $A$ and may output $\perp$ at any point. We say that $A$ is a $Q$-query algorithm if $Q$ never outputs $\perp$.
  
-\end{definition}
+% \end{definition}
 
-\begin{definition}
+% \begin{definition}
 
-A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{perfect zero-knowledge} with query-checker $Q$ if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$, 
-$Q$-query algorithm $\widetilde{V}$ and the choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\widetilde{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \widetilde{V}(\mathbb{X};\rho))$ are identically distributed.
+% A interactive oracle proof of proximity IOPP = ($\textbf{P}$, $\textbf{V}$) for a relation $R$ is \textbf{perfect zero-knowledge} with query-checker $Q$ if there exists a polynomial-time simulator algorithm $\textbf{S}$ such that, for every $(\mathbb{X}, \mathbb{W}) \in R$, 
+% $Q$-query algorithm $\widetilde{V}$ and the choice of verifier randomness $\rho$, the random variables $\textbf{S}^{\widetilde{V}(\mathbb{X};\rho)}(\mathbb{X})$ and $\text{View}(\textbf{P}(\mathbb{X}, \mathbb{W}), \widetilde{V}(\mathbb{X};\rho))$ are identically distributed.
  
-\end{definition}
+% \end{definition}
 
 \section{Polynomials}
 
@@ -226,7 +226,7 @@ If $\mathbb{F}$ is a field and $C \subset \mathbb{F}^n$ is a subspace of $\mathb
 
 The weight of a codeword is the number of its elements that are nonzero and the distance between two codewords is the \textbf{Hamming distance} between them, that is, the number of elements in which they differ. The distance $d$ of the linear code is the minimum weight of its nonzero codewords, or equivalently, the \textbf{minimum distance} between distinct codewords. A linear code of length $n$, dimension $k$, and distance $d$ is called an $[n,k,d]$ code.
 
-As $C$ is a subspace, there exists a basis $c_1, c_2, \cdots, c_k$ where $k$ is the dimension of the subspace. Any codeword can be expressed as the linear combination of these basis vectors. We can write these vectors in matrix form as the rows of a $k \times n$ matrix. Such a matrix is called a \textbf{generator matrix}.
+As $C$ is a subspace, there exists a basis $c_1, c_2, \cdots, c_k$ where $k$ is the dimension of the subspace. Any codeword can be expressed as the linear combination of these basis vectors. We can write these vectors in matrix form as the rows of a $k \times n$ matrix. Such a matrix is called a \textbf{generator matrix} $G$. Given the message $m$, the encoded codeword is defined to be the vector-matrix multiplication $mG$.
 
 Additionally, any linear combination of valid codewords is also a valid codeword, which is the \textbf{linearity property}. Formally speaking, given $x_1, x_2, \cdots, x_n$ are valid codeword, and given $r_1, r_2, \cdots, r_n$ are some constants, $x^\prime = r_1 x_1 + r_2 x_2 + \cdots + r_n x_n$ is also a valid codeword.
 

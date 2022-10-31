@@ -20,6 +20,9 @@ such that $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 
 
 \section{LWE Protocol}
 
+In this protocol, the prover $\mathcal{P}$ wants to prove to the verifier $\mathcal{V}$ in zero-knowledge that he knows $s$ and $e$ such that equation $As + e = u$ holds.
+
+The protocol itself is inspired by \cite{lwe}. It differs from it in two aspects. First, the protocol in \cite{lwe} use Reed-Solomon linear code, whereas we use the Brakedown linear code. Brakedown linear code can encode a message in linear time, which is more efficient than Reed-Solomon linear code. Second, we send the entire $\overline{H}$ message to the verifier $\mathcal{V}$, whereas in \cite{lwe} only a subset of $\overline{H}$ is sent. Our version reduces the computation required by the verifier $\mathcal{V}$ at the cost of increasing communication complexity / proof size. Also, our security proof could be cleaner and simpler.
 
 Prover $\mathcal{P}$'s input: $A \in \mathbb{F}^{n \times m}$, $u \in \mathbb{F}^{n}$, $s \in \{-1, 0, 1\}^{m}$ and $e \in \{-1, 0, 1\}^{n}$ such that $u = As + e$.
 

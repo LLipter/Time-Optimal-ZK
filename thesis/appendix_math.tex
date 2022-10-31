@@ -7,7 +7,6 @@
 $\binom{n}{m} \le (\frac{en}{m})^m$, for $n, m \in \mathbb{Z}^+$
 
 \end{lemma}
-
 \begin{proof}
 \begin{align}
 \log m! 
@@ -16,7 +15,6 @@ $\binom{n}{m} \le (\frac{en}{m})^m$, for $n, m \in \mathbb{Z}^+$
     &= [x \log x - x]_1^m \nonumber \\
     &= m \log m - m + 1 \label{eq:logm!}
 \end{align}
-
 \begin{align}
 m! 
     &= e^{\ln m!} \nonumber \\
@@ -27,8 +25,6 @@ m!
     &= (\frac{m}{e})^m \cdot e \nonumber \\
     &\ge (\frac{m}{e})^m \label{eq:m!}
 \end{align}
-
-
 \begin{align}
 \binom{n}{m} 
     &= \frac{n \cdot (n-1) \cdot (n-2) \cdots (n-m+1)}{m!} \nonumber \\
@@ -37,7 +33,6 @@ m!
     && \text{apply equation \ref{eq:m!}} \\
     &= (\frac{en}{m})^m
 \end{align}
-
 \end{proof}
 
 % https://math.stackexchange.com/questions/544667/upper-bound-for-1-1-xx
