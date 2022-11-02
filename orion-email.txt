@@ -4,32 +4,34 @@ We use a toy linear code that maps from F^2 to F^3.
 Its generator matrix looks like this:
 1 1 0
 0 0 1
-which means for message [a b], the corresponding codeword will be [a a b]. 
+which means for message [a b], the corresponding codeword will be [a a b].     [a b a] []
 The first element and the second element in the codeword is identical to the first element in the message.
 
-In orion's protocol
-suppose C_2_m is the mask matrix, it looks like this:
-a1 a2 a3
-a4 a5 a6
-a7 a8 a9
-we choose the index set I_1 = {2} and I_1_hat = {1}
+In Orion, consider coefficient matrix w and mask matrix m.
 
-And C_2_m_w is the masked matrix, it looks like this:
-b1 b2 b3
-b4 b5 b6
-b7 b8 b9
-we choose the index set I_0 = {1} and I_0_hat = {2}
+Write Enc(w) as
+W1 W2 W3
+W4 W5 W6
+W7 W8 W9
+
+Write Enc(m) as
+M1 M2 M3
+M4 M5 M6
+M7 M8 M9
+
+Then we have Enc(m+w) has the form
+B1 B2 B3
+B4 B5 B6
+B7 B8 B9
+
+We choose index sets I_1 = {2}, I_1_hat = {1} for Enc(m) and I_0 = {1}, I_0_hat = {2} for Enc(m+w).
 
 Note that I_0 ^ I_1 = emptyset and  I_0_hat ^  I_1_hat = emptyset. The restriction is satisfied.
 
-And the coefficient matrix looks like this:
-w1 w2 w3
-w4 w5 w6
-w7 w8 w9
+Then when we execute the protocol, we will query and learn M4 and B2. 
+Since [M2 M5 M8] is a valid codeword, then M2 = M5
+Since [M4 M5 M6] is a valid codeword, then M4 = M5
+Then we can compute W2 and break zero-knowledge as follows:
+W2 = B2 - M2 = B2 - M5 = B2 - M4
 
-Then when we execute the protocol, we will query and learn a4 and b2. 
-Since [a2 a5 a8] is a valid codeword, then a2 = a5
-Since [a4 a5 a6] is a valid codeword, then a4 = a5
-Then we can reveal w2 and break zero-knowledge as follows:
-w2 = b2 - a2 = b2 - a5 = b2 - a4
-
+It seems like Orion implicitly requires some extra conditions on the error correcting code, at least that the code is systematic, and maybe more.
