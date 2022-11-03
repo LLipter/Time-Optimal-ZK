@@ -281,7 +281,7 @@ A linear code $\mathcal{C}$ is $l$-query independent if and only if any $l+1$ co
 \begin{proof}
 First, we prove the ``only if'' part, i.e. a linear code $\mathcal{C}$ is $l$-query independent $\Rightarrow$ any $l+1$ columns of the generator matrix $G$ are linearly independent of each other.
 
-We prove it by contrapositive. Suppose there exists $l+1$ columns of generator matrix $G$ are NOT linearly independent of each other. Without loss of generality, we use $G[I_1], \cdots, G[I_l]$ and $G[I_{l+1}]$ to denote these $l+1$ columns. Then it must be possible to write $G[I_{l+1}]$ as a linear combination of $G[I_1], \cdots, G[I_l]$. Namely, 
+We prove it by contrapositive. Suppose there exists $l+1$ columns of generator matrix $G$ are NOT linearly independent of each other. We use $G[I_1], \cdots, G[I_l]$ and $G[I_{l+1}]$ to denote these $l+1$ columns. Without loss of generality, it must be possible to write $G[I_{l+1}]$ as a linear combination of $G[I_1], \cdots, G[I_l]$. Namely, 
 $$
     G[I_{l+1}] = a_{1}G[I_1] + \cdots + a_{l}G[I_l]
 $$
@@ -322,13 +322,14 @@ H^\prime_{\text{challenge}} =
     0 & \dots & 0 & 1 &  & \dots &  & c[I_{l+1}] + s
 \end{bmatrix}  
 $$
-which is equivalent to the following equation,
+where $s$ is a known value and is introduced by those row operations in the Gaussian elimination algorithm.
+
+And it is equivalent to the following equation,
 \begin{equation}
 \label{eq:lind-gau}
     m_j + \sum_{a=j+1}^{k} m_a H^\prime_{\text{challenge}}[a] = c[I_{l+1}] + s
 \end{equation}
- 
-$m_a$ is the $a$-th element in the message $m$. $s$ is a known value and is introduced by those row operations in the Gaussian elimination algorithm.
+where $m_a$ is the $a$-th element in the message $m$.
 
 By rearranging the equation \ref{eq:lind-gau}, we have the following equation,
 \begin{equation}
