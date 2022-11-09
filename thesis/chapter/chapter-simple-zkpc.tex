@@ -8,9 +8,9 @@ We first present the construction, then we prove the construction is complete an
 
 \section{Proximity Test}
 
-In this section, we describe the testing phase in the above protocol formally in terms of an IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes^1(\mathbb{F}, C, m, N, t)$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
+In this section, we describe the testing phase in the above protocol formally in terms of an IOPP (interactive oracle proof of proximity) with point queries for the relation $R_\otimes^1$ between a prover $\textbf{P}$ and a verifier $\textbf{V}$.
 
-The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C, m, N, t)$ and witness $\mathbb{W} = (M_0^{\prime}, M_1^{\prime}, \cdots, M_{t-1}^{\prime}, PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1}^{\prime})$. The verifier $\textbf{V}$ takes as input the instance $\mathbb{X}$.
+The prover $\textbf{P}$ takes as input an instance $\mathbb{X} = (\mathbb{F}, C, m, N, t)$ and witness $\mathbb{W} = (M_0)$. The verifier $\textbf{V}$ takes as input the instance $\mathbb{X}$. The distance $\Delta_\otimes$ is defined to be the max of $\Delta_\otimes^{M}$ and $\Delta_\otimes^{PAD}$, where $\Delta_\otimes^{M}$ comes from the coefficient matrix and $\Delta_\otimes^{PAD}$ comes from the pad matrix.
 
 \begin{enumerate}
     \item \textit{Interactive phase}. 
