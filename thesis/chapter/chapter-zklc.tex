@@ -137,7 +137,7 @@ By rearranging the above equation, we have $ d > \frac{H(\epsilon) \ln 2 - \frac
 
 For example, if $\epsilon = 0.05$, $n = 5000$, $p = 2^{-256}$, then degree $d$ need to be greater than $93.60$.
 
-Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfy the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in the graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such set is hard to found. Similar to hash functions, hash collision must exist somewhere, but this collision is hard to be found.
+Compared with lemma \ref{lemma:randomgraph}, lemma \ref{lemma:randomgraph2} produces a much tighter bound by weakening the expansion property. A graph satisfying the expansion property in lemma \ref{lemma:randomgraph2} may not satisfy the expansion property in lemma \ref{lemma:randomgraph}. There may exist a set $S \subset L$ in the graph such that the expansion property fails. But lemma \ref{lemma:randomgraph2} guarantees that such a set is hard to find. Similar to hash functions, hash collision must exist somewhere, but this collision is hard to be found.
 
 \end{proof}
 
@@ -216,7 +216,7 @@ Figure \ref{fig:degree} presents the relation between relative distance and runt
 
 \section{Possible Improvement?}
 
-The performance of our zero-knowledge linear code construction suffers from the degree of underlying random expander graph. The larger the degree, the slower the encoding function. Recently, we notice an idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
+The performance of our zero-knowledge linear code construction suffers from the degree of the underlying random expander graph. The larger the degree, the slower the encoding function. Recently, we notice an idea presented in \cite{orion} that might solve this problem. They propose a new algorithm to test whether a random bipartite graph is a lossless expander graph or not based on the densest subgraph algorithm, which helps to sample lossless expanders with an overwhelming probability.
 
 We can prove a graph is not an expander graph by providing one counter-example. The densest-subgraph algorithm used by this detection algorithm can help us to find the counter-example efficiently.
 Basically, if the graph is not a good expander graph, the detection algorithm in \cite{orion} can identify this situation with some probability $p$ using a random input $r$. And if the graph is a good expander graph, the detection algorithm will not falsely identify it (no false positive). Then we can run this detection algorithm $\lambda$ times with different random inputs and amplify the detection probability to $1 - (1 - p)^\lambda$. Additionally, if we find the graph is not a good expander graph, then we can simply discard it and generate a new random graph.

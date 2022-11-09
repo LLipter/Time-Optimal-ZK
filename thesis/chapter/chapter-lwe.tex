@@ -175,7 +175,7 @@ where $q$ is the size of the underlying field and $\delta$ is the relative dista
 
 Suppose $H_2^\prime$, $H_1^\prime$ or $H_0^\prime$ is at least $\frac{\delta}{10}$ far away from a valid codeword. Without loss of generality, we assume $H_2^\prime$ is not a valid codeword. Then let $c^* = (1, 0, 0)$, according to lemma \ref{lemma:lweseproof}, the probability that a structured linear combination of $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ is $\frac{\delta}{30}$ close to a codeword is bound by $\frac{2}{q-1}$. Then the probability that they are not $\frac{\delta}{30}$ close to a codeword is $\frac{q-3}{q-1}$. In this case, the probability that verification equation \ref{eq:lwe5} passed is $(1 - \frac{29\delta}{30})^\lambda$. Therefore, the soundness error is at most $\frac{2}{q-1} + \frac{q-3}{q-1}(1 - \frac{29\delta}{30})^\lambda$.
 
-Otherwise, $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ are $\frac{\delta}{10}$ close to a valid codeword, and it is possible to decode them to a instance/witness $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$. 
+Otherwise, $H_2^\prime$, $H_1^\prime$ and $H_0^\prime$ are $\frac{\delta}{10}$ close to a valid codeword, and it is possible to decode them to an instance/witness $(\mathbb{X}, \mathbb{W}) = ((\mathbb{F}, n, m, A, u), (s, e))$. 
 
 Suppose the malicious prover $\mathcal{P}$ does not follow the protocol honestly and sends incorrect messages. 
 \begin{itemize}
@@ -190,7 +190,7 @@ Suppose the malicious prover $\mathcal{P}$ does not follow the protocol honestly
     And since $\widetilde{\textsc{Enc}}(H_i, r_i)$ and $H_i^\prime$ are $\frac{\delta}{10}$ close to each other, at least $\frac{7\delta}{10}$ portion of $\widetilde{\textsc{Enc}}$ and 
     $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \frac{7\delta}{10})^\lambda$.
     
-    \item If $f_2, f_1, f_0, v_2, v_1, v_0, w_2, w_1$ or $w_0$ is incorrect (different from equation \ref{eq:lwe1}, \ref{eq:lwe2}, \ref{eq:lwe3}, \ref{eq:lwe4}), denote the incorrect polynomial as $f^\prime$, $g^\prime$ or $h^\prime$. Since $f$ and $f^\prime$, $g$ and $g^\prime$ or $h$ and $h^\prime$ are polynomials with degree at most 2. According to the Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{2}{q}$. If this event does not happen, then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda$.
+    \item If $f_2, f_1, f_0, v_2, v_1, v_0, w_2, w_1$ or $w_0$ is incorrect (different from equation \ref{eq:lwe1}, \ref{eq:lwe2}, \ref{eq:lwe3}, \ref{eq:lwe4}), denote the incorrect polynomial as $f^\prime$, $g^\prime$ or $h^\prime$. Since $f$ and $f^\prime$, $g$ and $g^\prime$ or $h$ and $h^\prime$ are polynomials with a degree at most 2. According to the Schwartz-Zippel lemma, they can agree on at most 2 evaluation points. And since evaluation point $x$ is sampled randomly, the probability this event happens is at most $\frac{2}{q}$. If this event does not happen, then according to the relative distance property of the encoding function $\widetilde{\textsc{Enc}}$, at least $\delta$ portion of $\widetilde{\textsc{Enc}}(\overline{H}, \overline{r})$ and $H_2^\prime x^2 + H_1^\prime x + H_0^\prime$ will be different. The probability that all $\lambda$ random checks (equation \ref{eq:lwe5}) are passed is at most $(1 - \delta)^\lambda$. Therefore, the soundness error is at most $\frac{2}{q} + \frac{q-2}{q}(1 - \delta)^\lambda$.
 
 
 \end{itemize}
@@ -272,7 +272,7 @@ In the real transcripts, individual elements in $H_2^\prime, H_1^\prime$, and $H
 
 \section{Benchmark}
 
-In practice, we use Merkle tree commitment to compile the IOP to a real argument system as well. We implement the above mentioned protocol in Rust. We benchmark the above LWE protocol on a computer with
+In practice, we use Merkle tree commitment to compile the IOP to a real argument system as well. We implement the above-mentioned protocol in Rust. We benchmark the above LWE protocol on a computer with
 Intel \textregistered \, Core  \textsuperscript{TM} i7-7700HQ CPU @ 2.80GHz (Kabylake), L1 cache: 128KB, L2 cache: 256KB and L3 cache: 6MB. There are 8 physical CPU cores available on this machine. The runtimes are summarized in the table \ref{table:benchmark-lwe}.
 
 

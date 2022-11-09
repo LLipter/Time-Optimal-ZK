@@ -2,7 +2,9 @@
 
 In this chapter, we describe a simple method to add the zero-knowledge property to a given polynomial commitment scheme. This method uses random numbers to hide the actual coefficients and it works similarly to one-time pad encryption.
 
-We first present the construction, then we prove the construction is complete and sound. For the zero-knowledge property, we first present an failed attempt of proof, then we fix it and present the complete proof.
+The idea behind this protocol is similar to \cite{orion}. But we generalize it to higher dimensions and we have different restrictions on query patterns. Also, \cite{orion} uses a code-switching technique to further improve efficiency. We execute the protocol in the previous chapter twice, once for the coefficient matrix and once for the pad matrix. The protocol executed for the pad matrix will terminate early to prevent information leaking. \cite{orion} does not has this concern because of their more restricted query pattern.
+
+We first present the construction, then we prove the construction is complete and sound. For the zero-knowledge property, we first present a failed attempt of proof, then we fix it and present the complete proof.
 
 \section{Proximity Test}
 
@@ -102,7 +104,7 @@ And the right side of this equation is equivalent to:
 \textbf{Fold}_{t-i+1}(M_{i-1}^\prime, r_i) 
 &= \textbf{Fold}_{t-i+1}(\textbf{Enc}_{1, \cdots, t- i}(M_{i-1} \oplus PAD_{i-1}), r_i) \label{lb:exp2} \\
 \end{align}
-Since both \textbf{Fold} and \textbf{Enc} operations are linear operation, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. And similar argument applied to the equation \ref{eq:szkpctc_eq2}.
+Since both \textbf{Fold} and \textbf{Enc} operations are linear operations, expression \ref{lb:exp1} and  expression \ref{lb:exp2} are equivalent to each other. And the similar argument is applied to the equation \ref{eq:szkpctc_eq2}.
 The equations checked by the verifier $\textbf{V}$ hold.
 
 \end{proof}
@@ -187,9 +189,9 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (j_1, j_2, 
 \begin{itemize}
     \item If $j_k \le m$ for $\forall k \in [t]$ (this is the message part),
     
-    In the simulation world, both $M_0^\prime[I]$ and $PAD_0^\prime[I]$ are uniformly random variables. And both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combination of a set of uniformly random variables, which are also uniformly random variables.
+    In the simulation world, both $M_0^\prime[I]$ and $PAD_0^\prime[I]$ are uniformly random variables. And both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combinations of a set of uniformly random variables, which are also uniformly random variables.
     
-    In the real world, $PAD_0^\prime[I]$ is a uniformly random variable by definition. $M_0^\prime[I]$ is also a uniformly random variable because $M_0^\prime[I] = u[I] + PAD_0^\prime[I]$. Similarly, both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combination of a set of uniformly random variables, which are also uniformly random variables.
+    In the real world, $PAD_0^\prime[I]$ is a uniformly random variable by definition. $M_0^\prime[I]$ is also a uniformly random variable because $M_0^\prime[I] = u[I] + PAD_0^\prime[I]$. Similarly, both $M_i^\prime[I]$ and $PAD_i^\prime[I]$ for $i > 0$ are linear combinations of a set of uniformly random variables, which are also uniformly random variables.
     
     Therefore, the verifier will see a uniformly distributed random element from $\mathbb{F}$ both in the simulation world and in the real world.
     
@@ -197,7 +199,7 @@ If the verifier query $M_i^{\prime}$ or $PAD_i^\prime$ at index $I = (j_1, j_2, 
     
     In the simulation world and in the real world, $M_i^\prime[I]$ can be determined by a set of random elements in $M_i$. Denote this computation equation as $\textsc{Func}$, namely, $M_i^\prime[I] = \textsc{Func}(M_i[I_1], \cdots, M_i[I_x])$. And $M_i^\prime[I]$ will represent a distribution that is uniquely determined by function \textsc{Func} and the distribution of variables $M_i[I_1], \cdots, M_i[I_x]$. Similarly, $PAD_i^\prime[I]$ will represent a distribution that is uniquely determined by function \textsc{Func} and the distribution of variables $PAD_i[I_1], \cdots, PAD_i[I_x]$.
     
-    Note that both in simulation world and in the real world, $M_i[I_1], \cdots, M_i[I_x]$ and $PAD_i[I_1], \cdots, PAD_i[I_x]$ will represent uniformly random variables. And since the function \textsc{Func} is identical in both cases, distribution of $M_i^\prime[I]$ and $PAD_i^\prime[I]$ will be identical in two worlds.
+    Note that both in the simulation world and in the real world, $M_i[I_1], \cdots, M_i[I_x]$ and $PAD_i[I_1], \cdots, PAD_i[I_x]$ will represent uniformly random variables. And since the function \textsc{Func} is identical in both cases, the distribution of $M_i^\prime[I]$ and $PAD_i^\prime[I]$ will be identical in two worlds.
     
     
 \end{itemize}
@@ -269,7 +271,7 @@ Pr
 $$
 \end{definition}
 
-We sample a random codeword in this definition, which is little bit different from \cite{BCL22}, because in the context we are using this definition the codewords are random. We include the randomness to reflect this situation.
+We sample a random codeword in this definition, which is a little bit different from \cite{BCL22}, because in the context we are using this definition the codewords are random. We include randomness to reflect this situation.
 
 \begin{lemma}
 \label{lemma:lquery-zk}
@@ -281,7 +283,7 @@ A linear code $\mathcal{C}$ is $l$-query independent if and only if any $l+1$ co
 \begin{proof}
 First, we prove the ``only if'' part, i.e. a linear code $\mathcal{C}$ is $l$-query independent $\Rightarrow$ any $l+1$ columns of the generator matrix $G$ are linearly independent of each other.
 
-We prove it by contrapositive. Suppose there exists $l+1$ columns of generator matrix $G$ are NOT linearly independent of each other. We use $G[I_1], \cdots, G[I_l]$ and $G[I_{l+1}]$ to denote these $l+1$ columns. Without loss of generality, it must be possible to write $G[I_{l+1}]$ as a linear combination of $G[I_1], \cdots, G[I_l]$. Namely, 
+We prove it by contrapositive. Suppose there exists $l+1$ columns of generator matrix $G$ that are NOT linearly independent of each other. We use $G[I_1], \cdots, G[I_l]$ and $G[I_{l+1}]$ to denote these $l+1$ columns. Without loss of generality, it must be possible to write $G[I_{l+1}]$ as a linear combination of $G[I_1], \cdots, G[I_l]$. Namely, 
 $$
     G[I_{l+1}] = a_{1}G[I_1] + \cdots + a_{l}G[I_l]
 $$
@@ -295,7 +297,7 @@ c[I_{l+1}]
     &= a_{1}(G[I_1]\cdot m) + \cdots + a_{l}(G[I_l]\cdot m) \nonumber \\
     &= a_1 c[I_1] + \cdots + a_{l} c[I_l] \nonumber
 \end{align}
-At the end, the adversary $\mathcal{A}$ will output 1 if $t_b = c[I_{l+1}]$. Otherwise the adversary $\mathcal{A}$ will output 0. 
+At the end, the adversary $\mathcal{A}$ will output 1 if $t_b = c[I_{l+1}]$. Otherwise, the adversary $\mathcal{A}$ will output 0. 
 
 If $b = 1$, then the adversary $\mathcal{A}$ always wins the game. 
 
@@ -315,7 +317,7 @@ H =
     G[I_{l+1}]^T & c[I_{l+1}]
 \end{bmatrix}  
 $$
-In $H$, only $c[I_{l+1}]$ is unknown. And we refer the last row as the challenge row. Then we run the Gaussian elimination algorithm on it and get the $H^\prime$ matrix in reduced row echelon form. Because these $l+1$ columns are linearly independent of each other, each row in $H^\prime$ matrix will have a pivot element. We use $j$ to denote the pivot position of the challenge row. And the challenge row should have the following form,
+In $H$, only $c[I_{l+1}]$ is unknown. And we refer to the last row as the challenge row. Then we run the Gaussian elimination algorithm on it and get the $H^\prime$ matrix in reduced row echelon form. Because these $l+1$ columns are linearly independent of each other, each row in the $H^\prime$ matrix will have a pivot element. We use $j$ to denote the pivot position of the challenge row. And the challenge row should have the following form,
 $$
 H^\prime_{\text{challenge}} = 
 \begin{bmatrix}
@@ -337,7 +339,7 @@ By rearranging the equation \ref{eq:lind-gau}, we have the following equation,
 \end{equation}
 where $s^\prime = \sum_{a=j+1}^{k} m_a H^\prime_{\text{challenge}}[a] - s$. 
 
-By definition of the reduced row echelon form, the $j$-th column of matrix $H^\prime$ are all zeros except the one in the challenge row. This implies that $m_j$ is not computable from $c[I_1], \cdots, c[I_l]$. Since the codeword is sampled uniformly random, $m_j$ looks randomly. And $c[I_{l+1}]$ is also uniformly random from the adversary $\mathcal{A}$'s perspective. Therefore, the adversary $\mathcal{A}$ cannot distinguish it from a random element $t_0$ and win the game. 
+By definition of the reduced row echelon form, the $j$-th column of matrix $H^\prime$ are all zeros except the one in the challenge row. This implies that $m_j$ is not computable from $c[I_1], \cdots, c[I_l]$. Since the codeword is sampled uniformly random, $m_j$ looks random. And $c[I_{l+1}]$ is also uniformly random from the adversary $\mathcal{A}$'s perspective. Therefore, the adversary $\mathcal{A}$ cannot distinguish it from a random element $t_0$ and win the game. 
 
 \qedsymbol{}
 $ $
@@ -382,4 +384,4 @@ It is clear that $k+1$ evaluation points are required to fix a polynomial with d
 \qedsymbol{}
 \end{proof}
 
-For a general codeword, one may use the lemma \ref{lemma:lquery-zk} to test the code naively in a brute-force manner. Faster algorithms are possible with the help of minimum distance decoding algorithm. However, whether it is possible to find an efficient algorithm remains an open question.
+For a general codeword, one may use the lemma \ref{lemma:lquery-zk} to test the code naively in a brute-force manner. Faster algorithms are possible with the help of the minimum distance decoding algorithm. However, whether it is possible to find an efficient algorithm remains an open question.

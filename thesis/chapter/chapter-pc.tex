@@ -1,17 +1,17 @@
 \chapter{IOPs for Polynomial Commitment}
 
-In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}. We first present the formal description of the protocol. Then we generalize it to arbitrary $t$ with detailed analysis available.
+In this chapter, we present a general polynomial commitment scheme in the language of IOP for arbitrary dimension $t$. The scheme is an extension of the polynomial commitment scheme for $t=2$ described in \cite{brakedown}, which is also described in \cite{cryptoeprint:2020/1426}. We first present the formal description of the protocol. Then we generalize it to arbitrary $t$ with detailed analysis available.
 
 \section{Notation}
 
-Let $g$ be a multilinear polynomial with $n$ coefficients. For simplicity we assume that $n = m^t$ for some integer $m$. And let $u$ denote the coefficient vector of $g$ in the Lagrange basis, which means $u$ represents all evaluations of $g$ over inputs in hypercube $\{0, 1\}^{\log n}$. 
+Let $g$ be a multilinear polynomial with $n$ coefficients. For simplicity, we assume that $n = m^t$ for some integer $m$. And let $u$ denote the coefficient vector of $g$ in the Lagrange basis, which means $u$ represents all evaluations of $g$ over inputs in hypercube $\{0, 1\}^{\log n}$. 
 We can rearrange $u$ to be a $\underbrace{n^{\frac{1}{t}} \times n^{\frac{1}{t}} \times \cdots \times n^{\frac{1}{t}}}_{t \text{ times}}$ matrix, such that we can index entries in this matrix easily by elements from set $[m]^t$.
 
 Let $N = \rho^{-1} \cdot m$ and \text{Enc}: $\mathbb{F}^m \rightarrow \mathbb{F}^N$ represent the encoding function of a linear code with a constant rate $\rho > 0$ and a constant minimum relative distance $\gamma > 0$.
 
 \subsubsection{Encode Operation}
 
-Let $\text{Enc}_i(M)$ denote the function that encode every stripes in the $i$-th dimension of matrix $M$ using encoding function Enc. For example, $\text{Enc}_1(M)$ will encode each column of a $n \times n $ matrix and produce a $N \times m$ matrix.
+Let $\text{Enc}_i(M)$ denote the function that encodes every stripe in the $i$-th dimension of the matrix $M$ using encoding function Enc. For example, $\text{Enc}_1(M)$ will encode each column of a $n \times n $ matrix and produce a $N \times m$ matrix.
 
 
 Define $\textbf{Enc}_{1,\cdots,i}$ be short-hand for $\text{Enc}_1 \circ \text{Enc}_2 \circ \cdots \circ \text{Enc}_{i}$.
@@ -49,7 +49,7 @@ And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_
 
 \section{Proximity Test for Arbitrary t}
 
-Proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes^1$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tensor code $C^{\otimes t}$.
+The proximity test is the core component of the polynomial commitment scheme, which will test whether $(\mathbb{X}, \mathbb{W})$ is in relation $R_\otimes^1$ (definition \ref{def:relation-prox}). The purpose of this protocol is to convince the verifier $\mathcal{V}$ that a matrix $M$ is very close to a valid tensor code $C^{\otimes t}$.
 
 \subsection{Formal Description}
 
@@ -155,7 +155,7 @@ Let $M_0 = u \in \mathbb{F}^{\overbrace{m \times m \times \cdots \times m}^{t \t
 \textbf{Evaluation Phase.}
 
 Execute the consistency test protocol. The prover $\mathcal{P}$'s input is $(M_0, M_0^{\prime})$ and the verifier $\mathcal{V}$'s input is $(q_1, q_2, \cdots, q_t)$ such that $g(x) =\langle q_1 \otimes q_2 \otimes \cdots \otimes q_t, u \rangle $.
-If all consistency checks passed, then the verifier $\mathcal{V}$ will consider $\langle q_t, M_{t-1} \rangle$ as the evaluation result $g(x)$. 
+If all consistency checks are passed, then the verifier $\mathcal{V}$ will consider $\langle q_t, M_{t-1} \rangle$ as the evaluation result $g(x)$. 
 
 \textbf{Testing Phase.}
 
@@ -184,7 +184,7 @@ where $d = \delta \cdot N$, and $\delta$ denotes the relative distance.
 
 \section{Implementation Details}
 
-The protocol presented above is in IOP model, and is not concrete polynomial commitment algorithms. We can use the Merkle tree to compile such point-query IOPs into concrete arguments.
+The protocol presented above is in the IOP model and is not concrete polynomial commitment algorithms. We can use the Merkle tree to compile such point-query IOPs into concrete arguments.
 
 \subsection{Merkle Tree Commitment}
 
@@ -202,7 +202,7 @@ Coefficient matrices $M_0^\prime, M_1^\prime, \cdots, M_{t-1}^\prime$ sent by th
 
 \subsection{Zero-knowledge Merkle Tree Commitment}
 
-To implement a zero-knowledge polynomial commitment scheme, we also need a zero-knowledge Merkle tree commitment to preventing information-leaking from the Merkle tree path. If we use the random oracle model, we can argue that the Merkle hash is completely random, thus, leaking no information at all. On the other hand, we can prevent information leaking by adding randomness to the leaf nodes. The leaf node is $hash(data_i || r_i)$ where $r_i$ is some random elements. 
+To implement a zero-knowledge polynomial commitment scheme, we also need a zero-knowledge Merkle tree commitment to prevent information-leaking from the Merkle tree path. If we use the random oracle model, we can argue that the Merkle hash is completely random, thus, leaking no information at all. On the other hand, we can prevent information leaking by adding randomness to the leaf nodes. The leaf node is $hash(data_i || r_i)$ where $r_i$ is some random elements. 
 
 \subsection{Parallelism}
 
@@ -257,7 +257,7 @@ Running the polynomial commitment scheme with the same setting, using 8-threads-
 \end{table}
 
 
-As the dimension increases, it generally requires more time to complete the commit phase for the prover. And less time is required to complete the verification phase for the verifier. Also, a high dimensional polynomial commitment scheme will have less communication complexity. However, since the relative distance is decreasing as the tensor code's dimension is increasing, the soundness error will also increase. In fact, the soundness error for 3-dimensional and 4-dimensional polynomial commitment schemes is higher than 1, which is unusable in practice.
+As the dimension increases, it generally requires more time to complete the commit phase for the prover. And less time is required to complete the verification phase for the verifier. Also, a high-dimensional polynomial commitment scheme will have less communication complexity. However, since the relative distance is decreasing as the tensor code's dimension is increasing, the soundness error will also increase. In fact, the soundness error for 3-dimensional and 4-dimensional polynomial commitment schemes is higher than 1, which is unusable in practice.
 
 \subsection{Soundness Error}
 

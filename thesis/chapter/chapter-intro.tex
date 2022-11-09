@@ -1,6 +1,6 @@
 \chapter{Background}
 
-In this chapter, we first explain the proof system models that will be used later in the thesis and their relevant history. Then we introduce the concept of polynomial commitment schemes and linear code. They are the essential building blocks of the cryptographic protocol studied in this thesis.
+In this chapter, we first explain the proof system models that will be used later in the thesis and their relevant history. Then we introduce the concept of polynomial commitment schemes and linear code. They are the essential building blocks of the cryptographic protocols studied in this thesis.
 
 \section{Proof System Models}
 
@@ -8,8 +8,6 @@ In this chapter, we first explain the proof system models that will be used late
 A \textbf{zero-knowledge proof} is a cryptographic protocol that enables an untrusted prover to convince a skeptical verifier that a statement is true without revealing any further information about how the statement is true. 
 Verifiable computing is one example use-case, where a powerful, but untrusted server proves, to a computationally weak client, that they performed an extensive calculation correctly.
 This technique is important and draws lots of attention because it is trivial to prove that one has knowledge of certain information by revealing it; the trick is to prove that possession without revealing the information itself or any additional information. 
-Also, an argument is a relaxation of a proof. The interactive argument is introduced in \cite{10.1145/22145.22178}.
-The difference is that the prover in the argument system is computationally bounded, whereas the prover in the proof system has no such restrictions and is assumed to have unlimited resources. This is why arguments are therefore called ``computationally sound proofs''. In the rest of this chapter, we will use the word arguments/proofs interchangeably and ignore their subtle difference.
 
 
 
@@ -22,6 +20,10 @@ One of the most famous and the earliest interactive proof is the quadratic resid
 
 The interactive proofs turn out to be very powerful, and more and more protocols for problems in different areas have been proposed later. There even exists an interactive proof for language that may not rest in NP, for example, graph non-isomorphism (GNI) problem.
 The terminology IP also refers to the class of problems that can be solved by interactive proof systems in computational complexity theory. And one of the well-known results is that IP=PSPACE, where PSPACE denotes the class of decision problems that can is solvable by Turing machines using a polynomial amount of space.
+
+Also, an argument is a relaxation of a proof. The interactive argument is introduced in \cite{10.1145/22145.22178}.
+The difference is that the prover in the argument system is computationally bounded, whereas the prover in the proof system has no such restrictions and is assumed to have unlimited resources. This is why arguments are therefore called ``computationally sound proofs''. In the rest of this chapter, we will use the word arguments/proofs interchangeably and ignore their subtle difference.
+
 
 
 % linear-time zero-knowledge
@@ -46,13 +48,14 @@ Also, though PCPs are protocols purely in theory due to the oracle used in the p
 
 Later, \textbf{Interactive oracle proofs (IOPs)} was introduced by \cite{DBLP:conf/tcc/Ben-SassonCS16} and \cite{DBLP:journals/jacm/KalaiRR22}, which is powerful and is the focus of this thesis. It naturally combines the structure of IPs and PCPs.
 In other words, an IOP is a PCP that consists of multiple rounds. It generalizes an interactive proof as follows:
-the verifier $\mathcal{V}$ has oracle access to the prover $\mathcal{P}$’s messages and may query them on a few positions probabilistically (rather than having to read the proof string in full). 
+the verifier $\mathcal{V}$ has oracle access to the prover $\mathcal{P}$’s messages and may query them on a few positions probabilistically (rather than having to read the proof string in full). The IOPs with such a query pattern are also called point IOPs.
 
 To be more precise, a $k$-round IOP consists of $k$ rounds of interaction. In the $i$-th round of interaction, the verifier $\mathcal{V}$ sends a message $m_i$ to the prover $\mathcal{P}$, which the prover $\mathcal{P}$ reads in full. 
 Then the prover $\mathcal{P}$ replies with a message $o_i$ to the verifier $\mathcal{V}$ as an oracle proof string.
 The verifier $\mathcal{V}$ can query $o_i$ either in this or in all later rounds. 
 After the $k$ rounds of interaction, the verifier $\mathcal{V}$ either accepts or rejects the statement.
 Apart from point queries, other query classes are also possible.
+For example, IOPs with polynomial query patterns are called polynomial-query IOPs.
 
 IOPs are even more powerful because, on one hand, it preserves the expressiveness and richness of PCPs, containing the complexity class NEXP rather than only PSPACE, allowing checking only a few positions of the proof string. Also, on the other hand, it is as flexible as IPs, allowing multiple rounds of interaction with the prover $\mathcal{P}$. IOPs have already found several major applications, including linear-time zero-knowledge arguments, zero-knowledge proofs for NP relations with bounded space requirements, and verifiable computing.
 Additionally, lots of researchers have built linear-time IOPs, while whether linear-time PCPs with non-trivial query complexity exists is still an open question.
@@ -87,27 +90,11 @@ Linear codes are essential in many proof systems. Those protocols rely on specia
 In coding theory, a linear code is a mapping between vectors in space $\mathbb{F}^k$ and vectors in space $\mathbb{F}^n$, where $\mathbb{F}$ is a finite field with $q$ elements. It is an error-correcting code and it is linear because any linear combination of codewords is also a codeword. A linear code is often defined by a generator matrix $G \in \mathbb{F}^{k \times n}$. The relative distance is defined to be the minimum distance between any valid distinct codewords divided by $n$, the length of the codeword. The rate of a linear code is the ratio between the length of the message and the length of the codeword. Since we are interested in linear-time protocols, the linear code used in the protocol must also be in linear time, which implies a constant code rate ($k = O(n)$).
 
 To encode a message, we can use the naive algorithm, where the message vector is multiplied by the generator matrix $G$ directly. Obviously, this naive algorithm runs in $O(n^2)$ time. 
-Random linear code is generated by sampling the generator matrix randomly, and it is an example that will use the naive encoding algorithm. It is well known that a random linear code may have a good minimal distance property with overwhelming probability. However, one major disadvantage of random linear codes is that their encoding complexity grows quadratically with the message length. The best-known algorithm for vector-matrix multiplication is still far from linear time, which is an essential requirement for building a linear-time zero-knowledge proof system that uses linear code. For other types of code that has a special structure, faster algorithms are possible. Reed-Solomon code is one such example, whose generator matrix is a Vandermonde matrix It can encode the message in $O(n \log n)$ time with the help of the FFT algorithm.
+Random linear code is generated by sampling the generator matrix randomly, and it is an example that will use the naive encoding algorithm. It is well known that a random linear code may have a good minimal distance property with overwhelming probability. However, one major disadvantage of random linear codes is that their encoding complexity grows quadratically with the message length. The best-known algorithm for vector-matrix multiplication is still far from linear time, which is an essential requirement for building a linear-time zero-knowledge proof system that uses linear code. For other types of code that have a special structure, faster algorithms are possible. Reed-Solomon code is one such example, whose generator matrix is a Vandermonde matrix It can encode the message in $O(n \log n)$ time with the help of the FFT algorithm.
 
 
 
 One of the main research directions is minimizing the encoding complexity
-of codes. Since the reading of the input message already takes linear time, the best asymptotic encoding time complexity one could imagine is linear in $k$, the size of the input vectors. One question to ask is whether it is possible to find a family of efficient \textbf{linear-time encodable codes} with good minimum distance property. Gelfand, Dobrushin, and Pinsker \cite{gelfand1973complexity} presented a first proof showing a positive answer. They presented a randomized construction of linear-time encodable linear codes over the binary field. Later Spielman \cite{DBLP:conf/stoc/Spielman95} gives an explicit construction of such codes, which includes both a linear-time encoding algorithm and a linear-time decoding algorithm. The Brakedown linear code presented in \cite{brakedown} recently is another example.
+of codes. Since the reading of the input message already takes linear time, the best asymptotic encoding time complexity one could imagine is linear in $k$, the size of the input vectors. One question to ask is whether it is possible to find a family of efficient \textbf{linear-time encodable codes}. Gelfand, Dobrushin, and Pinsker \cite{gelfand1973complexity} presented a first proof showing a positive answer. They presented a randomized construction of linear-time encodable linear codes over the binary field. Later Spielman \cite{DBLP:conf/stoc/Spielman95} gives an explicit construction of such codes, which includes both a linear-time encoding algorithm and a linear-time decoding algorithm. The Brakedown linear code presented in \cite{brakedown} recently is another example.
 
 Another research direction is maximizing the minimum distance property. Minimum distance property can directly affect the soundness error of many cryptographic protocols including the polynomial commitment schemes focus on by this thesis. Generally speaking, the larger the minimum distance, the smaller the soundness error, and smaller security parameters and proof size may be achievable. Since the concrete rate/distance tradeoff obtained by Spielman’s codes is far from the theoretical GV bound, lots of work has been done to improve that. For example, Guruswami and Indyk \cite{DBLP:journals/tit/GuruswamiI05} introduced linear-time encodable codes whose rate and distance property can get arbitrarily close to the GV bound. And Druk and Ishai \cite{10.1145/2554797.2554815} proposed a construction to further boost the relative distance property. 
-
-% Start by gathering references
-% Then fill in the new section with as much text as you can so that we can discuss it together.
-% Explain what the object is. Why it is useful.
-% List best papers/history and what they contribute.
-
-
-% In this thesis, we focus on the practical usage of \textbf{linear time} interactive argument with or without zero-knowledge property. Additionally, many interactive argument systems use polynomial commitment as a fundamental building block. And polynomial commitment can imply a general interactive argument system. Hence, we will investigate the linear time polynomial commitment instead.
-
-%   After years of research improving the proof size and verifier run-time of zero-knowledge proofs, prover runtime remains a major bottleneck.
-
-% A line of work \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} attempts to address this with zero-knowledge protocols where prover runtime is a constant multiplied by the time taken to perform the calculation. The only one of these works which investigates the practical efficiency of their constructions is \cite{brakedown}, which makes stronger security assumptions than the other works to achieve zero-knowledge and good verifier runtime. On the other hand, \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on specialized constructions of error-correcting codes, hash functions, and sub-protocols whose practical performance is unknown.
-
-% The protocols in these works rely on special families of linear-time error-correcting codes, whose properties influence the final performance of the proof systems. Firstly, \cite{brakedown} \cite{cryptoeprint:2020/1426} \cite{BCL22} rely on codes with a tensor structure. The lower the dimension of the tensors, the smaller the proof size and verification time of the zero-knowledge proofs. The implementation of \cite{brakedown} uses low dimension. The first goal of this project is to extend the implementation of \cite{brakedown} to a higher dimension and investigate the impact of dimension on performance, at various security levels.
-
-% Secondly, while \cite{brakedown} rely on strong assumptions in order to achieve zero-knowledge, \cite{cryptoeprint:2020/1426} \cite{BCL22} use codes with extra zero-knowledge properties. Codes with zero-knowledge properties are easy to obtain from plain codes via simple transformations that is similar to one-time-pad encryption, and codes with stronger zero-knowledge properties use more complex transformations, as described in \cite{10.1145/2554797.2554815}. The second goal of this project is to investigate the performance impact of adding zero-knowledge to the \cite{brakedown} polynomial commitment scheme using zero-knowledge codes, using the plain codes implemented by \cite{brakedown} as a starting point, and assess which transformations are more practical.
