@@ -38,7 +38,7 @@ For an $l$-variate multilinear polynomial $g$ represented in the Lagrange basis 
     g(x) = \langle (x_1, 1-x_1) \otimes (x_2, 1-x_2) \otimes \cdots \otimes (x_l, 1-x_l) , u \rangle
 \]
 
-And for any $ 1 \le t  \le l$, there always exist vectors $q_1, q_2, \cdots , q_t \in \mathbb{F}^{n^{\frac{1}{t}}}$ such that the following holds:
+And for any $ 1 \le t  \le l$ (we assume $t|l$ for simplicity), there always exist vectors $q_1, q_2, \cdots , q_t \in \mathbb{F}^{n^{\frac{1}{t}}}$ such that the following holds:
 
 \[
     (x_1, 1-x_1) \otimes (x_2, 1-x_2) \otimes \cdots \otimes (x_l, 1-x_l) = q_1 \otimes q_2 \otimes \cdots \otimes q_t
@@ -219,7 +219,7 @@ Most of the computations for the polynomial commitment scheme can be done in par
 \centering
 \begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
  \hline
- Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
+ Dimension & Message Length $m$ & Code Length $N$ & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
  \hline\hline
  2 & 1024   & 1762 & 41737  & 3057  & 0.37 & 1206579 \\
  \hline
@@ -243,7 +243,7 @@ Running the polynomial commitment scheme with the same setting, using 8-threads-
 \centering
 \begin{tabular}{| c | m{4em}  | m{3em}  | m{3.5em} | m{2.5em} | m{5em} | m{7em} |} 
  \hline
- Dimension & Message Length & Code Length & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
+ Dimension & Message Length $m$ & Code Length $n$ & Commit Time [ms] & Verify Time [ms] & Soundness Error & Communication Complexity [Field Element] \\ [0.5ex] 
  \hline\hline
  2 & 1024   & 1762 & 10048 & 776 & 0.37 & 1206579  \\
  \hline

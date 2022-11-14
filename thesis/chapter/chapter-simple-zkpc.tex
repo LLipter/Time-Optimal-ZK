@@ -50,7 +50,7 @@ $$
     In step 1, the verifier $\textbf{V}$ samples $l_1$ tuples of the form $(j_1, \cdots, j_t)$ in space $[N]^t$. Denote this set of tuples as $L_1$.
     The verifier $\textbf{V}$ proceeds as follows for each sampled tuple.
     
-    For each $0 \le i \le t-1$, 
+    For each $0 \le i \le t$, 
     the verifier $\textbf{V}$ will query $M_{i}^{\prime}$ at $(j_1, \cdots, j_{t-i-1}, j_k)$ for each $j_k \in [m]$. 
     
     Then the verifier $\textbf{V}$ will check the following equation for $i \in [t-1]$:
@@ -143,12 +143,14 @@ If $((\mathbb{F}, C, m, N, t), (PAD_0^{\prime}, PAD_1^{\prime}, \cdots, PAD_{t-1
 
 In a complete proximity test, we use $E_{last}$ to denote the event that the last round of the test is passed. And we use $E_{other}$ to denote the event that all other tests are passed.
 The soundness error is the probability the verifier is convinced by a malicious input.
-The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_{last}$ and event $E_{other}$ occur. Therefore, $P_t = P_{E_{last}} \cdot P_{E_{last}}$. Note that $P_{E_{last}}$ is actually the soundness error when $t=2$, namely, $P_{E_{last}} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_{other}}$ is the soundness error introduced by the second proximity test here, where the input is malicious and all tests except the last one are passed. Therefore, $P_{E_{other}} = \frac{P_{t}}{P_{E_{last}}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
+The soundness error of a complete proximity test is $P_t = \epsilon(\Delta_\otimes, t, l_2)$. And it is also the probability where both event $E_{last}$ and event $E_{other}$ occur. Therefore, $P_t = P_{E_{last}} \cdot P_{E_{other}}$. Note that $P_{E_{last}}$ is actually the soundness error when $t=2$, namely, $P_{E_{last}} = \epsilon(\Delta_\otimes, 2, l_2)$. And $P_{E_{other}}$ is the soundness error introduced by the second proximity test here, where the input is malicious and all tests except the last one are passed. Therefore, $P_{E_{other}} = \frac{P_{t}}{P_{E_{last}}} = \frac{\epsilon(\Delta_\otimes, t, l_2)}{\epsilon(\Delta_\otimes, 2, l_2)}$.
 
 \end{proof}
 
 
 \section{Proximity Test Zero-Knowledge}
+
+In this section, we first present a failed attempt of proof. Then we fix it and present the complete proof.
 
 \begin{lemma}
 \label{lemma:szkpc-zk}
